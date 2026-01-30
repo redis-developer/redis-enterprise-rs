@@ -367,6 +367,10 @@ pub use error::{RestError, Result};
 #[cfg(feature = "tower-integration")]
 pub use client::tower_support;
 
+// Testing utilities for consumers
+#[cfg(feature = "test-support")]
+pub mod testing;
+
 // Database management
 pub use bdb::{
     BdbHandler, CreateDatabaseRequest, CreateDatabaseRequestBuilder, Database, ModuleConfig,
