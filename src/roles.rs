@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use typed_builder::TypedBuilder;
 
 /// Role information
@@ -24,9 +23,6 @@ pub struct RoleInfo {
     pub bdb_roles: Option<Vec<BdbRole>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cluster_roles: Option<Vec<String>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Database-specific role permissions

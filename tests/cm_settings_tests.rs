@@ -151,7 +151,6 @@ async fn test_cm_settings_update_full() {
         slave_ha: Some(true),
         slave_ha_grace_period: Some(600),
         max_simultaneous_backups: Some(5),
-        extra: json!({}),
     };
 
     Mock::given(method("PUT"))
@@ -203,7 +202,6 @@ async fn test_cm_settings_update_partial() {
         slave_ha: None,
         slave_ha_grace_period: None,
         max_simultaneous_backups: Some(2),
-        extra: json!({}),
     };
 
     Mock::given(method("PUT"))
@@ -251,7 +249,6 @@ async fn test_cm_settings_update_minimal() {
         slave_ha: None,
         slave_ha_grace_period: None,
         max_simultaneous_backups: None,
-        extra: json!({}),
     };
 
     Mock::given(method("PUT"))
@@ -295,7 +292,6 @@ async fn test_cm_settings_update_invalid() {
         slave_ha: Some(true),
         slave_ha_grace_period: Some(0),    // Invalid grace period
         max_simultaneous_backups: Some(0), // Invalid backup count
-        extra: json!({}),
     };
 
     Mock::given(method("PUT"))
@@ -388,7 +384,6 @@ async fn test_cm_settings_workflow() {
         slave_ha: Some(true),
         slave_ha_grace_period: Some(300),
         max_simultaneous_backups: Some(3),
-        extra: json!({}),
     };
 
     Mock::given(method("PUT"))

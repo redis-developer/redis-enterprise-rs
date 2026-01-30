@@ -56,9 +56,6 @@ pub struct ClusterActionResponse {
     pub action_uid: String,
     /// Description of the action
     pub description: Option<String>,
-    /// Additional fields from the response
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Node information
@@ -71,9 +68,6 @@ pub struct ClusterNode {
     pub total_memory: Option<u64>,
     pub used_memory: Option<u64>,
     pub cpu_cores: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Cluster information from the REST API
@@ -332,9 +326,6 @@ pub struct ClusterInfo {
 
     /// Wait command support
     pub wait_command: Option<bool>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Cluster-wide settings configuration (57 fields)
@@ -409,9 +400,6 @@ pub struct ClusterSettings {
     pub show_internals: Option<bool>,
     pub slave_threads_when_master: Option<bool>,
     pub use_empty_shard_backups: Option<bool>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Bootstrap request for creating a new cluster
@@ -666,9 +654,6 @@ pub struct NodeInfo {
     pub shards: Option<Vec<u32>>,
     pub total_memory: Option<u64>,
     pub used_memory: Option<u64>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// License information
@@ -679,7 +664,4 @@ pub struct LicenseInfo {
     pub expiration_date: Option<String>,
     pub shards_limit: Option<u32>,
     pub features: Option<Vec<String>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }

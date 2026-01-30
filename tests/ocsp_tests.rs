@@ -82,7 +82,6 @@ fn test_ocsp_config_obj() -> OcspConfig {
         query_frequency: Some(3600),
         recovery_frequency: Some(60),
         recovery_max_tries: Some(5),
-        extra: json!({}),
     }
 }
 
@@ -94,7 +93,6 @@ fn test_ocsp_config_minimal() -> OcspConfig {
         query_frequency: None,
         recovery_frequency: None,
         recovery_max_tries: None,
-        extra: json!({}),
     }
 }
 
@@ -229,7 +227,6 @@ async fn test_ocsp_update_config_invalid() {
         query_frequency: None,
         recovery_frequency: None,
         recovery_max_tries: None,
-        extra: json!({}),
     };
 
     Mock::given(method("PUT"))

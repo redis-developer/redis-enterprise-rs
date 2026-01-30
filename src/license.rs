@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use typed_builder::TypedBuilder;
 
 /// License information
@@ -72,9 +71,6 @@ pub struct License {
     /// List of features supported by license
     #[serde(skip_serializing_if = "Option::is_none")]
     pub features: Option<Vec<String>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// License update request
@@ -102,9 +98,6 @@ pub struct LicenseUsage {
     /// Maximum amount of RAM allowed by license (bytes)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ram_limit: Option<u64>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// License handler

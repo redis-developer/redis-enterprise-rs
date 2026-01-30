@@ -44,9 +44,6 @@ pub struct DiagnosticResult {
     /// Recommended actions to resolve any issues found
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommendations: Option<Vec<String>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Diagnostic report
@@ -61,9 +58,6 @@ pub struct DiagnosticReport {
     /// Summary statistics of the diagnostic run
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<DiagnosticSummary>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Diagnostic summary

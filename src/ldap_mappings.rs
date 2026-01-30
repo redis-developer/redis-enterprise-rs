@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use typed_builder::TypedBuilder;
 
 /// LDAP mapping information
@@ -28,9 +27,6 @@ pub struct LdapMapping {
     /// List of role uids associated with the LDAP group
     #[serde(skip_serializing_if = "Option::is_none")]
     pub role_uids: Option<Vec<u32>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Create or update LDAP mapping request
@@ -78,9 +74,6 @@ pub struct LdapConfig {
     /// Password for LDAP binding
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bind_pass: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// LDAP server configuration

@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 /// Action information
 /// Represents an action (operation) in the cluster
@@ -36,9 +35,6 @@ pub struct Action {
     pub bdb_uid: Option<u32>,
     /// Node UID associated with the action
     pub node_uid: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Action handler for tracking async operations

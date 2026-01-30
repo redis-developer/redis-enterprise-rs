@@ -57,9 +57,6 @@ pub struct Module {
 
     /// SHA256 checksum of the module binary for verification
     pub sha256: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Module handler for managing Redis modules

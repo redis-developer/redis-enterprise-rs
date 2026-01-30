@@ -16,8 +16,6 @@ pub struct MetricResponse {
     pub interval: String,
     pub timestamps: Vec<i64>,
     pub values: Vec<Value>,
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Proxy information
@@ -128,9 +126,6 @@ pub struct Proxy {
     /// CPU usage threshold percentage for thread scaling decisions
     #[serde(skip_serializing_if = "Option::is_none")]
     pub threads_usage_threshold: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Proxy stats information
@@ -138,9 +133,6 @@ pub struct Proxy {
 pub struct ProxyStats {
     pub uid: u32,
     pub intervals: Vec<StatsInterval>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -223,6 +215,4 @@ pub struct ProxyUpdate {
     pub max_connections: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub threads: Option<u32>,
-    #[serde(flatten)]
-    pub extra: Value,
 }

@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 /// Database group information
 /// Represents a group of databases that share a memory pool
@@ -24,8 +23,6 @@ pub struct BdbGroup {
     /// A list of UIDs of member databases (read-only)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub members: Option<Vec<String>>,
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Handler for database group operations

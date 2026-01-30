@@ -34,9 +34,6 @@ pub struct CrdbTask {
     /// Error description if the task failed
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// CRDB task creation request

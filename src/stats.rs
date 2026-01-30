@@ -85,9 +85,6 @@ pub struct StatsQuery {
 pub struct StatsResponse {
     /// Array of time intervals with their corresponding metrics
     pub intervals: Vec<StatsInterval>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Stats interval
@@ -119,8 +116,6 @@ pub struct LastStatsResponse {
 pub struct AggregatedStatsResponse {
     /// Array of stats for individual resources (nodes, databases, shards)
     pub stats: Vec<ResourceStats>,
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Stats for a single resource
@@ -130,8 +125,6 @@ pub struct ResourceStats {
     pub uid: u32,
     /// Time intervals with metrics for this specific resource
     pub intervals: Vec<StatsInterval>,
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Stats handler for retrieving metrics

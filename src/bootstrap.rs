@@ -24,9 +24,6 @@ pub struct BootstrapConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Admin credentials for cluster access
     pub credentials: Option<CredentialsBootstrap>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Cluster bootstrap configuration
@@ -81,9 +78,6 @@ pub struct BootstrapStatus {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Status message or error description
     pub message: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Bootstrap handler for cluster initialization

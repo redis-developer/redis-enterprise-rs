@@ -199,7 +199,7 @@ mod tests {
             .and(basic_auth("admin", "password"))
             .respond_with(
                 ResponseTemplate::new(200)
-                    .set_body_json(serde_json::json!({"task_id": "export-123"})),
+                    .set_body_json(serde_json::json!({"action_uid": "export-123"})),
             )
             .mount(&mock_server)
             .await;
@@ -215,8 +215,7 @@ mod tests {
         let result = handler.export(1, "ftp://backup/db1.rdb").await;
 
         assert!(result.is_ok());
-        // ExportResponse doesn't have task_id, check action_uid instead
-        assert!(result.unwrap().extra["task_id"].is_string());
+        assert!(result.unwrap().action_uid.is_some());
     }
 
     #[tokio::test]
@@ -228,7 +227,7 @@ mod tests {
             .and(basic_auth("admin", "password"))
             .respond_with(
                 ResponseTemplate::new(200)
-                    .set_body_json(serde_json::json!({"task_id": "import-456"})),
+                    .set_body_json(serde_json::json!({"action_uid": "import-456"})),
             )
             .mount(&mock_server)
             .await;
@@ -244,8 +243,7 @@ mod tests {
         let result = handler.import(1, "ftp://backup/db1.rdb", true).await;
 
         assert!(result.is_ok());
-        // ImportResponse doesn't have task_id, check action_uid instead
-        assert!(result.unwrap().extra["task_id"].is_string());
+        assert!(result.unwrap().action_uid.is_some());
     }
 
     #[tokio::test]
@@ -257,7 +255,7 @@ mod tests {
             .and(basic_auth("admin", "password"))
             .respond_with(
                 ResponseTemplate::new(200)
-                    .set_body_json(serde_json::json!({"backup_id": "backup-789"})),
+                    .set_body_json(serde_json::json!({"backup_uid": "backup-789"})),
             )
             .mount(&mock_server)
             .await;
@@ -273,8 +271,7 @@ mod tests {
         let result = handler.backup(1).await;
 
         assert!(result.is_ok());
-        // BackupResponse has backup_uid field
-        assert!(result.unwrap().extra["backup_id"].is_string());
+        assert!(result.unwrap().backup_uid.is_some());
     }
 
     #[tokio::test]
