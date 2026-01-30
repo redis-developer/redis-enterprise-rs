@@ -1,0 +1,28 @@
+# Rust build artifacts
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+# Test coverage
+tarpaulin-report.html
+cobertura.xml
+lcov.info
+*.profraw
+
+# Backup files
+*.bak
+*.backup

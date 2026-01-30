@@ -1,0 +1,46 @@
+[package]
+name = "redis-enterprise"
+version = "0.7.4"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Josh Rotenberg <joshrotenberg@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/redis-developer/redis-enterprise-rs"
+homepage = "https://github.com/redis-developer/redis-enterprise-rs"
+documentation = "https://docs.rs/redis-enterprise"
+description = "Redis Enterprise REST API client library"
+keywords = ["redis", "enterprise", "api", "rest", "client"]
+categories = ["api-bindings", "database"]
+readme = "README.md"
+
+[dependencies]
+async-trait = "0.1"
+async-stream = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "multipart"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_path_to_error = "0.1"
+serde_urlencoded = "0.7"
+thiserror = "2.0"
+tokio = { version = "1.40", features = ["full"] }
+tokio-stream = "0.1"
+futures = "0.3"
+tracing = "0.1"
+anyhow = "1.0"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+url = "2.5"
+typed-builder = "0.20"
+tower = { version = "0.5", optional = true }
+
+[features]
+tower-integration = ["tower"]
+
+[dev-dependencies]
+wiremock = "0.6"
+tokio = { version = "1.40", features = ["rt", "macros", "test-util"] }
+pretty_assertions = "1.4"
+serial_test = "3.1"
+env_logger = "0.11.8"
+tower = { version = "0.5", features = ["timeout", "limit", "retry", "buffer"] }
+chrono = { version = "0.4", features = ["serde"] }
