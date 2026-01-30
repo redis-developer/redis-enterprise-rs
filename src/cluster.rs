@@ -10,17 +10,15 @@
 //!
 //! ### Getting Cluster Information
 //! ```no_run
-//! use redis_enterprise::{EnterpriseClient, ClusterHandler};
+//! use redis_enterprise::EnterpriseClient;
 //!
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! let cluster = ClusterHandler::new(client);
-//!
 //! // Get basic cluster info
-//! let info = cluster.info().await?;
-//! println!("Cluster: {} ({})", info.name, info.version.unwrap_or_default());
+//! let info = client.cluster().info().await?;
+//! println!("Cluster: {}", info.name);
 //!
 //! // Check license status
-//! let license = cluster.license().await?;
+//! let license = client.cluster().license().await?;
 //! println!("Licensed shards: {:?}", license.shards_limit);
 //! # Ok(())
 //! # }
@@ -28,12 +26,10 @@
 //!
 //! ### Node Management
 //! ```no_run
-//! # use redis_enterprise::{EnterpriseClient, ClusterHandler};
+//! # use redis_enterprise::EnterpriseClient;
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! let cluster = ClusterHandler::new(client);
-//!
 //! // Join a new node to the cluster
-//! let result = cluster.join_node(
+//! let result = client.cluster().join_node(
 //!     "192.168.1.100",
 //!     "admin",
 //!     "password"
@@ -41,7 +37,7 @@
 //! println!("Node joined: {:?}", result);
 //!
 //! // Remove a node
-//! let action = cluster.remove_node(3).await?;
+//! let action = client.cluster().remove_node(3).await?;
 //! println!("Removal started: {:?}", action);
 //! # Ok(())
 //! # }
@@ -94,9 +90,6 @@ pub struct ClusterInfo {
 
     /// Last changed time (read-only)
     pub last_changed_time: Option<String>,
-
-    /// Software version
-    pub version: Option<String>,
 
     /// License expiration status
     pub license_expired: Option<bool>,

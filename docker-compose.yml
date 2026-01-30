@@ -1,0 +1,61 @@
+# Docker Compose for local Redis Enterprise testing
+#
+# Usage:
+#   docker compose up -d              # Start Redis Enterprise
+#   docker compose up init            # Initialize cluster (run once after first start)
+#   docker compose down -v            # Stop and remove
+#
+# Environment variables (optional):
+#   REDIS_ENTERPRISE_IMAGE    - Docker image (default: redislabs/redis:latest)
+#   REDIS_ENTERPRISE_PLATFORM - Platform (default: linux/amd64, use linux/arm64 for Apple Silicon)
+#
+# For Apple Silicon Macs, use:
+#   REDIS_ENTERPRISE_IMAGE=kurtfm/rs-arm:latest REDIS_ENTERPRISE_PLATFORM=linux/arm64 docker compose up -d
+#
+# After initialization:
+#   API:      https://localhost:9443 (admin@redis.local / Redis123!)
+#   Web UI:   https://localhost:8443
+#   Database: localhost:12000
+
+services:
+  redis-enterprise:
+    image: ${REDIS_ENTERPRISE_IMAGE:-redislabs/redis:latest}
+    platform: ${REDIS_ENTERPRISE_PLATFORM:-linux/amd64}
+    container_name: redis-enterprise
+    tty: true
+    cap_add:
+      - ALL
+    ports:
+      - "12000:12000"  # Default database port
+      - "9443:9443"    # REST API
+      - "8443:8443"    # Admin UI
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:9443/v1/bootstrap"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  init:
+    image: ghcr.io/redis-developer/redisctl:latest
+    container_name: redis-enterprise-init
+    depends_on:
+      redis-enterprise:
+        condition: service_healthy
+    environment:
+      REDIS_ENTERPRISE_URL: "https://redis-enterprise:9443"
+      REDIS_ENTERPRISE_INSECURE: "true"
+    command:
+      [
+        "enterprise",
+        "workflow",
+        "init-cluster",
+        "--name",
+        "test-cluster",
+        "--username",
+        "admin@redis.local",
+        "--password",
+        "Redis123!",
+      ]
+    profiles:
+      - init

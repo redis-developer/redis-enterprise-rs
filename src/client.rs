@@ -1,6 +1,37 @@
 //! REST API client implementation
 
+use crate::actions::ActionHandler;
+use crate::alerts::AlertHandler;
+use crate::bdb::BdbHandler;
+use crate::bdb_groups::BdbGroupsHandler;
+use crate::bootstrap::BootstrapHandler;
+use crate::cluster::ClusterHandler;
+use crate::cm_settings::CmSettingsHandler;
+use crate::crdb::CrdbHandler;
+use crate::crdb_tasks::CrdbTasksHandler;
+use crate::debuginfo::DebugInfoHandler;
+use crate::diagnostics::DiagnosticsHandler;
+use crate::endpoints::EndpointsHandler;
 use crate::error::{RestError, Result};
+use crate::job_scheduler::JobSchedulerHandler;
+use crate::jsonschema::JsonSchemaHandler;
+use crate::ldap_mappings::LdapMappingHandler;
+use crate::license::LicenseHandler;
+use crate::local::LocalHandler;
+use crate::logs::LogsHandler;
+use crate::migrations::MigrationsHandler;
+use crate::modules::ModuleHandler;
+use crate::nodes::NodeHandler;
+use crate::ocsp::OcspHandler;
+use crate::proxies::ProxyHandler;
+use crate::redis_acls::RedisAclHandler;
+use crate::roles::RolesHandler;
+use crate::services::ServicesHandler;
+use crate::shards::ShardHandler;
+use crate::stats::StatsHandler;
+use crate::suffixes::SuffixesHandler;
+use crate::usage_report::UsageReportHandler;
+use crate::users::UserHandler;
 use reqwest::header::{HeaderMap, HeaderValue, USER_AGENT};
 use reqwest::{Client, Response};
 use serde::{Serialize, de::DeserializeOwned};
@@ -40,35 +71,41 @@ impl Default for EnterpriseClientBuilder {
 
 impl EnterpriseClientBuilder {
     /// Create a new builder
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Set the base URL
+    #[must_use]
     pub fn base_url(mut self, url: impl Into<String>) -> Self {
         self.base_url = url.into();
         self
     }
 
     /// Set the username
+    #[must_use]
     pub fn username(mut self, username: impl Into<String>) -> Self {
         self.username = Some(username.into());
         self
     }
 
     /// Set the password
+    #[must_use]
     pub fn password(mut self, password: impl Into<String>) -> Self {
         self.password = Some(password.into());
         self
     }
 
     /// Set the timeout
+    #[must_use]
     pub fn timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
     }
 
     /// Allow insecure TLS connections (self-signed certificates)
+    #[must_use]
     pub fn insecure(mut self, insecure: bool) -> Self {
         self.insecure = insecure;
         self
@@ -79,6 +116,7 @@ impl EnterpriseClientBuilder {
     /// The default user agent is `redis-enterprise/{version}`.
     /// This can be overridden to identify specific clients, for example:
     /// `redisctl/1.2.3` or `my-app/1.0.0`.
+    #[must_use]
     pub fn user_agent(mut self, user_agent: impl Into<String>) -> Self {
         self.user_agent = user_agent.into();
         self
@@ -579,6 +617,196 @@ impl EnterpriseClient {
             .map_err(|e| self.map_reqwest_error(e, &url))?;
 
         self.handle_response(response).await
+    }
+
+    // ========================================================================
+    // Fluent API - Handler Accessors
+    // ========================================================================
+
+    /// Get a handler for action operations
+    #[must_use]
+    pub fn actions(&self) -> ActionHandler {
+        ActionHandler::new(self.clone())
+    }
+
+    /// Get a handler for alert operations
+    #[must_use]
+    pub fn alerts(&self) -> AlertHandler {
+        AlertHandler::new(self.clone())
+    }
+
+    /// Get a handler for database (BDB) operations
+    #[must_use]
+    pub fn databases(&self) -> BdbHandler {
+        BdbHandler::new(self.clone())
+    }
+
+    /// Get a handler for database group operations
+    #[must_use]
+    pub fn database_groups(&self) -> BdbGroupsHandler {
+        BdbGroupsHandler::new(self.clone())
+    }
+
+    /// Get a handler for bootstrap operations
+    #[must_use]
+    pub fn bootstrap(&self) -> BootstrapHandler {
+        BootstrapHandler::new(self.clone())
+    }
+
+    /// Get a handler for cluster operations
+    #[must_use]
+    pub fn cluster(&self) -> ClusterHandler {
+        ClusterHandler::new(self.clone())
+    }
+
+    /// Get a handler for Cluster Manager settings
+    #[must_use]
+    pub fn cm_settings(&self) -> CmSettingsHandler {
+        CmSettingsHandler::new(self.clone())
+    }
+
+    /// Get a handler for Active-Active (CRDB) database operations
+    #[must_use]
+    pub fn crdb(&self) -> CrdbHandler {
+        CrdbHandler::new(self.clone())
+    }
+
+    /// Get a handler for CRDB task operations
+    #[must_use]
+    pub fn crdb_tasks(&self) -> CrdbTasksHandler {
+        CrdbTasksHandler::new(self.clone())
+    }
+
+    /// Get a handler for debug info operations
+    #[must_use]
+    pub fn debug_info(&self) -> DebugInfoHandler {
+        DebugInfoHandler::new(self.clone())
+    }
+
+    /// Get a handler for diagnostic operations
+    #[must_use]
+    pub fn diagnostics(&self) -> DiagnosticsHandler {
+        DiagnosticsHandler::new(self.clone())
+    }
+
+    /// Get a handler for endpoint operations
+    #[must_use]
+    pub fn endpoints(&self) -> EndpointsHandler {
+        EndpointsHandler::new(self.clone())
+    }
+
+    /// Get a handler for job scheduler operations
+    #[must_use]
+    pub fn job_scheduler(&self) -> JobSchedulerHandler {
+        JobSchedulerHandler::new(self.clone())
+    }
+
+    /// Get a handler for JSON schema operations
+    #[must_use]
+    pub fn json_schema(&self) -> JsonSchemaHandler {
+        JsonSchemaHandler::new(self.clone())
+    }
+
+    /// Get a handler for LDAP mapping operations
+    #[must_use]
+    pub fn ldap_mappings(&self) -> LdapMappingHandler {
+        LdapMappingHandler::new(self.clone())
+    }
+
+    /// Get a handler for license operations
+    #[must_use]
+    pub fn license(&self) -> LicenseHandler {
+        LicenseHandler::new(self.clone())
+    }
+
+    /// Get a handler for local operations
+    #[must_use]
+    pub fn local(&self) -> LocalHandler {
+        LocalHandler::new(self.clone())
+    }
+
+    /// Get a handler for log operations
+    #[must_use]
+    pub fn logs(&self) -> LogsHandler {
+        LogsHandler::new(self.clone())
+    }
+
+    /// Get a handler for migration operations
+    #[must_use]
+    pub fn migrations(&self) -> MigrationsHandler {
+        MigrationsHandler::new(self.clone())
+    }
+
+    /// Get a handler for module operations
+    #[must_use]
+    pub fn modules(&self) -> ModuleHandler {
+        ModuleHandler::new(self.clone())
+    }
+
+    /// Get a handler for node operations
+    #[must_use]
+    pub fn nodes(&self) -> NodeHandler {
+        NodeHandler::new(self.clone())
+    }
+
+    /// Get a handler for OCSP operations
+    #[must_use]
+    pub fn ocsp(&self) -> OcspHandler {
+        OcspHandler::new(self.clone())
+    }
+
+    /// Get a handler for proxy operations
+    #[must_use]
+    pub fn proxies(&self) -> ProxyHandler {
+        ProxyHandler::new(self.clone())
+    }
+
+    /// Get a handler for Redis ACL operations
+    #[must_use]
+    pub fn redis_acls(&self) -> RedisAclHandler {
+        RedisAclHandler::new(self.clone())
+    }
+
+    /// Get a handler for role operations
+    #[must_use]
+    pub fn roles(&self) -> RolesHandler {
+        RolesHandler::new(self.clone())
+    }
+
+    /// Get a handler for service operations
+    #[must_use]
+    pub fn services(&self) -> ServicesHandler {
+        ServicesHandler::new(self.clone())
+    }
+
+    /// Get a handler for shard operations
+    #[must_use]
+    pub fn shards(&self) -> ShardHandler {
+        ShardHandler::new(self.clone())
+    }
+
+    /// Get a handler for statistics operations
+    #[must_use]
+    pub fn stats(&self) -> StatsHandler {
+        StatsHandler::new(self.clone())
+    }
+
+    /// Get a handler for suffix operations
+    #[must_use]
+    pub fn suffixes(&self) -> SuffixesHandler {
+        SuffixesHandler::new(self.clone())
+    }
+
+    /// Get a handler for usage report operations
+    #[must_use]
+    pub fn usage_reports(&self) -> UsageReportHandler {
+        UsageReportHandler::new(self.clone())
+    }
+
+    /// Get a handler for user operations
+    #[must_use]
+    pub fn users(&self) -> UserHandler {
+        UserHandler::new(self.clone())
     }
 }
 

@@ -16,14 +16,12 @@
 //!
 //! ### Querying Database Stats
 //! ```no_run
-//! use redis_enterprise::{EnterpriseClient, StatsHandler};
+//! use redis_enterprise::EnterpriseClient;
 //! use redis_enterprise::stats::StatsQuery;
 //!
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! let stats = StatsHandler::new(client);
-//!
 //! // Get last interval stats for a database
-//! let last_stats = stats.database_last(1).await?;
+//! let last_stats = client.stats().database_last(1).await?;
 //! println!("Database stats: {:?}", last_stats);
 //!
 //! // Query with specific interval (all metrics by default)
@@ -33,7 +31,7 @@
 //!     etime: None,
 //!     metrics: None,  // None means all metrics
 //! };
-//! let historical = stats.database(1, Some(query)).await?;
+//! let historical = client.stats().database(1, Some(query)).await?;
 //! println!("5-minute intervals: {:?}", historical.intervals);
 //! # Ok(())
 //! # }
@@ -41,16 +39,14 @@
 //!
 //! ### Cluster-Wide Statistics
 //! ```no_run
-//! # use redis_enterprise::{EnterpriseClient, StatsHandler};
+//! # use redis_enterprise::EnterpriseClient;
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! let stats = StatsHandler::new(client);
-//!
 //! // Get aggregated stats for all nodes
-//! let all_nodes = stats.nodes_last().await?;
+//! let all_nodes = client.stats().nodes_last().await?;
 //! println!("Total stats across cluster: {:?}", all_nodes.stats);
 //!
 //! // Get aggregated database stats
-//! let all_dbs = stats.databases_last().await?;
+//! let all_dbs = client.stats().databases_last().await?;
 //! for resource_stats in &all_dbs.stats {
 //!     println!("Resource {}: {:?}", resource_stats.uid, resource_stats.intervals);
 //! }

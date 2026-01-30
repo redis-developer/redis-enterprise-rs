@@ -10,11 +10,9 @@
 //!
 //! ### Creating a Database
 //! ```no_run
-//! use redis_enterprise::{EnterpriseClient, BdbHandler as DatabaseHandler, CreateDatabaseRequest};
+//! use redis_enterprise::{EnterpriseClient, CreateDatabaseRequest};
 //!
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! let handler = DatabaseHandler::new(client);
-//!
 //! // Simple cache database
 //! let cache_db = CreateDatabaseRequest::builder()
 //!     .name("my-cache")
@@ -23,7 +21,7 @@
 //!     .persistence("disabled")
 //!     .build();
 //!
-//! let db = handler.create(cache_db).await?;
+//! let db = client.databases().create(cache_db).await?;
 //! println!("Created database with ID: {}", db.uid);
 //! # Ok(())
 //! # }
@@ -31,21 +29,20 @@
 //!
 //! ### Database Actions
 //! ```no_run
-//! # use redis_enterprise::{EnterpriseClient, BdbHandler as DatabaseHandler};
+//! # use redis_enterprise::EnterpriseClient;
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! let handler = DatabaseHandler::new(client);
 //! let db_id = 1;
 //!
 //! // Backup database
-//! let backup = handler.backup(db_id).await?;
+//! let backup = client.databases().backup(db_id).await?;
 //! println!("Backup started: {:?}", backup.action_uid);
 //!
 //! // Export to remote location
-//! let export = handler.export(db_id, "ftp://backup.site/db.rdb").await?;
+//! let export = client.databases().export(db_id, "ftp://backup.site/db.rdb").await?;
 //! println!("Export initiated: {:?}", export.action_uid);
 //!
 //! // Import from backup
-//! let import = handler.import(db_id, "ftp://backup.site/db.rdb", true).await?;
+//! let import = client.databases().import(db_id, "ftp://backup.site/db.rdb", true).await?;
 //! println!("Import started: {:?}", import.action_uid);
 //! # Ok(())
 //! # }
@@ -53,18 +50,16 @@
 //!
 //! ### Monitoring Databases
 //! ```no_run
-//! # use redis_enterprise::{EnterpriseClient, BdbHandler as DatabaseHandler};
+//! # use redis_enterprise::EnterpriseClient;
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! let handler = DatabaseHandler::new(client);
-//!
 //! // List all databases
-//! let databases = handler.list().await?;
+//! let databases = client.databases().list().await?;
 //! for db in databases {
 //!     println!("{}: {} MB used", db.name, db.memory_used.unwrap_or(0) / 1_048_576);
 //! }
 //!
 //! // Get database endpoints
-//! let endpoints = handler.endpoints(1).await?;
+//! let endpoints = client.databases().endpoints(1).await?;
 //! for endpoint in endpoints {
 //!     println!("Endpoint: {:?}:{:?}", endpoint.dns_name, endpoint.port);
 //! }
@@ -921,7 +916,7 @@ impl DatabaseHandler {
     ///
     /// ```no_run
     /// # use redis_enterprise::EnterpriseClient;
-    /// # use redis_enterprise::bdb::{BdbHandler, DatabaseUpgradeRequest};
+    /// # use redis_enterprise::bdb::DatabaseUpgradeRequest;
     /// # async fn example() -> redis_enterprise::Result<()> {
     /// let client = EnterpriseClient::builder()
     ///     .base_url("https://localhost:9443")
@@ -929,7 +924,6 @@ impl DatabaseHandler {
     ///     .password("password")
     ///     .insecure(true)
     ///     .build()?;
-    /// let db_handler = BdbHandler::new(client);
     ///
     /// // Upgrade to latest Redis version
     /// let request = DatabaseUpgradeRequest {
@@ -937,7 +931,7 @@ impl DatabaseHandler {
     ///     preserve_roles: Some(true),
     ///     ..Default::default()
     /// };
-    /// db_handler.upgrade_redis_version(1, request).await?;
+    /// client.databases().upgrade_redis_version(1, request).await?;
     ///
     /// // Upgrade to specific Redis version
     /// let request = DatabaseUpgradeRequest {
@@ -945,7 +939,7 @@ impl DatabaseHandler {
     ///     preserve_roles: Some(true),
     ///     ..Default::default()
     /// };
-    /// db_handler.upgrade_redis_version(1, request).await?;
+    /// client.databases().upgrade_redis_version(1, request).await?;
     /// # Ok(())
     /// # }
     /// ```
@@ -1008,13 +1002,13 @@ impl DatabaseHandler {
     ///
     /// # Example
     /// ```no_run
-    /// use redis_enterprise::{EnterpriseClient, BdbHandler as DatabaseHandler};
+    /// use redis_enterprise::EnterpriseClient;
     /// use futures::StreamExt;
     /// use std::time::Duration;
     ///
     /// # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-    /// let handler = DatabaseHandler::new(client);
-    /// let mut stream = handler.watch_database(1, Duration::from_secs(5));
+    /// let db_handler = client.databases();
+    /// let mut stream = db_handler.watch_database(1, Duration::from_secs(5));
     ///
     /// while let Some(result) = stream.next().await {
     ///     match result {

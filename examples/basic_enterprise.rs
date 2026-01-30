@@ -7,7 +7,7 @@
 //!
 //! Run with: cargo run --example basic_enterprise
 
-use redis_enterprise::{BdbHandler, EnterpriseClient};
+use redis_enterprise::EnterpriseClient;
 use std::env;
 
 #[tokio::main]
@@ -34,32 +34,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .insecure(insecure)
         .build()?;
 
-    // Get cluster information using raw API
+    // Get cluster information using fluent API
     println!("Fetching cluster information...");
-    let cluster: serde_json::Value = client.get("/v1/cluster").await?;
-    println!("Cluster Name: {}", cluster["name"]);
-    println!("Cluster Version: {}", cluster["software_version"]);
+    let cluster_info = client.cluster().info().await?;
+    println!("Cluster Name: {}", cluster_info.name);
     println!();
 
-    // List all nodes using raw API
+    // List all nodes using fluent API
     println!("Fetching nodes...");
-    let nodes: serde_json::Value = client.get("/v1/nodes").await?;
+    let nodes = client.nodes().list().await?;
 
-    if let Some(nodes_array) = nodes.as_array() {
-        println!("Found {} node(s):", nodes_array.len());
-        for node in nodes_array {
-            println!(
-                "  - Node {}: {} ({})",
-                node["uid"], node["addr"], node["status"]
-            );
-        }
+    println!("Found {} node(s):", nodes.len());
+    for node in &nodes {
+        println!("  - Node {}: {:?} ({})", node.uid, node.addr, node.status);
     }
     println!();
 
-    // List all databases (BDBs) using handler
+    // List all databases (BDBs) using fluent API
     println!("Fetching databases...");
-    let db_handler = BdbHandler::new(client.clone());
-    let databases = db_handler.list().await?;
+    let databases = client.databases().list().await?;
 
     println!("Found {} database(s):", databases.len());
     for db in &databases {
