@@ -1,5 +1,6 @@
 //! Error types for REST API operations
 
+use std::time::Duration;
 use thiserror::Error;
 
 #[derive(Error, Debug, Clone)]
@@ -39,6 +40,21 @@ pub enum RestError {
 
     #[error("Server error: {0}")]
     ServerError(String),
+
+    #[error("Request timed out")]
+    Timeout,
+
+    #[error("Rate limited{}", .retry_after.map(|d| format!(" (retry after {:?})", d)).unwrap_or_default())]
+    RateLimited { retry_after: Option<Duration> },
+
+    #[error("Resource already exists")]
+    AlreadyExists,
+
+    #[error("Conflict: {0}")]
+    Conflict(String),
+
+    #[error("Cluster is busy or unavailable")]
+    ClusterBusy,
 }
 
 impl From<reqwest::Error> for RestError {
@@ -71,6 +87,38 @@ impl RestError {
     pub fn is_server_error(&self) -> bool {
         matches!(self, RestError::ServerError(_))
             || matches!(self, RestError::ApiError { code, .. } if *code >= 500)
+    }
+
+    /// Check if this is a timeout error
+    pub fn is_timeout(&self) -> bool {
+        matches!(self, RestError::Timeout)
+    }
+
+    /// Check if this is a rate limit error
+    pub fn is_rate_limited(&self) -> bool {
+        matches!(self, RestError::RateLimited { .. })
+            || matches!(self, RestError::ApiError { code, .. } if *code == 429)
+    }
+
+    /// Check if this is a conflict/already exists error
+    pub fn is_conflict(&self) -> bool {
+        matches!(self, RestError::AlreadyExists)
+            || matches!(self, RestError::Conflict(_))
+            || matches!(self, RestError::ApiError { code, .. } if *code == 409)
+    }
+
+    /// Check if this is a cluster busy error
+    pub fn is_cluster_busy(&self) -> bool {
+        matches!(self, RestError::ClusterBusy)
+            || matches!(self, RestError::ApiError { code, .. } if *code == 503)
+    }
+
+    /// Check if this error is retryable
+    pub fn is_retryable(&self) -> bool {
+        self.is_timeout()
+            || self.is_rate_limited()
+            || self.is_cluster_busy()
+            || self.is_server_error()
     }
 }
 

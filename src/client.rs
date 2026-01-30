@@ -177,6 +177,12 @@ impl EnterpriseClient {
         self.client.clone()
     }
 
+    /// Get the configured request timeout
+    #[must_use]
+    pub fn timeout(&self) -> Duration {
+        self.timeout
+    }
+
     /// Normalize URL path concatenation to avoid double slashes
     fn normalize_url(&self, path: &str) -> String {
         let base = self.base_url.trim_end_matches('/');
@@ -541,10 +547,7 @@ impl EnterpriseClient {
                 url
             ))
         } else if error.is_timeout() {
-            RestError::ConnectionError(format!(
-                "Request to {} timed out after {:?}. Check network connectivity or increase timeout.",
-                url, self.timeout
-            ))
+            RestError::Timeout
         } else if error.is_decode() {
             RestError::ConnectionError(format!(
                 "Failed to decode JSON response from {}: {}. Server may have returned invalid JSON or HTML error page.",
@@ -588,6 +591,9 @@ impl EnterpriseClient {
             match status.as_u16() {
                 401 => Err(RestError::Unauthorized),
                 404 => Err(RestError::NotFound),
+                409 => Err(RestError::Conflict(text)),
+                429 => Err(RestError::RateLimited { retry_after: None }),
+                503 => Err(RestError::ClusterBusy),
                 500..=599 => Err(RestError::ServerError(text)),
                 _ => Err(RestError::ApiError {
                     code: status.as_u16(),
