@@ -37,53 +37,25 @@ services:
       start_period: 10s
 
   init:
-    image: curlimages/curl:latest
+    image: ghcr.io/redis-developer/redisctl:latest
     container_name: redis-enterprise-init
     depends_on:
       redis-enterprise:
         condition: service_healthy
-    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      REDIS_ENTERPRISE_URL: "https://redis-enterprise:9443"
+      REDIS_ENTERPRISE_INSECURE: "true"
     command:
-      - |
-        echo "Initializing Redis Enterprise cluster..."
-
-        # Bootstrap the cluster
-        curl -sk -X POST https://redis-enterprise:9443/v1/bootstrap/create_cluster \
-          -H "Content-Type: application/json" \
-          -d '{
-            "action": "create_cluster",
-            "cluster": {"name": "test-cluster"},
-            "node": {"paths": {"persistent_path": "/var/opt/redislabs/persist", "ephemeral_path": "/var/opt/redislabs/tmp"}},
-            "credentials": {"username": "admin@redis.local", "password": "Redis123!"}
-          }'
-
-        echo ""
-        echo "Waiting for cluster to be ready..."
-        sleep 5
-
-        # Create a test database
-        echo "Creating test database..."
-        curl -sk -X POST https://redis-enterprise:9443/v1/bdbs \
-          -u "admin@redis.local:Redis123!" \
-          -H "Content-Type: application/json" \
-          -d '{
-            "name": "test-db",
-            "memory_size": 104857600,
-            "port": 12000,
-            "replication": false,
-            "data_persistence": "disabled",
-            "eviction_policy": "allkeys-lru"
-          }'
-
-        echo ""
-        echo "============================================"
-        echo "Redis Enterprise cluster initialized!"
-        echo ""
-        echo "API:      https://localhost:9443"
-        echo "Web UI:   https://localhost:8443"
-        echo "Database: localhost:12000"
-        echo ""
-        echo "Credentials: admin@redis.local / Redis123!"
-        echo "============================================"
+      [
+        "enterprise",
+        "workflow",
+        "init-cluster",
+        "--name",
+        "test-cluster",
+        "--username",
+        "admin@redis.local",
+        "--password",
+        "Redis123!",
+      ]
     profiles:
       - init
