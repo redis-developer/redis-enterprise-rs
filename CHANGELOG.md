@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.5](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.7.4...v0.7.5) - 2026-01-30
+
+### Added
+
+- add Python bindings ([#2](https://github.com/redis-developer/redis-enterprise-rs/pull/2))
+- initial standalone redis-enterprise crate
+
 ## [0.7.4](https://github.com/redis-developer/redisctl/compare/redis-enterprise-v0.7.3...redis-enterprise-v0.7.4) - 2026-01-23
 
 ### Added
