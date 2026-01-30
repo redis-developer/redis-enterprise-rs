@@ -5,7 +5,6 @@
 //! - Configure role permissions
 //! - Query role assignments
 
-use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -72,43 +71,21 @@ pub struct CreateRoleRequest {
     pub cluster_roles: Option<Vec<String>>,
 }
 
-/// Roles handler
-pub struct RolesHandler {
-    client: RestClient,
-}
+define_handler!(
+    /// Roles handler
+    pub struct RolesHandler;
+);
 
+impl_crud!(RolesHandler {
+    list => RoleInfo, "/v1/roles";
+    get(u32) => RoleInfo, "/v1/roles/{}";
+    delete(u32), "/v1/roles/{}";
+    create(CreateRoleRequest) => RoleInfo, "/v1/roles";
+    update(u32, CreateRoleRequest) => RoleInfo, "/v1/roles/{}";
+});
+
+// Custom methods
 impl RolesHandler {
-    pub fn new(client: RestClient) -> Self {
-        RolesHandler { client }
-    }
-
-    /// List all roles
-    pub async fn list(&self) -> Result<Vec<RoleInfo>> {
-        self.client.get("/v1/roles").await
-    }
-
-    /// Get specific role
-    pub async fn get(&self, uid: u32) -> Result<RoleInfo> {
-        self.client.get(&format!("/v1/roles/{}", uid)).await
-    }
-
-    /// Create a new role
-    pub async fn create(&self, request: CreateRoleRequest) -> Result<RoleInfo> {
-        self.client.post("/v1/roles", &request).await
-    }
-
-    /// Update an existing role
-    pub async fn update(&self, uid: u32, request: CreateRoleRequest) -> Result<RoleInfo> {
-        self.client
-            .put(&format!("/v1/roles/{}", uid), &request)
-            .await
-    }
-
-    /// Delete a role
-    pub async fn delete(&self, uid: u32) -> Result<()> {
-        self.client.delete(&format!("/v1/roles/{}", uid)).await
-    }
-
     /// Get built-in roles
     pub async fn built_in(&self) -> Result<Vec<RoleInfo>> {
         self.client.get("/v1/roles/builtin").await

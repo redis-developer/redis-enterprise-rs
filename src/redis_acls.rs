@@ -5,7 +5,6 @@
 //! - Manage user permissions
 //! - Query ACL rules
 
-use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -35,46 +34,24 @@ pub struct CreateRedisAclRequest {
     pub description: Option<String>,
 }
 
-/// Redis ACL handler for managing ACLs
-pub struct RedisAclHandler {
-    client: RestClient,
-}
+define_handler!(
+    /// Redis ACL handler for managing ACLs
+    pub struct RedisAclHandler;
+);
+
+impl_crud!(RedisAclHandler {
+    list => RedisAcl, "/v1/redis_acls";
+    get(u32) => RedisAcl, "/v1/redis_acls/{}";
+    delete(u32), "/v1/redis_acls/{}";
+    create(CreateRedisAclRequest) => RedisAcl, "/v1/redis_acls";
+    update(u32, CreateRedisAclRequest) => RedisAcl, "/v1/redis_acls/{}";
+});
 
 /// Alias for backwards compatibility and intuitive plural naming
 pub type RedisAclsHandler = RedisAclHandler;
 
+// Custom methods
 impl RedisAclHandler {
-    pub fn new(client: RestClient) -> Self {
-        RedisAclHandler { client }
-    }
-
-    /// List all Redis ACLs
-    pub async fn list(&self) -> Result<Vec<RedisAcl>> {
-        self.client.get("/v1/redis_acls").await
-    }
-
-    /// Get specific Redis ACL
-    pub async fn get(&self, uid: u32) -> Result<RedisAcl> {
-        self.client.get(&format!("/v1/redis_acls/{}", uid)).await
-    }
-
-    /// Create a new Redis ACL
-    pub async fn create(&self, request: CreateRedisAclRequest) -> Result<RedisAcl> {
-        self.client.post("/v1/redis_acls", &request).await
-    }
-
-    /// Update an existing Redis ACL
-    pub async fn update(&self, uid: u32, request: CreateRedisAclRequest) -> Result<RedisAcl> {
-        self.client
-            .put(&format!("/v1/redis_acls/{}", uid), &request)
-            .await
-    }
-
-    /// Delete a Redis ACL
-    pub async fn delete(&self, uid: u32) -> Result<()> {
-        self.client.delete(&format!("/v1/redis_acls/{}", uid)).await
-    }
-
     /// Validate an ACL payload - POST /v1/redis_acls/validate
     pub async fn validate(&self, body: CreateRedisAclRequest) -> Result<AclValidation> {
         self.client.post("/v1/redis_acls/validate", &body).await
