@@ -6,6 +6,8 @@ rust-version = "1.85"
 authors = ["Josh Rotenberg <joshrotenberg@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Python bindings for Redis Enterprise API client"
+repository = "https://github.com/redis-developer/redis-enterprise-rs"
+homepage = "https://github.com/redis-developer/redis-enterprise-rs"
 publish = false
 
 [lib]

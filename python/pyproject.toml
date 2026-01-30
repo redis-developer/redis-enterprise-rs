@@ -6,7 +6,6 @@ build-backend = "maturin"
 name = "redis-enterprise"
 version = "0.1.0"
 description = "Python bindings for Redis Enterprise REST API client"
-readme = "README.md"
 license = { text = "MIT OR Apache-2.0" }
 authors = [
     { name = "Josh Rotenberg", email = "joshrotenberg@gmail.com" }
