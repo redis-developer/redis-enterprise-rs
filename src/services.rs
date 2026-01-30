@@ -31,9 +31,6 @@ pub struct Service {
     /// List of node UIDs where this service is running
     #[serde(skip_serializing_if = "Option::is_none")]
     pub node_uids: Option<Vec<u32>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Service configuration request
@@ -64,9 +61,6 @@ pub struct ServiceStatus {
     /// Status of the service on individual nodes
     #[serde(skip_serializing_if = "Option::is_none")]
     pub node_statuses: Option<Vec<NodeServiceStatus>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Node service status

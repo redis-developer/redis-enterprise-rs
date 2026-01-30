@@ -47,9 +47,6 @@ pub struct User {
     pub alert_bdb_crdt_src_syncer: Option<bool>,
     /// Password expiration duration in seconds
     pub password_expiration_duration: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Create user request
@@ -155,9 +152,6 @@ pub struct Role {
     pub name: String,
     pub management: Option<String>,
     pub data_access: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// User handler for managing users
@@ -249,8 +243,6 @@ pub struct AuthResponse {
     pub jwt: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<String>,
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

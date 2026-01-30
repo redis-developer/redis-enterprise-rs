@@ -30,9 +30,6 @@ pub struct OcspConfig {
     /// Maximum number of recovery attempts
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recovery_max_tries: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// OCSP status information
@@ -55,9 +52,6 @@ pub struct OcspStatus {
     /// Reason for certificate revocation (if revoked)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub revocation_reason: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// OCSP test result
@@ -71,9 +65,6 @@ pub struct OcspTestResult {
     /// Response time from OCSP server in milliseconds
     #[serde(skip_serializing_if = "Option::is_none")]
     pub response_time_ms: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// OCSP handler for managing OCSP configuration

@@ -90,7 +90,6 @@ fn test_ldap_config_obj() -> LdapConfig {
         authorization_query_suffix: Some("ou=groups,dc=example,dc=com".to_string()),
         bind_dn: Some("cn=service,dc=example,dc=com".to_string()),
         bind_pass: Some("secret".to_string()),
-        extra: json!({}),
     }
 }
 
@@ -456,7 +455,6 @@ async fn test_ldap_update_config_invalid() {
         authorization_query_suffix: None,
         bind_dn: None,
         bind_pass: None,
-        extra: json!({}),
     };
 
     Mock::given(method("PUT"))

@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 /// Cluster Manager settings
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,9 +33,6 @@ pub struct CmSettings {
     /// Maximum number of simultaneous backup operations allowed
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_simultaneous_backups: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Cluster Manager settings handler

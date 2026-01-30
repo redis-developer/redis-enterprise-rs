@@ -46,9 +46,6 @@ pub struct Alert {
     /// Error code associated with the alert
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_code: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Generic alert settings (legacy - kept for compatibility)
@@ -150,9 +147,6 @@ pub struct DbAlertsSettings {
     /// (Deprecated) Replica of - sync encountered in general error
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bdb_syncer_general_error: Option<BdbAlertSettingsWithThreshold>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Cluster alert settings with threshold
@@ -212,9 +206,6 @@ pub struct ClusterAlertsSettings {
     /// Node persistent storage below threshold
     #[serde(skip_serializing_if = "Option::is_none")]
     pub node_persistent_storage: Option<ClusterAlertSettingsWithThreshold>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Alert handler for managing alerts

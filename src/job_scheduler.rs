@@ -34,9 +34,6 @@ pub struct ScheduledJob {
     /// Job-specific parameters and configuration
     #[serde(skip_serializing_if = "Option::is_none")]
     pub params: Option<Value>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Create scheduled job request
@@ -78,9 +75,6 @@ pub struct JobExecution {
     /// Error description if the job execution failed
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Job scheduler handler

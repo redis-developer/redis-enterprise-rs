@@ -10,7 +10,6 @@ use crate::client::RestClient;
 use crate::error::Result;
 use futures::stream::Stream;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::pin::Pin;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -25,11 +24,6 @@ pub struct LogEntry {
     /// (e.g., "bdb_name_updated", "node_status_changed", etc.)
     #[serde(rename = "type")]
     pub event_type: String,
-
-    /// Additional fields based on event type
-    /// May include severity, bdb_uid, old_val, new_val, and other event-specific fields
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Logs query parameters

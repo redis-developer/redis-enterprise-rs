@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use typed_builder::TypedBuilder;
 
 /// Redis ACL information
@@ -22,9 +21,6 @@ pub struct RedisAcl {
     /// List of database UIDs this ACL is associated with
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bdbs: Option<Vec<u32>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Create or update Redis ACL request
@@ -90,6 +86,4 @@ pub struct AclValidation {
     pub valid: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
-    #[serde(flatten)]
-    pub extra: Value,
 }

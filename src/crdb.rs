@@ -32,9 +32,6 @@ pub struct Crdb {
     pub replication: Option<bool>,
     /// Data eviction policy (e.g., 'allkeys-lru', 'volatile-lru')
     pub eviction_policy: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// CRDB instance information
@@ -50,9 +47,6 @@ pub struct CrdbInstance {
     pub status: String,
     /// List of endpoint addresses for this instance
     pub endpoints: Option<Vec<String>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Create CRDB request

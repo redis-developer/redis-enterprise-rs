@@ -32,9 +32,6 @@ pub struct Endpoint {
     /// Error code if endpoint has an error
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_code: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Endpoint statistics
@@ -42,9 +39,6 @@ pub struct Endpoint {
 pub struct EndpointStats {
     pub uid: String,
     pub intervals: Vec<StatsInterval>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

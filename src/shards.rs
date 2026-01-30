@@ -16,8 +16,6 @@ pub struct MetricResponse {
     pub interval: String,
     pub timestamps: Vec<i64>,
     pub values: Vec<Value>,
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Shard information
@@ -46,9 +44,6 @@ pub struct Shard {
     pub redis_info: Option<Value>,
     /// Roles assigned to this shard
     pub roles: Option<Vec<String>>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Shard stats information
@@ -56,9 +51,6 @@ pub struct Shard {
 pub struct ShardStats {
     pub uid: String,
     pub intervals: Vec<StatsInterval>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -147,8 +139,6 @@ impl ShardHandler {
 pub struct ShardActionRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shard_uids: Option<Vec<String>>,
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -156,6 +146,4 @@ pub struct Action {
     pub action_uid: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
-    #[serde(flatten)]
-    pub extra: Value,
 }

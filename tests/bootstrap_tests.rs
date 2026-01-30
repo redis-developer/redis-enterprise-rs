@@ -51,7 +51,6 @@ fn cluster_bootstrap_config() -> BootstrapConfig {
             username: "admin".to_string(),
             password: "secure123".to_string(),
         }),
-        extra: json!({}),
     }
 }
 
@@ -68,10 +67,6 @@ fn join_node_config() -> BootstrapConfig {
         credentials: Some(CredentialsBootstrap {
             username: "admin".to_string(),
             password: "secure123".to_string(),
-        }),
-        extra: json!({
-            "cluster_host": "10.0.0.1",
-            "cluster_port": 9443
         }),
     }
 }
@@ -326,7 +321,6 @@ async fn test_bootstrap_create_minimal_config() {
             username: "admin".to_string(),
             password: "minimal123".to_string(),
         }),
-        extra: json!({}),
     };
 
     let result = handler.create(config).await;

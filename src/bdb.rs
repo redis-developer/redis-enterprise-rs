@@ -90,9 +90,6 @@ pub struct DatabaseActionResponse {
     pub action_uid: String,
     /// Description of the action
     pub description: Option<String>,
-    /// Additional fields from the response
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Response from backup operation
@@ -103,9 +100,6 @@ pub struct BackupResponse {
     pub action_uid: Option<String>,
     /// Backup UID if available
     pub backup_uid: Option<String>,
-    /// Additional fields from the response
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Response from import operation
@@ -116,9 +110,6 @@ pub struct ImportResponse {
     pub action_uid: Option<String>,
     /// Import status
     pub status: Option<String>,
-    /// Additional fields from the response
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Response from export operation
@@ -129,9 +120,6 @@ pub struct ExportResponse {
     pub action_uid: Option<String>,
     /// Export status
     pub status: Option<String>,
-    /// Additional fields from the response
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Module information for database upgrade
@@ -419,10 +407,6 @@ pub struct DatabaseInfo {
     pub roles_permissions: Option<Vec<Value>>,
     pub tags: Option<Vec<String>>,
     pub topology_epoch: Option<u32>,
-
-    /// Capture any additional fields not explicitly defined
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Database endpoint information
@@ -446,9 +430,6 @@ pub struct EndpointInfo {
     pub exclude_proxies: Option<Vec<u32>>,
     /// List of proxy UIDs to include
     pub include_proxies: Option<Vec<u32>>,
-    /// Capture any additional fields
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Module configuration for database creation

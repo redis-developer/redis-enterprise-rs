@@ -18,9 +18,6 @@ pub struct NodeActionResponse {
     pub action_uid: String,
     /// Description of the action
     pub description: Option<String>,
-    /// Additional fields from the response
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Node information
@@ -122,10 +119,6 @@ pub struct Node {
 
     /// Recovery files path
     pub recovery_path: Option<String>,
-
-    /// Capture any additional fields not explicitly defined
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Node stats
@@ -140,9 +133,6 @@ pub struct NodeStats {
     pub network_bytes_out: Option<u64>,
     pub persistent_storage_free: Option<u64>,
     pub ephemeral_storage_free: Option<u64>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Node action request

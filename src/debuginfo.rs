@@ -65,9 +65,6 @@ pub struct DebugInfoStatus {
     /// Error description if the collection task failed
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Debug info handler

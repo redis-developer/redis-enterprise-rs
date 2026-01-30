@@ -34,9 +34,6 @@ pub struct Migration {
     /// Error message if migration failed
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Migration endpoint configuration

@@ -507,8 +507,4 @@ async fn test_database_upgrade_redis_version() {
     assert!(result.is_ok());
     let response = result.unwrap();
     assert_eq!(response.action_uid, "591d9dcb-ddd7-48a9-a04d-bd5d4d6834d0");
-    // Verify the flattened extra fields are captured
-    assert_eq!(response.extra["uid"], 1);
-    assert_eq!(response.extra["name"], "test-db");
-    assert_eq!(response.extra["redis_version"], "7.4");
 }

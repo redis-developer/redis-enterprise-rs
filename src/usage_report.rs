@@ -32,9 +32,6 @@ pub struct UsageReport {
     /// Summary of overall usage across the cluster
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<UsageSummary>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Database usage information
@@ -55,9 +52,6 @@ pub struct DatabaseUsage {
     /// Number of shards in the database
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shard_count: Option<u32>,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Node usage information
@@ -73,9 +67,6 @@ pub struct NodeUsage {
     pub persistent_storage_usage: u64,
     /// Ephemeral storage usage (bytes)
     pub ephemeral_storage_usage: u64,
-
-    #[serde(flatten)]
-    pub extra: Value,
 }
 
 /// Usage summary
