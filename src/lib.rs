@@ -318,6 +318,9 @@
 //! - **Modules**: Redis module management
 //! - **Maintenance**: Upgrades, migrations, debug info
 
+#[macro_use]
+mod macros;
+
 pub mod actions;
 pub mod alerts;
 pub mod bdb;

@@ -5,7 +5,6 @@
 //! - Map LDAP groups to roles
 //! - Query mapping status
 
-use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -91,45 +90,21 @@ pub struct LdapServer {
     pub starttls: Option<bool>,
 }
 
-/// LDAP mapping handler
-pub struct LdapMappingHandler {
-    client: RestClient,
-}
+define_handler!(
+    /// LDAP mapping handler
+    pub struct LdapMappingHandler;
+);
 
+impl_crud!(LdapMappingHandler {
+    list => LdapMapping, "/v1/ldap_mappings";
+    get(u32) => LdapMapping, "/v1/ldap_mappings/{}";
+    delete(u32), "/v1/ldap_mappings/{}";
+    create(CreateLdapMappingRequest) => LdapMapping, "/v1/ldap_mappings";
+    update(u32, CreateLdapMappingRequest) => LdapMapping, "/v1/ldap_mappings/{}";
+});
+
+// Custom methods for LDAP configuration
 impl LdapMappingHandler {
-    pub fn new(client: RestClient) -> Self {
-        LdapMappingHandler { client }
-    }
-
-    /// List all LDAP mappings
-    pub async fn list(&self) -> Result<Vec<LdapMapping>> {
-        self.client.get("/v1/ldap_mappings").await
-    }
-
-    /// Get specific LDAP mapping
-    pub async fn get(&self, uid: u32) -> Result<LdapMapping> {
-        self.client.get(&format!("/v1/ldap_mappings/{}", uid)).await
-    }
-
-    /// Create a new LDAP mapping
-    pub async fn create(&self, request: CreateLdapMappingRequest) -> Result<LdapMapping> {
-        self.client.post("/v1/ldap_mappings", &request).await
-    }
-
-    /// Update an existing LDAP mapping
-    pub async fn update(&self, uid: u32, request: CreateLdapMappingRequest) -> Result<LdapMapping> {
-        self.client
-            .put(&format!("/v1/ldap_mappings/{}", uid), &request)
-            .await
-    }
-
-    /// Delete an LDAP mapping
-    pub async fn delete(&self, uid: u32) -> Result<()> {
-        self.client
-            .delete(&format!("/v1/ldap_mappings/{}", uid))
-            .await
-    }
-
     /// Get LDAP configuration
     pub async fn get_config(&self) -> Result<LdapConfig> {
         self.client.get("/v1/cluster/ldap").await

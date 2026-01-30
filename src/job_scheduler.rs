@@ -5,7 +5,6 @@
 //! - Query job history
 //! - Manage job execution
 
-use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -77,51 +76,21 @@ pub struct JobExecution {
     pub error: Option<String>,
 }
 
-/// Job scheduler handler
-pub struct JobSchedulerHandler {
-    client: RestClient,
-}
+define_handler!(
+    /// Job scheduler handler
+    pub struct JobSchedulerHandler;
+);
 
+impl_crud!(JobSchedulerHandler {
+    list => ScheduledJob, "/v1/job_scheduler";
+    get(&str) => ScheduledJob, "/v1/job_scheduler/{}";
+    delete(&str), "/v1/job_scheduler/{}";
+    create(CreateScheduledJobRequest) => ScheduledJob, "/v1/job_scheduler";
+    update(&str, CreateScheduledJobRequest) => ScheduledJob, "/v1/job_scheduler/{}";
+});
+
+// Custom methods
 impl JobSchedulerHandler {
-    pub fn new(client: RestClient) -> Self {
-        JobSchedulerHandler { client }
-    }
-
-    /// List all scheduled jobs
-    pub async fn list(&self) -> Result<Vec<ScheduledJob>> {
-        self.client.get("/v1/job_scheduler").await
-    }
-
-    /// Get specific scheduled job
-    pub async fn get(&self, job_id: &str) -> Result<ScheduledJob> {
-        self.client
-            .get(&format!("/v1/job_scheduler/{}", job_id))
-            .await
-    }
-
-    /// Create a new scheduled job
-    pub async fn create(&self, request: CreateScheduledJobRequest) -> Result<ScheduledJob> {
-        self.client.post("/v1/job_scheduler", &request).await
-    }
-
-    /// Update a scheduled job
-    pub async fn update(
-        &self,
-        job_id: &str,
-        request: CreateScheduledJobRequest,
-    ) -> Result<ScheduledJob> {
-        self.client
-            .put(&format!("/v1/job_scheduler/{}", job_id), &request)
-            .await
-    }
-
-    /// Delete a scheduled job
-    pub async fn delete(&self, job_id: &str) -> Result<()> {
-        self.client
-            .delete(&format!("/v1/job_scheduler/{}", job_id))
-            .await
-    }
-
     /// Trigger job execution
     pub async fn trigger(&self, job_id: &str) -> Result<JobExecution> {
         self.client
