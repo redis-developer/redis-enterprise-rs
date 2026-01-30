@@ -43,7 +43,7 @@ use redis_enterprise::EnterpriseClient;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create client using builder pattern
     let client = EnterpriseClient::builder()
-        .url("https://cluster.example.com:9443")
+        .base_url("https://cluster.example.com:9443")
         .username("admin@example.com")
         .password("your-password")
         .insecure(false) // Set to true for self-signed certificates
@@ -54,11 +54,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Cluster: {:?}", cluster);
 
     // List databases (BDBs)
-    let databases = client.database().list().await?;
+    let databases = client.databases().list().await?;
     println!("Databases: {:?}", databases);
 
     // Get node statistics
-    let nodes = client.node().list().await?;
+    let nodes = client.nodes().list().await?;
     println!("Nodes: {:?}", nodes);
 
     Ok(())
