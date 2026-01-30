@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.7.5...v0.8.0) - 2026-01-30
+
+### Added
+
+- add more specific error variants ([#12](https://github.com/redis-developer/redis-enterprise-rs/pull/12))
+- add fluent API and align with redis-cloud patterns ([#10](https://github.com/redis-developer/redis-enterprise-rs/pull/10))
+
+### Fixed
+
+- add README to PyPI package ([#3](https://github.com/redis-developer/redis-enterprise-rs/pull/3))
+
+### Other
+
+- cleanup README and Python bindings ([#15](https://github.com/redis-developer/redis-enterprise-rs/pull/15))
+- split database tests into modular structure ([#14](https://github.com/redis-developer/redis-enterprise-rs/pull/14))
+- reduce handler boilerplate with macros ([#13](https://github.com/redis-developer/redis-enterprise-rs/pull/13))
+- remove extra: Value fields from all response types ([#11](https://github.com/redis-developer/redis-enterprise-rs/pull/11))
+
 ## [0.7.5](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.7.4...v0.7.5) - 2026-01-30
 
 ### Added
