@@ -172,6 +172,53 @@ impl MockEnterpriseServer {
             .await;
     }
 
+    // Alert mocks
+
+    /// Mock GET /v1/alerts to return a list of alerts
+    pub async fn mock_alerts_list(&self, alerts: Vec<Value>) {
+        Mock::given(method("GET"))
+            .and(path("/v1/alerts"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(alerts))
+            .mount(&self.server)
+            .await;
+    }
+
+    /// Mock GET /v1/alerts/{uid} to return a specific alert
+    pub async fn mock_alert_get(&self, uid: &str, alert: Value) {
+        Mock::given(method("GET"))
+            .and(path(format!("/v1/alerts/{}", uid)))
+            .respond_with(ResponseTemplate::new(200).set_body_json(alert))
+            .mount(&self.server)
+            .await;
+    }
+
+    /// Mock GET /v1/bdbs/{bdb_uid}/alerts to return alerts for a database
+    pub async fn mock_database_alerts(&self, bdb_uid: u32, alerts: Vec<Value>) {
+        Mock::given(method("GET"))
+            .and(path(format!("/v1/bdbs/{}/alerts", bdb_uid)))
+            .respond_with(ResponseTemplate::new(200).set_body_json(alerts))
+            .mount(&self.server)
+            .await;
+    }
+
+    /// Mock GET /v1/nodes/{node_uid}/alerts to return alerts for a node
+    pub async fn mock_node_alerts(&self, node_uid: u32, alerts: Vec<Value>) {
+        Mock::given(method("GET"))
+            .and(path(format!("/v1/nodes/{}/alerts", node_uid)))
+            .respond_with(ResponseTemplate::new(200).set_body_json(alerts))
+            .mount(&self.server)
+            .await;
+    }
+
+    /// Mock GET /v1/cluster/alerts to return cluster alerts
+    pub async fn mock_cluster_alerts(&self, alerts: Vec<Value>) {
+        Mock::given(method("GET"))
+            .and(path("/v1/cluster/alerts"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(alerts))
+            .mount(&self.server)
+            .await;
+    }
+
     // Error mocks
 
     /// Mock any GET request to a path pattern to return 404
@@ -220,7 +267,7 @@ impl MockEnterpriseServer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::testing::fixtures::{ClusterFixture, DatabaseFixture, NodeFixture};
+    use crate::testing::fixtures::{AlertFixture, ClusterFixture, DatabaseFixture, NodeFixture};
 
     #[tokio::test]
     async fn test_mock_server_starts() {
@@ -309,5 +356,59 @@ mod tests {
             })))
             .mount(server.inner())
             .await;
+    }
+
+    #[tokio::test]
+    async fn test_mock_alerts_list_with_handler() {
+        let server = MockEnterpriseServer::start().await;
+
+        server
+            .mock_alerts_list(vec![
+                AlertFixture::new("alert-1", "bdb_size")
+                    .severity("WARNING")
+                    .entity_type("bdb")
+                    .entity_uid("1")
+                    .build(),
+                AlertFixture::new("alert-2", "node_memory")
+                    .severity("CRITICAL")
+                    .entity_type("node")
+                    .entity_uid("2")
+                    .build(),
+            ])
+            .await;
+
+        let client = server.client();
+        let alerts = client.alerts().list().await.unwrap();
+
+        assert_eq!(alerts.len(), 2);
+        assert_eq!(alerts[0].uid, "alert-1");
+        assert_eq!(alerts[0].name, "bdb_size");
+        assert_eq!(alerts[0].severity, "WARNING");
+        assert_eq!(alerts[1].uid, "alert-2");
+        assert_eq!(alerts[1].name, "node_memory");
+        assert_eq!(alerts[1].severity, "CRITICAL");
+    }
+
+    #[tokio::test]
+    async fn test_mock_database_alerts_with_handler() {
+        let server = MockEnterpriseServer::start().await;
+
+        server
+            .mock_database_alerts(
+                1,
+                vec![
+                    AlertFixture::new("alert-db-1", "bdb_high_latency")
+                        .severity("WARNING")
+                        .description("Latency above threshold")
+                        .build(),
+                ],
+            )
+            .await;
+
+        let client = server.client();
+        let alerts = client.alerts().list_by_database(1).await.unwrap();
+
+        assert_eq!(alerts.len(), 1);
+        assert_eq!(alerts[0].name, "bdb_high_latency");
     }
 }

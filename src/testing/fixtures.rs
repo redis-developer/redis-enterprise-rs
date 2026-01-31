@@ -362,6 +362,142 @@ impl ActionFixture {
     }
 }
 
+/// Builder for alert fixtures
+///
+/// # Example
+///
+/// ```
+/// use redis_enterprise::testing::fixtures::AlertFixture;
+///
+/// // Create a warning alert
+/// let alert = AlertFixture::new("alert-123", "high_memory_usage")
+///     .severity("WARNING")
+///     .description("Memory usage above 80%")
+///     .build();
+///
+/// // Create a critical alert for a specific database
+/// let db_alert = AlertFixture::new("alert-456", "bdb_size")
+///     .severity("CRITICAL")
+///     .entity_type("bdb")
+///     .entity_uid("1")
+///     .entity_name("my-database")
+///     .build();
+/// ```
+#[derive(Debug, Clone)]
+pub struct AlertFixture {
+    uid: String,
+    name: String,
+    severity: String,
+    state: String,
+    entity_type: Option<String>,
+    entity_name: Option<String>,
+    entity_uid: Option<String>,
+    description: Option<String>,
+    threshold: Option<String>,
+    change_time: Option<String>,
+}
+
+impl AlertFixture {
+    /// Create a new alert fixture with required fields
+    ///
+    /// # Arguments
+    /// * `uid` - Unique identifier for the alert
+    /// * `name` - Alert name/type (e.g., "bdb_size", "node_memory", "cluster_license_about_to_expire")
+    pub fn new(uid: impl Into<String>, name: impl Into<String>) -> Self {
+        Self {
+            uid: uid.into(),
+            name: name.into(),
+            severity: "WARNING".to_string(),
+            state: "on".to_string(),
+            entity_type: None,
+            entity_name: None,
+            entity_uid: None,
+            description: None,
+            threshold: None,
+            change_time: None,
+        }
+    }
+
+    /// Set alert severity (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    pub fn severity(mut self, severity: impl Into<String>) -> Self {
+        self.severity = severity.into();
+        self
+    }
+
+    /// Set alert state ("on" or "off")
+    pub fn state(mut self, state: impl Into<String>) -> Self {
+        self.state = state.into();
+        self
+    }
+
+    /// Set the entity type this alert is associated with (e.g., "bdb", "node", "cluster")
+    pub fn entity_type(mut self, entity_type: impl Into<String>) -> Self {
+        self.entity_type = Some(entity_type.into());
+        self
+    }
+
+    /// Set the entity name
+    pub fn entity_name(mut self, name: impl Into<String>) -> Self {
+        self.entity_name = Some(name.into());
+        self
+    }
+
+    /// Set the entity UID
+    pub fn entity_uid(mut self, uid: impl Into<String>) -> Self {
+        self.entity_uid = Some(uid.into());
+        self
+    }
+
+    /// Set the alert description
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    /// Set the alert threshold
+    pub fn threshold(mut self, threshold: impl Into<String>) -> Self {
+        self.threshold = Some(threshold.into());
+        self
+    }
+
+    /// Set the change time (ISO 8601 format)
+    pub fn change_time(mut self, time: impl Into<String>) -> Self {
+        self.change_time = Some(time.into());
+        self
+    }
+
+    /// Build the JSON fixture
+    pub fn build(self) -> Value {
+        let mut obj = json!({
+            "uid": self.uid,
+            "name": self.name,
+            "severity": self.severity,
+            "state": self.state
+        });
+
+        if let Some(entity_type) = self.entity_type {
+            obj["entity_type"] = json!(entity_type);
+        }
+        if let Some(entity_name) = self.entity_name {
+            obj["entity_name"] = json!(entity_name);
+        }
+        if let Some(entity_uid) = self.entity_uid {
+            obj["entity_uid"] = json!(entity_uid);
+        }
+        if let Some(description) = self.description {
+            obj["description"] = json!(description);
+        }
+        if let Some(threshold) = self.threshold {
+            obj["threshold"] = json!(threshold);
+        }
+        if let Some(change_time) = self.change_time {
+            obj["change_time"] = json!(change_time);
+        }
+
+        obj
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -411,5 +547,37 @@ mod tests {
 
         let expired = LicenseFixture::expired().build();
         assert_eq!(expired["expired"], true);
+    }
+
+    #[test]
+    fn test_alert_fixture_defaults() {
+        let alert = AlertFixture::new("alert-1", "bdb_size").build();
+        assert_eq!(alert["uid"], "alert-1");
+        assert_eq!(alert["name"], "bdb_size");
+        assert_eq!(alert["severity"], "WARNING");
+        assert_eq!(alert["state"], "on");
+    }
+
+    #[test]
+    fn test_alert_fixture_customized() {
+        let alert = AlertFixture::new("alert-2", "node_memory")
+            .severity("CRITICAL")
+            .state("off")
+            .entity_type("node")
+            .entity_uid("1")
+            .entity_name("node-1")
+            .description("Memory usage critical")
+            .threshold("90")
+            .build();
+
+        assert_eq!(alert["uid"], "alert-2");
+        assert_eq!(alert["name"], "node_memory");
+        assert_eq!(alert["severity"], "CRITICAL");
+        assert_eq!(alert["state"], "off");
+        assert_eq!(alert["entity_type"], "node");
+        assert_eq!(alert["entity_uid"], "1");
+        assert_eq!(alert["entity_name"], "node-1");
+        assert_eq!(alert["description"], "Memory usage critical");
+        assert_eq!(alert["threshold"], "90");
     }
 }

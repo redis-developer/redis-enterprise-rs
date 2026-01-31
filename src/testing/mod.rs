@@ -95,7 +95,8 @@ pub mod server;
 
 // Re-export main types for convenience
 pub use fixtures::{
-    ActionFixture, ClusterFixture, DatabaseFixture, LicenseFixture, NodeFixture, UserFixture,
+    ActionFixture, AlertFixture, ClusterFixture, DatabaseFixture, LicenseFixture, NodeFixture,
+    UserFixture,
 };
 pub use server::MockEnterpriseServer;
 
