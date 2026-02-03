@@ -51,13 +51,34 @@ impl MockEnterpriseServer {
 
     /// Create an EnterpriseClient configured to use this mock server
     pub fn client(&self) -> EnterpriseClient {
+        self.client_builder()
+            .build()
+            .expect("Failed to build test client")
+    }
+
+    /// Get a pre-configured client builder for this mock server
+    ///
+    /// Use this when you need to customize the client configuration,
+    /// for example to test CA certificate handling or custom timeouts.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let server = MockEnterpriseServer::start().await;
+    ///
+    /// // Customize the client
+    /// let client = server.client_builder()
+    ///     .timeout(std::time::Duration::from_secs(5))
+    ///     .user_agent("my-app/1.0")
+    ///     .build()
+    ///     .unwrap();
+    /// ```
+    pub fn client_builder(&self) -> crate::EnterpriseClientBuilder {
         EnterpriseClient::builder()
             .base_url(self.uri())
             .username("test@example.com")
             .password("password")
             .insecure(true)
-            .build()
-            .expect("Failed to build test client")
     }
 
     /// Get a reference to the underlying MockServer for custom mocking
