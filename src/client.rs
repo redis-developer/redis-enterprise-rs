@@ -188,7 +188,7 @@ impl EnterpriseClientBuilder {
             .timeout(self.timeout)
             .default_headers(default_headers);
 
-        // Add custom CA certificate if provided
+        // Add custom CA certificate if provided (merged with system roots)
         if let Some(ca_cert_path) = &self.ca_cert_path {
             let cert_pem = std::fs::read(ca_cert_path).map_err(|e| {
                 RestError::ConnectionError(format!(
@@ -199,17 +199,17 @@ impl EnterpriseClientBuilder {
             let cert = reqwest::Certificate::from_pem(&cert_pem).map_err(|e| {
                 RestError::ConnectionError(format!("Invalid CA certificate: {}", e))
             })?;
-            client_builder = client_builder.add_root_certificate(cert);
+            client_builder = client_builder.tls_certs_merge([cert]);
         } else if let Some(ca_cert_pem) = &self.ca_cert_pem {
             let cert = reqwest::Certificate::from_pem(ca_cert_pem).map_err(|e| {
                 RestError::ConnectionError(format!("Invalid CA certificate: {}", e))
             })?;
-            client_builder = client_builder.add_root_certificate(cert);
+            client_builder = client_builder.tls_certs_merge([cert]);
         }
 
-        // Only disable cert verification if explicitly requested AND no custom CA was provided
+        // Only disable cert verification if explicitly requested
         if self.insecure {
-            client_builder = client_builder.danger_accept_invalid_certs(true);
+            client_builder = client_builder.tls_danger_accept_invalid_certs(true);
         }
 
         let client = client_builder
