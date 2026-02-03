@@ -54,6 +54,8 @@ pub struct EnterpriseClientBuilder {
     timeout: Duration,
     insecure: bool,
     user_agent: String,
+    ca_cert_path: Option<std::path::PathBuf>,
+    ca_cert_pem: Option<Vec<u8>>,
 }
 
 impl Default for EnterpriseClientBuilder {
@@ -65,6 +67,8 @@ impl Default for EnterpriseClientBuilder {
             timeout: Duration::from_secs(30),
             insecure: false,
             user_agent: DEFAULT_USER_AGENT.to_string(),
+            ca_cert_path: None,
+            ca_cert_pem: None,
         }
     }
 }
@@ -122,6 +126,52 @@ impl EnterpriseClientBuilder {
         self
     }
 
+    /// Set a custom CA certificate from a file path
+    ///
+    /// This allows connecting to Redis Enterprise clusters that use self-signed
+    /// certificates (common in Kubernetes deployments) without disabling TLS
+    /// verification entirely.
+    ///
+    /// The certificate should be in PEM format.
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// let client = EnterpriseClient::builder()
+    ///     .base_url("https://rec-api.redis.svc:9443")
+    ///     .username("admin")
+    ///     .password("secret")
+    ///     .ca_cert("/path/to/cluster-ca.crt")
+    ///     .build()?;
+    /// ```
+    #[must_use]
+    pub fn ca_cert(mut self, path: impl Into<std::path::PathBuf>) -> Self {
+        self.ca_cert_path = Some(path.into());
+        self
+    }
+
+    /// Set a custom CA certificate from PEM bytes
+    ///
+    /// This is useful when the certificate is loaded from a Kubernetes Secret
+    /// or other source that provides raw bytes rather than a file path.
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// let ca_pem = std::fs::read("/var/run/secrets/ca.crt")?;
+    /// let client = EnterpriseClient::builder()
+    ///     .base_url("https://rec-api.redis.svc:9443")
+    ///     .username("admin")
+    ///     .password("secret")
+    ///     .ca_cert_pem(ca_pem)
+    ///     .build()?;
+    /// ```
+    #[must_use]
+    pub fn ca_cert_pem(mut self, pem: impl Into<Vec<u8>>) -> Self {
+        self.ca_cert_pem = Some(pem.into());
+        self
+    }
+
     /// Build the client
     pub fn build(self) -> Result<EnterpriseClient> {
         let username = self.username.unwrap_or_default();
@@ -134,10 +184,33 @@ impl EnterpriseClientBuilder {
                 .map_err(|e| RestError::ConnectionError(format!("Invalid user agent: {}", e)))?,
         );
 
-        let client_builder = Client::builder()
+        let mut client_builder = Client::builder()
             .timeout(self.timeout)
-            .danger_accept_invalid_certs(self.insecure)
             .default_headers(default_headers);
+
+        // Add custom CA certificate if provided (merged with system roots)
+        if let Some(ca_cert_path) = &self.ca_cert_path {
+            let cert_pem = std::fs::read(ca_cert_path).map_err(|e| {
+                RestError::ConnectionError(format!(
+                    "Failed to read CA certificate from {:?}: {}",
+                    ca_cert_path, e
+                ))
+            })?;
+            let cert = reqwest::Certificate::from_pem(&cert_pem).map_err(|e| {
+                RestError::ConnectionError(format!("Invalid CA certificate: {}", e))
+            })?;
+            client_builder = client_builder.tls_certs_merge([cert]);
+        } else if let Some(ca_cert_pem) = &self.ca_cert_pem {
+            let cert = reqwest::Certificate::from_pem(ca_cert_pem).map_err(|e| {
+                RestError::ConnectionError(format!("Invalid CA certificate: {}", e))
+            })?;
+            client_builder = client_builder.tls_certs_merge([cert]);
+        }
+
+        // Only disable cert verification if explicitly requested
+        if self.insecure {
+            client_builder = client_builder.tls_danger_accept_invalid_certs(true);
+        }
 
         let client = client_builder
             .build()
@@ -197,6 +270,7 @@ impl EnterpriseClient {
     /// - `REDIS_ENTERPRISE_USER`: Username for authentication (default: "admin@redis.local")
     /// - `REDIS_ENTERPRISE_PASSWORD`: Password for authentication (required)
     /// - `REDIS_ENTERPRISE_INSECURE`: Set to "true" to skip SSL verification (default: "false")
+    /// - `REDIS_ENTERPRISE_CA_CERT`: Path to custom CA certificate file (PEM format)
     pub fn from_env() -> Result<Self> {
         use std::env;
 
@@ -210,13 +284,19 @@ impl EnterpriseClient {
             .unwrap_or_else(|_| "false".to_string())
             .parse::<bool>()
             .unwrap_or(false);
+        let ca_cert = env::var("REDIS_ENTERPRISE_CA_CERT").ok();
 
-        Self::builder()
+        let mut builder = Self::builder()
             .base_url(base_url)
             .username(username)
             .password(password)
-            .insecure(insecure)
-            .build()
+            .insecure(insecure);
+
+        if let Some(ca_cert_path) = ca_cert {
+            builder = builder.ca_cert(ca_cert_path);
+        }
+
+        builder.build()
     }
 
     /// Make a GET request
