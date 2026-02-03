@@ -397,6 +397,42 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_ca_cert_builder_path_nonexistent() {
+        // Test that ca_cert builder method fails for nonexistent path
+        let result = EnterpriseClient::builder()
+            .base_url("https://example.com")
+            .username("test")
+            .password("test")
+            .ca_cert("/nonexistent/path/ca.pem")
+            .build();
+
+        // Should fail because file doesn't exist
+        match result {
+            Err(e) => assert!(
+                e.to_string().contains("Failed to read CA certificate"),
+                "Expected CA cert read error, got: {}",
+                e
+            ),
+            Ok(_) => panic!("Expected error for nonexistent CA cert path"),
+        }
+    }
+
+    #[test]
+    fn test_ca_cert_from_env() {
+        // Test that REDIS_ENTERPRISE_CA_CERT env var is documented in from_env
+        // We can't easily test the actual env var behavior without side effects,
+        // but we test that the method exists and handles missing password
+        // SAFETY: This test runs single-threaded and only modifies test-specific env vars
+        unsafe {
+            std::env::remove_var("REDIS_ENTERPRISE_PASSWORD");
+            std::env::remove_var("REDIS_ENTERPRISE_CA_CERT");
+        }
+
+        let result = EnterpriseClient::from_env();
+        assert!(result.is_err()); // Missing password
+    }
+
+    #[tokio::test]
     async fn test_url_normalization() {
         // Test various combinations of base URLs and paths to ensure no double slashes
         let test_cases = vec![
