@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.1...v0.8.2) - 2026-02-03
+
+### Added
+
+- add custom CA certificate support and upgrade reqwest to 0.13 ([#21](https://github.com/redis-developer/redis-enterprise-rs/pull/21))
+
+### Other
+
+- add CA cert tests and client_builder() for test support ([#24](https://github.com/redis-developer/redis-enterprise-rs/pull/24))
+- update bytes to 1.11.1 (RUSTSEC-2026-0007) ([#22](https://github.com/redis-developer/redis-enterprise-rs/pull/22))
+
 ## [0.8.1](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.0...v0.8.1) - 2026-01-31
 
 ### Added
