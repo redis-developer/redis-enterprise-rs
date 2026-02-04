@@ -136,38 +136,64 @@ pub struct ModuleUpgrade {
 }
 
 /// Request for database upgrade operation
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use redis_enterprise::bdb::DatabaseUpgradeRequest;
+///
+/// // Upgrade to latest Redis version with role preservation
+/// let request = DatabaseUpgradeRequest::builder()
+///     .preserve_roles(true)
+///     .build();
+///
+/// // Upgrade to specific version
+/// let request = DatabaseUpgradeRequest::builder()
+///     .redis_version("7.4.2")
+///     .preserve_roles(true)
+///     .parallel_shards_upgrade(2)
+///     .build();
+/// ```
+#[derive(Debug, Clone, Serialize, Deserialize, Default, TypedBuilder)]
 pub struct DatabaseUpgradeRequest {
     /// Target Redis version (optional, defaults to latest)
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
     pub redis_version: Option<String>,
 
     /// Preserve master/replica roles (requires extra failover)
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub preserve_roles: Option<bool>,
 
     /// Restart shards even if no version change
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub force_restart: Option<bool>,
 
     /// Allow data loss in non-replicated, non-persistent databases
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub may_discard_data: Option<bool>,
 
     /// Force data discard even if replicated/persistent
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub force_discard: Option<bool>,
 
     /// Keep current CRDT protocol version
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub keep_crdt_protocol_version: Option<bool>,
 
     /// Maximum parallel shard upgrades (default: all shards)
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub parallel_shards_upgrade: Option<u32>,
 
     /// Modules to upgrade alongside Redis
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub modules: Option<Vec<ModuleUpgrade>>,
 }
 

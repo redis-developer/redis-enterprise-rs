@@ -9,61 +9,92 @@ use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use typed_builder::TypedBuilder;
 
 /// Bootstrap configuration for cluster initialization
-#[derive(Debug, Clone, Serialize, Deserialize)]
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use redis_enterprise::{BootstrapConfig, ClusterBootstrap, CredentialsBootstrap};
+///
+/// let config = BootstrapConfig::builder()
+///     .action("create_cluster")
+///     .cluster(ClusterBootstrap::builder()
+///         .name("my-cluster.local")
+///         .rack_aware(true)
+///         .build())
+///     .credentials(CredentialsBootstrap::builder()
+///         .username("admin@example.com")
+///         .password("secure-password")
+///         .build())
+///     .build();
+/// ```
+#[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct BootstrapConfig {
     /// Action to perform (e.g., 'create', 'join', 'recover_cluster')
+    #[builder(setter(into))]
     pub action: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// Cluster configuration for initialization
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub cluster: Option<ClusterBootstrap>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// Node configuration for bootstrap
-    pub node: Option<NodeBootstrap>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub node: Option<NodeBootstrap>,
     /// Admin credentials for cluster access
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub credentials: Option<CredentialsBootstrap>,
 }
 
 /// Cluster bootstrap configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct ClusterBootstrap {
     /// Cluster name for identification
+    #[builder(setter(into))]
     pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// DNS suffixes for cluster FQDN resolution
-    pub dns_suffixes: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub dns_suffixes: Option<Vec<String>>,
     /// Enable rack-aware placement for high availability
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub rack_aware: Option<bool>,
 }
 
 /// Node bootstrap configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct NodeBootstrap {
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// Storage paths configuration for the node
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub paths: Option<NodePaths>,
 }
 
 /// Node paths configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct NodePaths {
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// Path for persistent storage (databases, configuration, logs)
-    pub persistent_path: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub persistent_path: Option<String>,
     /// Path for ephemeral storage (temporary files, caches)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
     pub ephemeral_path: Option<String>,
 }
 
 /// Credentials bootstrap configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct CredentialsBootstrap {
     /// Admin username for cluster management
+    #[builder(setter(into))]
     pub username: String,
     /// Admin password for authentication
+    #[builder(setter(into))]
     pub password: String,
 }
 

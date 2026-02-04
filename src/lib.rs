@@ -373,7 +373,8 @@ pub mod testing;
 
 // Database management
 pub use bdb::{
-    BdbHandler, CreateDatabaseRequest, CreateDatabaseRequestBuilder, Database, ModuleConfig,
+    BdbHandler, CreateDatabaseRequest, CreateDatabaseRequestBuilder, Database,
+    DatabaseUpgradeRequest, ModuleConfig,
 };
 
 // Database groups

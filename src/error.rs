@@ -120,6 +120,12 @@ impl RestError {
             || self.is_cluster_busy()
             || self.is_server_error()
     }
+
+    /// Check if this is a bad request / validation error
+    pub fn is_bad_request(&self) -> bool {
+        matches!(self, RestError::ValidationError(_))
+            || matches!(self, RestError::ApiError { code, .. } if *code == 400)
+    }
 }
 
 pub type Result<T> = std::result::Result<T, RestError>;
