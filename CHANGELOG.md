@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.4](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.3...v0.8.4) - 2026-02-05
+
+### Other
+
+- update rust-version to 1.89 and author email ([#29](https://github.com/redis-developer/redis-enterprise-rs/pull/29))
+
 ## [0.8.3](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.2...v0.8.3) - 2026-02-04
 
 ### Added
