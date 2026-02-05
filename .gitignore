@@ -26,3 +26,17 @@ lcov.info
 # Backup files
 *.bak
 *.backup
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.whl
+.venv/
+venv/
