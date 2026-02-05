@@ -2,8 +2,8 @@
 name = "redis-enterprise"
 version = "0.8.3"
 edition = "2024"
-rust-version = "1.85"
-authors = ["Josh Rotenberg <joshrotenberg@gmail.com>"]
+rust-version = "1.89"
+authors = ["Josh Rotenberg <josh.rotenberg@redis.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/redis-developer/redis-enterprise-rs"
 homepage = "https://github.com/redis-developer/redis-enterprise-rs"
