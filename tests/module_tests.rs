@@ -191,9 +191,7 @@ async fn test_module_list_with_platforms_map() {
     Mock::given(method("GET"))
         .and(path("/v1/modules"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([
-            test_module_with_platforms()
-        ])))
+        .respond_with(success_response(json!([test_module_with_platforms()])))
         .mount(&mock_server)
         .await;
 
@@ -208,7 +206,11 @@ async fn test_module_list_with_platforms_map() {
     let result = handler.list().await;
 
     // This should succeed after the fix
-    assert!(result.is_ok(), "Failed to deserialize module with platforms map: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Failed to deserialize module with platforms map: {:?}",
+        result.err()
+    );
     let modules = result.unwrap();
     assert_eq!(modules.len(), 1);
 
@@ -217,7 +219,10 @@ async fn test_module_list_with_platforms_map() {
     assert_eq!(module.module_name, Some("search".to_string()));
 
     // After the fix, platforms should be accessible as a HashMap
-    assert!(module.platforms.is_some(), "Platforms field should be present");
+    assert!(
+        module.platforms.is_some(),
+        "Platforms field should be present"
+    );
 }
 
 /// Test getting a single module with platforms field
@@ -243,9 +248,16 @@ async fn test_module_get_with_platforms_map() {
     let result = handler.get("2").await;
 
     // This should succeed after the fix
-    assert!(result.is_ok(), "Failed to deserialize module with platforms map: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Failed to deserialize module with platforms map: {:?}",
+        result.err()
+    );
     let module = result.unwrap();
     assert_eq!(module.uid, "2");
     assert_eq!(module.module_name, Some("search".to_string()));
-    assert!(module.platforms.is_some(), "Platforms field should be present");
+    assert!(
+        module.platforms.is_some(),
+        "Platforms field should be present"
+    );
 }
