@@ -9,6 +9,18 @@ use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
+
+/// Platform-specific information for a module
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlatformInfo {
+    /// Platform dependencies (typically an empty object)
+    #[serde(default)]
+    pub dependencies: Value,
+
+    /// SHA256 checksum of the module binary for this platform
+    pub sha256: Option<String>,
+}
 
 /// Module information
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -52,8 +64,10 @@ pub struct Module {
     /// Minimum Redis Enterprise version required for this module
     pub min_redis_pack_version: Option<String>,
 
-    /// List of platforms this module supports (e.g., 'linux-x64', 'linux-arm64')
-    pub platforms: Option<Vec<String>>,
+    /// Platform-specific information for this module
+    /// Maps platform names (e.g., 'rhel9/x86_64', 'rhel8/x86_64') to platform details
+    #[serde(default)]
+    pub platforms: Option<HashMap<String, PlatformInfo>>,
 
     /// SHA256 checksum of the module binary for verification
     pub sha256: Option<String>,
