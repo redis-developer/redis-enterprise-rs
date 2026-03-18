@@ -39,6 +39,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Sync Python package version
+        run: python scripts/sync_python_package_version.py
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -61,6 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sync Python package version
+        run: python scripts/sync_python_package_version.py
 
       - name: Build sdist
         uses: PyO3/maturin-action@v1
