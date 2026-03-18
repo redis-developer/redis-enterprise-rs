@@ -17,7 +17,7 @@ path = "src/lib.rs"
 
 [dependencies]
 redis-enterprise = { path = ".." }
-pyo3 = { version = "0.23", features = ["extension-module"] }
+pyo3 = { version = "0.23", features = ["extension-module", "abi3-py39"] }
 pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"] }
 tokio = { version = "1.40", features = ["rt-multi-thread"] }
 serde = { version = "1.0", features = ["derive"] }
