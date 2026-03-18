@@ -24,7 +24,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            build-args: --release --out dist -i python3.9
+          - os: macos-latest
+            build-args: --release --out dist
+          - os: windows-latest
+            build-args: --release --out dist
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +46,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           working-directory: python
-          args: --release --out dist
+          args: ${{ matrix.build-args }}
           sccache: true
           manylinux: auto
 
