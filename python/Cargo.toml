@@ -1,6 +1,6 @@
 [package]
 name = "redis-enterprise-py"
-version = "0.8.3"
+version = "0.8.6"
 edition = "2024"
 rust-version = "1.89"
 authors = ["Josh Rotenberg <josh.rotenberg@redis.com>"]
@@ -17,7 +17,7 @@ path = "src/lib.rs"
 
 [dependencies]
 redis-enterprise = { path = ".." }
-pyo3 = { version = "0.23", features = ["extension-module"] }
+pyo3 = { version = "0.23", features = ["extension-module", "abi3-py39"] }
 pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"] }
 tokio = { version = "1.40", features = ["rt-multi-thread"] }
 serde = { version = "1.0", features = ["derive"] }
