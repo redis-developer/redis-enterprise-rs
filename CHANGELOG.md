@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.6](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.5...v0.8.6) - 2026-03-19
+
+### Fixed
+
+- distinguish TLS certificate errors from connection failures ([#36](https://github.com/redis-developer/redis-enterprise-rs/pull/36))
+
+### Other
+
+- Fix Python packaging for Linux wheel installs ([#35](https://github.com/redis-developer/redis-enterprise-rs/pull/35))
+
 ## [0.8.5](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.4...v0.8.5) - 2026-02-10
 
 ### Fixed
