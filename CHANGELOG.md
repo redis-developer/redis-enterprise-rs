@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.7](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.6...v0.8.7) - 2026-03-19
+
+### Fixed
+
+- handle empty 200 response from PUT /v1/license ([#39](https://github.com/redis-developer/redis-enterprise-rs/pull/39))
+
+### Other
+
+- release v0.9.0 ([#37](https://github.com/redis-developer/redis-enterprise-rs/pull/37))
+
 ## [0.8.6](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.5...v0.8.6) - 2026-03-19
 
 ### Fixed
