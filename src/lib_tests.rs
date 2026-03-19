@@ -164,6 +164,12 @@ mod tests {
 
         let err = RestError::ConnectionError("Connection refused".to_string());
         assert_eq!(err.to_string(), "Connection error: Connection refused");
+
+        let err = RestError::TlsError("cert validation failed".to_string());
+        assert_eq!(
+            err.to_string(),
+            "TLS certificate error: cert validation failed"
+        );
     }
 
     #[tokio::test]
