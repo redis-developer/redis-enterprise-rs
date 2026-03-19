@@ -619,8 +619,42 @@ impl EnterpriseClient {
         }
     }
 
+    /// Check if a reqwest error is caused by TLS certificate validation failure.
+    ///
+    /// Walks the error source chain looking for rustls certificate-related errors,
+    /// which appear as connection errors but require a different fix (insecure mode
+    /// or CA cert, not network debugging).
+    fn is_tls_error(error: &reqwest::Error) -> bool {
+        use std::error::Error;
+        let mut source = error.source();
+        while let Some(err) = source {
+            let msg = err.to_string().to_lowercase();
+            if msg.contains("certificate")
+                || msg.contains("cert")
+                || msg.contains("invalidcertificate")
+                || msg.contains("handshake")
+            {
+                return true;
+            }
+            source = err.source();
+        }
+        false
+    }
+
     /// Map reqwest errors to more specific error messages
     fn map_reqwest_error(&self, error: reqwest::Error, url: &str) -> RestError {
+        // Check for TLS certificate errors before generic is_connect() —
+        // rustls cert failures register as connection errors, but the fix is
+        // different (insecure mode or ca_cert, not firewall debugging).
+        if Self::is_tls_error(&error) {
+            return RestError::TlsError(format!(
+                "TLS certificate verification failed for {}. The server may be using a \
+                 self-signed certificate. To proceed, set `insecure = true` in your profile \
+                 or provide a CA certificate via `ca_cert`.",
+                url
+            ));
+        }
+
         if error.is_connect() {
             RestError::ConnectionError(format!(
                 "Failed to connect to {}: Connection refused or host unreachable. Check if the Redis Enterprise server is running and accessible.",

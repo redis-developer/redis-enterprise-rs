@@ -26,6 +26,9 @@ pub enum RestError {
     #[error("Connection error: {0}")]
     ConnectionError(String),
 
+    #[error("TLS certificate error: {0}")]
+    TlsError(String),
+
     #[error("Not connected to REST API")]
     NotConnected,
 
