@@ -116,8 +116,13 @@ impl LicenseHandler {
     }
 
     /// Update license
+    ///
+    /// The Redis Enterprise API may return 200 with an empty body for this
+    /// endpoint, so we use put_action (which tolerates empty responses) and
+    /// follow up with a GET to return the installed license.
     pub async fn update(&self, request: LicenseUpdateRequest) -> Result<License> {
-        self.client.put("/v1/license", &request).await
+        self.client.put_action("/v1/license", &request).await?;
+        self.get().await
     }
 
     /// Get license usage statistics

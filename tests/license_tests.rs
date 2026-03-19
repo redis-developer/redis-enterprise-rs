@@ -104,10 +104,19 @@ async fn test_license_update() {
         license: "new-license-key-12345".to_string(),
     };
 
+    // PUT /v1/license returns 200 with empty body (real API behavior)
     Mock::given(method("PUT"))
         .and(path("/v1/license"))
         .and(basic_auth("admin", "password"))
         .and(body_json(&update_request))
+        .respond_with(ResponseTemplate::new(200))
+        .mount(&mock_server)
+        .await;
+
+    // Follow-up GET /v1/license returns the installed license
+    Mock::given(method("GET"))
+        .and(path("/v1/license"))
+        .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!({
             "key": "new-license-key-12345",
             "type": "production",

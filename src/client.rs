@@ -489,6 +489,34 @@ impl EnterpriseClient {
         }
     }
 
+    /// PUT request for actions that return no content (or may return an empty body)
+    pub async fn put_action<B: Serialize>(&self, path: &str, body: &B) -> Result<()> {
+        let url = self.normalize_url(path);
+        debug!("PUT {}", url);
+        trace!("Request body: {:?}", serde_json::to_value(body).ok());
+
+        let response = self
+            .client
+            .put(&url)
+            .basic_auth(&self.username, Some(&self.password))
+            .json(body)
+            .send()
+            .await
+            .map_err(|e| self.map_reqwest_error(e, &url))?;
+
+        trace!("Response status: {}", response.status());
+        if response.status().is_success() {
+            Ok(())
+        } else {
+            let status = response.status();
+            let text = response.text().await.unwrap_or_default();
+            Err(RestError::ApiError {
+                code: status.as_u16(),
+                message: text,
+            })
+        }
+    }
+
     /// POST request with multipart/form-data for file uploads
     pub async fn post_multipart<T: DeserializeOwned>(
         &self,
