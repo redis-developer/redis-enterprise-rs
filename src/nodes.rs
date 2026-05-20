@@ -180,6 +180,11 @@ impl NodeHandler {
         self.client.delete(&format!("/v1/nodes/{}", uid)).await
     }
 
+    /// Run node health checks - GET /v1/nodes/check/{uid}
+    pub async fn check(&self, uid: u32) -> Result<Value> {
+        self.client.get(&format!("/v1/nodes/check/{}", uid)).await
+    }
+
     /// Get node stats
     pub async fn stats(&self, uid: u32) -> Result<NodeStats> {
         self.client.get(&format!("/v1/nodes/{}/stats", uid)).await

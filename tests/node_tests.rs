@@ -86,6 +86,30 @@ async fn test_node_actions_alerts_and_status() {
 }
 
 #[tokio::test]
+async fn test_node_check() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/nodes/check/1"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({"node_uid": 1, "result": true})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = NodeHandler::new(client);
+    let result = handler.check(1).await.unwrap();
+    assert_eq!(result["node_uid"], 1);
+    assert_eq!(result["result"], true);
+}
+
+#[tokio::test]
 async fn test_node_snapshots_and_action_paths() {
     let mock_server = MockServer::start().await;
 

@@ -456,6 +456,11 @@ impl ClusterHandler {
         self.client.put("/v1/cluster", &updates).await
     }
 
+    /// Run health checks across all cluster nodes - GET /v1/cluster/check
+    pub async fn check(&self) -> Result<Value> {
+        self.client.get("/v1/cluster/check").await
+    }
+
     /// Get cluster stats (CLUSTER.STATS)
     pub async fn stats(&self) -> Result<Value> {
         self.client.get("/v1/cluster/stats").await

@@ -124,6 +124,102 @@ async fn test_user_create() {
 }
 
 #[tokio::test]
+async fn test_user_create_with_role_uids() {
+    let mock_server = MockServer::start().await;
+
+    let request = CreateUserRequest::builder()
+        .email("rbac@example.com")
+        .password("secret123")
+        .role_uids(vec![1])
+        .name("RBAC User")
+        .build();
+
+    Mock::given(method("POST"))
+        .and(path("/v1/users"))
+        .and(basic_auth("admin", "password"))
+        .and(wiremock::matchers::body_json(&request))
+        .respond_with(created_response(json!({
+            "uid": 2,
+            "email": "rbac@example.com",
+            "name": "RBAC User",
+            "role": "admin",
+            "role_uids": [1],
+            "auth_method": "regular",
+            "status": "active"
+        })))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = UserHandler::new(client);
+    let result = handler.create(request).await;
+
+    assert!(result.is_ok());
+    let user = result.unwrap();
+    assert_eq!(user.uid, 2);
+    assert_eq!(user.email, "rbac@example.com");
+    assert_eq!(user.role_uids, Some(vec![1]));
+}
+
+#[tokio::test]
+async fn test_user_create_requires_role_or_role_uids() {
+    let mock_server = MockServer::start().await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = UserHandler::new(client);
+    let request = CreateUserRequest::builder()
+        .email("test@example.com")
+        .password("secret123")
+        .build();
+
+    let result = handler.create(request).await;
+
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.is_bad_request());
+    assert!(err.to_string().contains("exactly one of role or role_uids"));
+}
+
+#[tokio::test]
+async fn test_user_create_rejects_both_role_and_role_uids() {
+    let mock_server = MockServer::start().await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = UserHandler::new(client);
+    let request = CreateUserRequest::builder()
+        .email("test@example.com")
+        .password("secret123")
+        .role("admin")
+        .role_uids(vec![1])
+        .build();
+
+    let result = handler.create(request).await;
+
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    assert!(err.is_bad_request());
+    assert!(err.to_string().contains("exactly one of role or role_uids"));
+}
+
+#[tokio::test]
 async fn test_user_deserialization() {
     // This test validates that User struct can deserialize actual API responses
     let user_json = common::fixtures::user_response();
