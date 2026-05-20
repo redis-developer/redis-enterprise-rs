@@ -81,8 +81,22 @@ impl CrdbTasksHandler {
     /// Cancel a CRDB task
     pub async fn cancel(&self, task_id: &str) -> Result<()> {
         self.client
-            .delete(&format!("/v1/crdb_tasks/{}", task_id))
+            .post_action(
+                &format!("/v1/crdb_tasks/{}/actions/cancel", task_id),
+                &serde_json::json!({}),
+            )
             .await
+    }
+
+    /// Cancel a CRDB task with optional force mode
+    pub async fn cancel_with_force(&self, task_id: &str, force: bool) -> Result<()> {
+        let path = if force {
+            format!("/v1/crdb_tasks/{}/actions/cancel?force=true", task_id)
+        } else {
+            format!("/v1/crdb_tasks/{}/actions/cancel", task_id)
+        };
+
+        self.client.post_action(&path, &serde_json::json!({})).await
     }
 
     /// Get tasks for a specific CRDB

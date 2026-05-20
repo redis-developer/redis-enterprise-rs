@@ -57,7 +57,7 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use futures::stream::Stream;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 use std::pin::Pin;
 use std::time::Duration;
@@ -88,12 +88,49 @@ pub struct StatsResponse {
 }
 
 /// Stats interval
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct StatsInterval {
     /// Timestamp for this interval (ISO 8601 format)
     pub time: String,
     /// Metrics data for this time interval (dynamic field names)
     pub metrics: Value,
+}
+
+impl<'de> Deserialize<'de> for StatsInterval {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = Value::deserialize(deserializer)?;
+        let object = value.as_object().ok_or_else(|| {
+            <D::Error as serde::de::Error>::custom("expected stats interval object")
+        })?;
+
+        if let (Some(time), Some(metrics)) = (
+            object.get("time").and_then(Value::as_str),
+            object.get("metrics"),
+        ) {
+            return Ok(Self {
+                time: time.to_string(),
+                metrics: metrics.clone(),
+            });
+        }
+
+        let time = object
+            .get("stime")
+            .and_then(Value::as_str)
+            .or_else(|| object.get("etime").and_then(Value::as_str))
+            .ok_or_else(|| {
+                <D::Error as serde::de::Error>::custom(
+                    "expected stats interval to contain either time or stime/etime",
+                )
+            })?;
+
+        Ok(Self {
+            time: time.to_string(),
+            metrics: value,
+        })
+    }
 }
 
 /// Last stats response for single resource
@@ -112,10 +149,29 @@ pub struct LastStatsResponse {
 }
 
 /// Aggregated stats response for multiple resources
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct AggregatedStatsResponse {
     /// Array of stats for individual resources (nodes, databases, shards)
     pub stats: Vec<ResourceStats>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(untagged)]
+enum AggregatedStatsResponseWire {
+    Wrapped { stats: Vec<ResourceStats> },
+    Bare(Vec<ResourceStats>),
+}
+
+impl<'de> Deserialize<'de> for AggregatedStatsResponse {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        match AggregatedStatsResponseWire::deserialize(deserializer)? {
+            AggregatedStatsResponseWire::Wrapped { stats } => Ok(Self { stats }),
+            AggregatedStatsResponseWire::Bare(stats) => Ok(Self { stats }),
+        }
+    }
 }
 
 /// Stats for a single resource
@@ -269,10 +325,10 @@ impl StatsHandler {
         if let Some(q) = query {
             let query_str = serde_urlencoded::to_string(&q).unwrap_or_default();
             self.client
-                .get(&format!("/v1/shards/{}/stats?{}", uid, query_str))
+                .get(&format!("/v1/shards/stats/{}?{}", uid, query_str))
                 .await
         } else {
-            self.client.get(&format!("/v1/shards/{}/stats", uid)).await
+            self.client.get(&format!("/v1/shards/stats/{}", uid)).await
         }
     }
 
@@ -289,6 +345,18 @@ impl StatsHandler {
     }
 
     // raw variant removed: use shards()
+
+    /// Get all shards last stats
+    pub async fn shards_last(&self) -> Result<Value> {
+        self.client.get("/v1/shards/stats/last").await
+    }
+
+    /// Get shard last stats
+    pub async fn shard_last(&self, uid: u32) -> Result<Value> {
+        self.client
+            .get(&format!("/v1/shards/stats/last/{}", uid))
+            .await
+    }
 
     /// Stream cluster stats in real-time by polling
     ///
