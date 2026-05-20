@@ -23,18 +23,21 @@ mod tests {
         let mock_server = MockServer::start().await;
         let handler = setup_mock_client(&mock_server).await;
 
-        let response_body = json!([
-            {
-                "uid": 1,
-                "name": "group1",
-                "bdbs": [1, 2, 3]
-            },
-            {
-                "uid": 2,
-                "name": "group2",
-                "bdbs": [4, 5]
-            }
-        ]);
+        // Regression guard for #62: real API wraps the list under `bdb_groups`.
+        let response_body = json!({
+            "bdb_groups": [
+                {
+                    "uid": 1,
+                    "name": "group1",
+                    "bdbs": [1, 2, 3]
+                },
+                {
+                    "uid": 2,
+                    "name": "group2",
+                    "bdbs": [4, 5]
+                }
+            ]
+        });
 
         Mock::given(method("GET"))
             .and(path("/v1/bdb_groups"))
