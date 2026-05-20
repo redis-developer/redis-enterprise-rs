@@ -18,13 +18,28 @@ pub struct MetricResponse {
     pub values: Vec<Value>,
 }
 
-/// Proxy information
+/// Proxy information.
+///
+/// `GET /v1/proxies` returns both global proxy configuration entries
+/// (no `bdb_uid`/`node_uid`) and per-database proxies, so the fields
+/// that distinguish the two are `Option`. `maxmemory_clients` is `u64`
+/// because real clusters report values that exceed `u32::MAX` (the
+/// recorded fixture has `4_294_967_296`).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Proxy {
+    /// Cluster-unique ID of the proxy.
     pub uid: u32,
-    pub bdb_uid: u32,
-    pub node_uid: u32,
-    pub status: String,
+    /// Database UID this proxy serves, if any. Absent on global proxy
+    /// configuration entries.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bdb_uid: Option<u32>,
+    /// Node UID this proxy runs on, if any. Absent on global proxy
+    /// configuration entries.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub node_uid: Option<u32>,
+    /// Current proxy status (e.g. `"active"`, `"deactivated"`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub addr: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -119,9 +134,13 @@ pub struct Proxy {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_worker_txns: Option<u32>,
 
-    /// Maximum memory in bytes allocated for client connections
+    /// Maximum memory in bytes allocated for client connections.
+    ///
+    /// Typed as `u64` (not `u32`) because real clusters report values
+    /// that exceed `u32::MAX` — the recorded `tests/fixtures/proxies_list.json`
+    /// contains `4_294_967_296` (one byte over the `u32` ceiling).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub maxmemory_clients: Option<u32>,
+    pub maxmemory_clients: Option<u64>,
 
     /// CPU usage threshold percentage for thread scaling decisions
     #[serde(skip_serializing_if = "Option::is_none")]
