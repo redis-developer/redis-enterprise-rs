@@ -145,11 +145,18 @@ impl CrdbHandler {
         self.client.post("/v1/crdbs", &request).await
     }
 
-    /// Update CRDB
+    /// Update an existing CRDB.
+    ///
+    /// `PATCH /v1/crdbs/{crdb_guid}`. The Redis Enterprise REST API
+    /// documents the CRDB update verb as `PATCH`; the previous
+    /// implementation used `PUT` and returned 405 on recent cluster
+    /// versions.
     pub async fn update(&self, guid: &str, updates: Value) -> Result<Crdb> {
-        self.client
-            .put(&format!("/v1/crdbs/{}", guid), &updates)
-            .await
+        let response = self
+            .client
+            .patch_raw(&format!("/v1/crdbs/{}", guid), updates)
+            .await?;
+        serde_json::from_value(response).map_err(Into::into)
     }
 
     /// Delete CRDB
