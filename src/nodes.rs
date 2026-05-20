@@ -195,15 +195,25 @@ impl NodeHandler {
         self.client.get(&format!("/v1/nodes/{}/actions", uid)).await
     }
 
-    /// Execute node action (e.g., "maintenance_on", "maintenance_off")
+    /// Execute a named node action (e.g. `"maintenance_on"`, `"maintenance_off"`).
+    ///
+    /// `POST /v1/nodes/{uid}/actions/{action}`. The previous implementation
+    /// POSTed to `/v1/nodes/{uid}/actions` with the action name in the body
+    /// — that endpoint is the GET-list URL, and the action name was
+    /// effectively dropped on the wire, so this method did not work
+    /// against real clusters.
+    ///
+    /// Callers that need to send a custom JSON body (e.g. action-specific
+    /// parameters) should use [`Self::action_execute`] directly.
     pub async fn execute_action(&self, uid: u32, action: &str) -> Result<NodeActionResponse> {
-        let request = NodeActionRequest {
-            action: action.to_string(),
-            node_uid: Some(uid),
-        };
-        self.client
-            .post(&format!("/v1/nodes/{}/actions", uid), &request)
-            .await
+        let response: Value = self
+            .client
+            .post(
+                &format!("/v1/nodes/{}/actions/{}", uid, action),
+                &serde_json::json!({}),
+            )
+            .await?;
+        serde_json::from_value(response).map_err(Into::into)
     }
 
     // raw variant removed in favor of typed execute_action

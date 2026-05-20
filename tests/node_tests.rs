@@ -557,15 +557,13 @@ async fn test_node_actions_nonexistent() {
 async fn test_node_execute_action_maintenance_on() {
     let mock_server = MockServer::start().await;
 
-    let expected_request = json!({
-        "action": "maintenance_on",
-        "node_uid": 1
-    });
-
+    // Regression guard for #60: action name lives in the URL path, not
+    // the body. Body is intentionally empty so the verb + path is the
+    // sole assertion.
     Mock::given(method("POST"))
-        .and(path("/v1/nodes/1/actions"))
+        .and(path("/v1/nodes/1/actions/maintenance_on"))
         .and(basic_auth("admin", "password"))
-        .and(body_json(&expected_request))
+        .and(body_json(json!({})))
         .respond_with(success_response(json!({
             "action_uid": "action-123-abc",
             "status": "pending",
@@ -590,15 +588,10 @@ async fn test_node_execute_action_maintenance_on() {
 async fn test_node_execute_action_maintenance_off() {
     let mock_server = MockServer::start().await;
 
-    let expected_request = json!({
-        "action": "maintenance_off",
-        "node_uid": 1
-    });
-
     Mock::given(method("POST"))
-        .and(path("/v1/nodes/1/actions"))
+        .and(path("/v1/nodes/1/actions/maintenance_off"))
         .and(basic_auth("admin", "password"))
-        .and(body_json(&expected_request))
+        .and(body_json(json!({})))
         .respond_with(success_response(json!({
             "action_uid": "action-456-def",
             "status": "completed",
@@ -623,15 +616,10 @@ async fn test_node_execute_action_maintenance_off() {
 async fn test_node_execute_action_invalid() {
     let mock_server = MockServer::start().await;
 
-    let expected_request = json!({
-        "action": "invalid_action",
-        "node_uid": 1
-    });
-
     Mock::given(method("POST"))
-        .and(path("/v1/nodes/1/actions"))
+        .and(path("/v1/nodes/1/actions/invalid_action"))
         .and(basic_auth("admin", "password"))
-        .and(body_json(&expected_request))
+        .and(body_json(json!({})))
         .respond_with(error_response(400, "Invalid action"))
         .mount(&mock_server)
         .await;
@@ -653,15 +641,10 @@ async fn test_node_execute_action_invalid() {
 async fn test_node_execute_action_nonexistent_node() {
     let mock_server = MockServer::start().await;
 
-    let expected_request = json!({
-        "action": "restart",
-        "node_uid": 999
-    });
-
     Mock::given(method("POST"))
-        .and(path("/v1/nodes/999/actions"))
+        .and(path("/v1/nodes/999/actions/restart"))
         .and(basic_auth("admin", "password"))
-        .and(body_json(&expected_request))
+        .and(body_json(json!({})))
         .respond_with(error_response(404, "Node not found"))
         .mount(&mock_server)
         .await;
