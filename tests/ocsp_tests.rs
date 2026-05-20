@@ -341,7 +341,7 @@ async fn test_ocsp_get_status_not_configured() {
 async fn test_ocsp_test_success() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("GET"))
+    Mock::given(method("POST"))
         .and(path("/v1/ocsp/test"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_ocsp_test_result_success()))
@@ -372,7 +372,7 @@ async fn test_ocsp_test_success() {
 async fn test_ocsp_test_failure() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("GET"))
+    Mock::given(method("POST"))
         .and(path("/v1/ocsp/test"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_ocsp_test_result_failure()))
@@ -403,7 +403,7 @@ async fn test_ocsp_test_failure() {
 async fn test_ocsp_test_not_configured() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("GET"))
+    Mock::given(method("POST"))
         .and(path("/v1/ocsp/test"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(400, "OCSP not enabled"))
