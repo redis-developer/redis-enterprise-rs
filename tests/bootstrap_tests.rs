@@ -21,15 +21,25 @@ fn no_content_response() -> ResponseTemplate {
     ResponseTemplate::new(204)
 }
 
+// Produces the real wire shape: { "bootstrap_status": { "state", "start_time", "end_time" }, "local_node_info": {...} }.
+// The old `(status, progress, message)` shape collapsed all three into the inner object; only
+// `state` is documented in the REST API (the other two are kept here for backward-compatible
+// test signatures but discarded — they were never on the wire).
 fn bootstrap_status_response(
-    status: &str,
-    progress: Option<f32>,
-    message: Option<&str>,
+    state: &str,
+    _progress: Option<f32>,
+    _message: Option<&str>,
 ) -> serde_json::Value {
     json!({
-        "status": status,
-        "progress": progress,
-        "message": message
+        "bootstrap_status": {
+            "state": state,
+            "start_time": "2026-05-20T15:00:00Z",
+            "end_time": null
+        },
+        "local_node_info": {
+            "architecture": "x86_64",
+            "os_family": "ubuntu"
+        }
     })
 }
 
@@ -99,9 +109,7 @@ async fn test_bootstrap_create_cluster() {
 
     assert!(result.is_ok());
     let status = result.unwrap();
-    assert_eq!(status.status, "in_progress");
-    assert_eq!(status.progress, Some(10.0));
-    assert_eq!(status.message, Some("Initializing cluster".to_string()));
+    assert_eq!(status.bootstrap_status.state, "in_progress");
 }
 
 #[tokio::test]
@@ -131,12 +139,7 @@ async fn test_bootstrap_status_in_progress() {
 
     assert!(result.is_ok());
     let status = result.unwrap();
-    assert_eq!(status.status, "in_progress");
-    assert_eq!(status.progress, Some(75.5));
-    assert_eq!(
-        status.message,
-        Some("Configuring cluster nodes".to_string())
-    );
+    assert_eq!(status.bootstrap_status.state, "in_progress");
 }
 
 #[tokio::test]
@@ -166,8 +169,7 @@ async fn test_bootstrap_status_completed() {
 
     assert!(result.is_ok());
     let status = result.unwrap();
-    assert_eq!(status.status, "completed");
-    assert_eq!(status.progress, Some(100.0));
+    assert_eq!(status.bootstrap_status.state, "completed");
 }
 
 #[tokio::test]
@@ -197,12 +199,7 @@ async fn test_bootstrap_status_failed() {
 
     assert!(result.is_ok());
     let status = result.unwrap();
-    assert_eq!(status.status, "failed");
-    assert_eq!(status.progress, Some(45.0));
-    assert_eq!(
-        status.message,
-        Some("Failed to connect to cluster node".to_string())
-    );
+    assert_eq!(status.bootstrap_status.state, "failed");
 }
 
 #[tokio::test]
@@ -259,9 +256,7 @@ async fn test_bootstrap_join_node() {
 
     assert!(result.is_ok());
     let status = result.unwrap();
-    assert_eq!(status.status, "in_progress");
-    assert_eq!(status.progress, Some(5.0));
-    assert_eq!(status.message, Some("Joining node to cluster".to_string()));
+    assert_eq!(status.bootstrap_status.state, "in_progress");
 }
 
 #[tokio::test]
@@ -327,6 +322,50 @@ async fn test_bootstrap_create_minimal_config() {
 
     assert!(result.is_ok());
     let status = result.unwrap();
-    assert_eq!(status.status, "in_progress");
-    assert_eq!(status.progress, Some(0.0));
+    assert_eq!(status.bootstrap_status.state, "in_progress");
+}
+
+#[tokio::test]
+async fn test_bootstrap_status_decodes_recorded_fixture() {
+    // Regression guard for #62: the recorded fixture has the canonical
+    // wrapper shape — bootstrap_status with state/start_time/end_time
+    // plus a sizeable local_node_info object. The previous
+    // (status/progress/message) struct decode-failed against this.
+    let mock_server = MockServer::start().await;
+
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/bootstrap_status.json"))
+            .expect("fixture should be valid JSON");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/bootstrap"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(fixture))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = BootstrapHandler::new(client);
+    let response = handler.status().await.expect("fixture should decode");
+
+    assert_eq!(response.bootstrap_status.state, "completed");
+    assert_eq!(
+        response.bootstrap_status.start_time.as_deref(),
+        Some("2025-10-14T00:01:06Z")
+    );
+    assert_eq!(
+        response.bootstrap_status.end_time.as_deref(),
+        Some("2025-10-14T00:01:22Z")
+    );
+
+    let node = response
+        .local_node_info
+        .expect("fixture has local_node_info");
+    assert_eq!(node["os_family"], "ubuntu");
 }

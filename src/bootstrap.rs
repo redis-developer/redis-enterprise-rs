@@ -98,17 +98,46 @@ pub struct CredentialsBootstrap {
     pub password: String,
 }
 
-/// Bootstrap status response
+/// Inner bootstrap state, as carried inside [`BootstrapStatusResponse`].
+///
+/// The Redis Enterprise REST API uses the field name `state`
+/// (not `status`) for the bootstrap lifecycle value, and pairs it with
+/// `start_time` and `end_time`. The previous shape (`status` /
+/// `progress` / `message`) did not match the wire response —
+/// see `tests/fixtures/bootstrap_status.json`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BootstrapStatus {
-    /// Current status of the bootstrap operation
-    pub status: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// Progress percentage (0.0-100.0) of the bootstrap operation
-    pub progress: Option<f32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// Status message or error description
-    pub message: Option<String>,
+    /// Current bootstrap state (e.g. `"idle"`, `"initializing"`,
+    /// `"completed"`, `"failed"`).
+    pub state: String,
+    /// ISO-8601 timestamp when the bootstrap began.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_time: Option<String>,
+    /// ISO-8601 timestamp when the bootstrap reached its terminal state.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_time: Option<String>,
+}
+
+/// Response wrapper for `GET /v1/bootstrap` (and `POST /v1/bootstrap` /
+/// `POST /v1/bootstrap/join`).
+///
+/// The Redis Enterprise API wraps the bootstrap state in a top-level
+/// `bootstrap_status` field and includes a `local_node_info` object
+/// describing the node that received the request. The previous Rust
+/// shape collapsed these into a single struct and used the wrong
+/// field names; the resulting decode failed against real responses.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BootstrapStatusResponse {
+    /// Inner bootstrap state.
+    pub bootstrap_status: BootstrapStatus,
+    /// Information about the local node that handled the request.
+    ///
+    /// Typed as `serde_json::Value` because the contents are
+    /// version-specific and operator-oriented (CPU/storage info,
+    /// supported Redis versions, software version, etc.); see the
+    /// recorded `bootstrap_status.json` fixture.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_node_info: Option<Value>,
 }
 
 /// Bootstrap handler for cluster initialization
@@ -121,18 +150,27 @@ impl BootstrapHandler {
         BootstrapHandler { client }
     }
 
-    /// Initialize cluster bootstrap
-    pub async fn create(&self, config: BootstrapConfig) -> Result<BootstrapStatus> {
+    /// Initialize cluster bootstrap.
+    ///
+    /// `POST /v1/bootstrap`. Returns the [`BootstrapStatusResponse`]
+    /// wrapper (`bootstrap_status` + optional `local_node_info`).
+    pub async fn create(&self, config: BootstrapConfig) -> Result<BootstrapStatusResponse> {
         self.client.post("/v1/bootstrap", &config).await
     }
 
-    /// Get bootstrap status
-    pub async fn status(&self) -> Result<BootstrapStatus> {
+    /// Get current bootstrap status.
+    ///
+    /// `GET /v1/bootstrap`. Returns the [`BootstrapStatusResponse`]
+    /// wrapper.
+    pub async fn status(&self) -> Result<BootstrapStatusResponse> {
         self.client.get("/v1/bootstrap").await
     }
 
-    /// Join node to existing cluster
-    pub async fn join(&self, config: BootstrapConfig) -> Result<BootstrapStatus> {
+    /// Join this node to an existing cluster.
+    ///
+    /// `POST /v1/bootstrap/join`. Returns the [`BootstrapStatusResponse`]
+    /// wrapper.
+    pub async fn join(&self, config: BootstrapConfig) -> Result<BootstrapStatusResponse> {
         self.client.post("/v1/bootstrap/join", &config).await
     }
 
