@@ -192,7 +192,7 @@
 //! let request = CreateUserRequest::builder()
 //!     .email("newuser@example.com")
 //!     .password("secure_password")
-//!     .role("db_member")
+//!     .role("db_member") // For RBAC-enabled clusters, use role_uids([...]) instead
 //!     .name("New User")
 //!     .email_alerts(true)
 //!     .build();

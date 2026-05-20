@@ -52,6 +52,32 @@ async fn test_cluster_actions_and_auditing() {
 }
 
 #[tokio::test]
+async fn test_cluster_check() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/cluster/check"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(
+            json!({"cluster_test_result": true, "nodes": [{"node_uid": 1, "result": true}]}),
+        ))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ClusterHandler::new(client);
+    let result = handler.check().await.unwrap();
+    assert_eq!(result["cluster_test_result"], true);
+    assert_eq!(result["nodes"][0]["node_uid"], 1);
+}
+
+#[tokio::test]
 async fn test_cluster_certs_policy_and_witness() {
     let mock_server = MockServer::start().await;
 

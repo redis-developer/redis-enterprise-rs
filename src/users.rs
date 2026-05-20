@@ -59,7 +59,7 @@ pub struct User {
 /// let request = CreateUserRequest::builder()
 ///     .email("john.doe@example.com")
 ///     .password("secure-password-123")
-///     .role("db_admin")
+///     .role("db_admin") // Or use role_uids([...]) on RBAC-enabled clusters
 ///     .name("John Doe")
 ///     .email_alerts(true)
 ///     .build();
@@ -72,9 +72,11 @@ pub struct CreateUserRequest {
     /// User's password (required)
     #[builder(setter(into))]
     pub password: String,
-    /// User's role (required) - for RBAC-enabled clusters, use role_uids instead
-    #[builder(setter(into))]
-    pub role: String,
+    /// User's role for non-RBAC clusters. For RBAC-enabled clusters, use role_uids instead.
+    /// Exactly one of role or role_uids must be provided.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub role: Option<String>,
     /// User's full name
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
@@ -88,6 +90,7 @@ pub struct CreateUserRequest {
     #[builder(default, setter(strip_option))]
     pub bdbs_email_alerts: Option<Vec<String>>,
     /// Role IDs for RBAC-enabled clusters
+    /// Exactly one of role or role_uids must be provided.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub role_uids: Option<Vec<u32>>,
@@ -179,6 +182,23 @@ impl UserHandler {
 
     /// Create new user
     pub async fn create(&self, request: CreateUserRequest) -> Result<User> {
+        let has_role = request
+            .role
+            .as_deref()
+            .map(|role| !role.trim().is_empty())
+            .unwrap_or(false);
+        let has_role_uids = request
+            .role_uids
+            .as_ref()
+            .map(|role_uids| !role_uids.is_empty())
+            .unwrap_or(false);
+
+        if has_role == has_role_uids {
+            return Err(crate::error::RestError::ValidationError(
+                "CreateUserRequest must include exactly one of role or role_uids".to_string(),
+            ));
+        }
+
         self.client.post("/v1/users", &request).await
     }
 
