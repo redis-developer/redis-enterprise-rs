@@ -174,8 +174,18 @@ impl EnterpriseClientBuilder {
 
     /// Build the client
     pub fn build(self) -> Result<EnterpriseClient> {
-        let username = self.username.unwrap_or_default();
-        let password = self.password.unwrap_or_default();
+        let username = self
+            .username
+            .filter(|value| !value.trim().is_empty())
+            .ok_or_else(|| {
+                RestError::ValidationError("Enterprise client username is required".to_string())
+            })?;
+        let password = self
+            .password
+            .filter(|value| !value.trim().is_empty())
+            .ok_or_else(|| {
+                RestError::ValidationError("Enterprise client password is required".to_string())
+            })?;
 
         let mut default_headers = HeaderMap::new();
         default_headers.insert(

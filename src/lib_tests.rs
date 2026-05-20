@@ -28,6 +28,67 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    #[test]
+    fn test_enterprise_client_builder_requires_username() {
+        let result = EnterpriseClient::builder()
+            .base_url("https://example.com")
+            .password("test_pass")
+            .build();
+
+        match result {
+            Err(RestError::ValidationError(message)) => {
+                assert!(
+                    message.contains("username"),
+                    "unexpected message: {message}"
+                );
+            }
+            Err(err) => panic!("expected validation error, got: {err}"),
+            Ok(_) => panic!("expected missing username to fail"),
+        }
+    }
+
+    #[test]
+    fn test_enterprise_client_builder_requires_password() {
+        let result = EnterpriseClient::builder()
+            .base_url("https://example.com")
+            .username("test_user")
+            .build();
+
+        match result {
+            Err(RestError::ValidationError(message)) => {
+                assert!(
+                    message.contains("password"),
+                    "unexpected message: {message}"
+                );
+            }
+            Err(err) => panic!("expected validation error, got: {err}"),
+            Ok(_) => panic!("expected missing password to fail"),
+        }
+    }
+
+    #[test]
+    fn test_enterprise_client_builder_rejects_blank_credentials() {
+        let missing_username = EnterpriseClient::builder()
+            .base_url("https://example.com")
+            .username("   ")
+            .password("test_pass")
+            .build();
+        let missing_password = EnterpriseClient::builder()
+            .base_url("https://example.com")
+            .username("test_user")
+            .password("   ")
+            .build();
+
+        assert!(matches!(
+            missing_username,
+            Err(RestError::ValidationError(message)) if message.contains("username")
+        ));
+        assert!(matches!(
+            missing_password,
+            Err(RestError::ValidationError(message)) if message.contains("password")
+        ));
+    }
+
     #[tokio::test]
     async fn test_enterprise_client_get_request() {
         // Start a background HTTP server on a random local port
