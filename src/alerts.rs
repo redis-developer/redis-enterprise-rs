@@ -9,6 +9,7 @@ use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
 
 /// Alert information
 /// Represents an alert state for a cluster object (database, node, or cluster)
@@ -46,6 +47,34 @@ pub struct Alert {
     /// Error code associated with the alert
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error_code: Option<String>,
+}
+
+/// Cluster-alert state as returned by `GET /v1/cluster/alerts`.
+///
+/// The cluster-alerts endpoint returns a map keyed by alert name —
+/// for example `cluster_ca_cert_about_to_expire`,
+/// `cluster_multiple_nodes_down`, etc. — whose values share this
+/// shape. The alert name itself lives in the map key, not in this
+/// struct.
+///
+/// Distinct from [`Alert`], which models the documented alert object
+/// used by the `/v1/bdbs/{uid}/alerts` and `/v1/nodes/{uid}/alerts`
+/// endpoints and the catalog at `/v1/alerts`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClusterAlertState {
+    /// Whether this alert is configured to fire.
+    pub enabled: bool,
+    /// Whether the alert is currently triggered.
+    pub state: bool,
+    /// Severity level (e.g. `"INFO"`, `"WARNING"`).
+    pub severity: String,
+    /// ISO-8601 timestamp of the last state change.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub change_time: Option<String>,
+    /// Alert-specific snapshot taken at the last state change
+    /// (thresholds, sampled values, etc.). Shape varies per alert.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub change_value: Option<Value>,
 }
 
 /// Generic alert settings (legacy - kept for compatibility)
@@ -245,8 +274,16 @@ impl AlertHandler {
             .await
     }
 
-    /// List alerts for the cluster
-    pub async fn list_cluster_alerts(&self) -> Result<Vec<Alert>> {
+    /// List active cluster-level alerts.
+    ///
+    /// `GET /v1/cluster/alerts`. The API returns a map keyed by alert
+    /// name (e.g. `cluster_multiple_nodes_down`), so the return type is
+    /// `HashMap<String, ClusterAlertState>`. The alert name itself is
+    /// the map key. See [`ClusterAlertState`] for the per-entry shape.
+    ///
+    /// Distinct from [`Self::list`], which returns the documented
+    /// `Alert` objects from `/v1/alerts`.
+    pub async fn list_cluster_alerts(&self) -> Result<HashMap<String, ClusterAlertState>> {
         self.client.get("/v1/cluster/alerts").await
     }
 
