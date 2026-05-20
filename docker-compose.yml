@@ -2,15 +2,14 @@
 #
 # Usage:
 #   docker compose up -d              # Start Redis Enterprise
-#   docker compose up init            # Initialize cluster (run once after first start)
+#   docker compose --profile init up init  # Initialize cluster (run once after first start)
 #   docker compose down -v            # Stop and remove
 #
 # Environment variables (optional):
-#   REDIS_ENTERPRISE_IMAGE    - Docker image (default: redislabs/redis:latest)
-#   REDIS_ENTERPRISE_PLATFORM - Platform (default: linux/amd64, use linux/arm64 for Apple Silicon)
-#
-# For Apple Silicon Macs, use:
-#   REDIS_ENTERPRISE_IMAGE=kurtfm/rs-arm:latest REDIS_ENTERPRISE_PLATFORM=linux/arm64 docker compose up -d
+#   REDIS_ENTERPRISE_IMAGE - Docker image (default: redislabs/redis:8.0.10-81)
+#   REDIS_ENTERPRISE_DB_PORT - Host port mapped to the default database port (default: 12000)
+#   REDIS_ENTERPRISE_API_PORT - Host port mapped to the REST API (default: 9443)
+#   REDIS_ENTERPRISE_UI_PORT - Host port mapped to the admin UI (default: 8443)
 #
 # After initialization:
 #   API:      https://localhost:9443 (admin@redis.local / Redis123!)
@@ -19,16 +18,14 @@
 
 services:
   redis-enterprise:
-    image: ${REDIS_ENTERPRISE_IMAGE:-redislabs/redis:latest}
-    platform: ${REDIS_ENTERPRISE_PLATFORM:-linux/amd64}
-    container_name: redis-enterprise
+    image: ${REDIS_ENTERPRISE_IMAGE:-redislabs/redis:8.0.10-81}
     tty: true
     cap_add:
       - ALL
     ports:
-      - "12000:12000"  # Default database port
-      - "9443:9443"    # REST API
-      - "8443:8443"    # Admin UI
+      - "${REDIS_ENTERPRISE_DB_PORT:-12000}:12000"    # Default database port
+      - "${REDIS_ENTERPRISE_API_PORT:-9443}:9443"     # REST API
+      - "${REDIS_ENTERPRISE_UI_PORT:-8443}:8443"      # Admin UI
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "https://localhost:9443/v1/bootstrap"]
       interval: 5s
@@ -38,7 +35,6 @@ services:
 
   init:
     image: ghcr.io/redis-developer/redisctl:latest
-    container_name: redis-enterprise-init
     depends_on:
       redis-enterprise:
         condition: service_healthy
