@@ -609,14 +609,17 @@ impl DatabaseHandler {
             .await
     }
 
-    /// Flush database (BDB.FLUSH)
+    /// Flush all keys from a database.
+    ///
+    /// `PUT /v1/bdbs/{uid}/flush`. This is the path-segment-style action
+    /// the REST API documents; the previous implementation POSTed to
+    /// `/v1/bdbs/{uid}/actions/flush`, which is not in the spec.
     pub async fn flush(&self, uid: u32) -> Result<DatabaseActionResponse> {
-        self.client
-            .post(
-                &format!("/v1/bdbs/{}/actions/flush", uid),
-                &serde_json::json!({}),
-            )
-            .await
+        let response = self
+            .client
+            .put_raw(&format!("/v1/bdbs/{}/flush", uid), serde_json::json!({}))
+            .await?;
+        serde_json::from_value(response).map_err(Into::into)
     }
 
     /// Backup database (BDB.BACKUP)
@@ -960,8 +963,12 @@ impl DatabaseHandler {
             .await
     }
 
-    /// Reset database password (BDB.RESET_PASSWORD)
-    pub async fn reset_password(
+    /// Reset the database admin password.
+    ///
+    /// `PUT /v1/bdbs/{uid}/reset_admin_pass`. This is the path-segment-style
+    /// action the REST API documents. The new password is sent in the body
+    /// under the `authentication_redis_pass` key.
+    pub async fn reset_admin_pass(
         &self,
         uid: u32,
         new_password: &str,
@@ -969,9 +976,28 @@ impl DatabaseHandler {
         let body = serde_json::json!({
             "authentication_redis_pass": new_password
         });
-        self.client
-            .post(&format!("/v1/bdbs/{}/actions/reset_password", uid), &body)
-            .await
+        let response = self
+            .client
+            .put_raw(&format!("/v1/bdbs/{}/reset_admin_pass", uid), body)
+            .await?;
+        serde_json::from_value(response).map_err(Into::into)
+    }
+
+    /// Reset database password.
+    ///
+    /// Deprecated alias for [`Self::reset_admin_pass`]. The previous
+    /// implementation POSTed to `/v1/bdbs/{uid}/actions/reset_password`,
+    /// which is not in the REST API spec.
+    #[deprecated(
+        since = "0.9.0",
+        note = "use `reset_admin_pass`; the action POST path was not in the REST API spec"
+    )]
+    pub async fn reset_password(
+        &self,
+        uid: u32,
+        new_password: &str,
+    ) -> Result<DatabaseActionResponse> {
+        self.reset_admin_pass(uid, new_password).await
     }
 
     /// Check database availability

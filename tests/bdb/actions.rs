@@ -172,3 +172,61 @@ async fn test_database_upgrade_redis_version() {
     let response = result.unwrap();
     assert_eq!(response.action_uid, "591d9dcb-ddd7-48a9-a04d-bd5d4d6834d0");
 }
+
+#[tokio::test]
+async fn test_database_flush_uses_put_path_segment() {
+    // Regression guard for #59: the documented verb/path is
+    // `PUT /v1/bdbs/{uid}/flush`, not `POST /v1/bdbs/{uid}/actions/flush`.
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/bdbs/1/flush"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({"action_uid": "flush-action-1"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = test_client(&mock_server);
+    let result = client.databases().flush(1).await;
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap().action_uid, "flush-action-1");
+}
+
+#[tokio::test]
+async fn test_database_reset_admin_pass_uses_put_path_segment() {
+    // Regression guard for #59: `PUT /v1/bdbs/{uid}/reset_admin_pass`
+    // (path-segment) is the documented endpoint; the previous
+    // `POST /v1/bdbs/{uid}/actions/reset_password` was not in the spec.
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/bdbs/1/reset_admin_pass"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({"action_uid": "reset-action-1"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = test_client(&mock_server);
+    let result = client.databases().reset_admin_pass(1, "new-pass-123").await;
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap().action_uid, "reset-action-1");
+}
+
+#[tokio::test]
+#[allow(deprecated)]
+async fn test_database_reset_password_deprecated_alias_routes_through_new_path() {
+    // `reset_password` is kept as a deprecated alias for `reset_admin_pass`
+    // and must hit the same documented endpoint, not the legacy action path.
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/bdbs/1/reset_admin_pass"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({"action_uid": "reset-action-1"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = test_client(&mock_server);
+    let result = client.databases().reset_password(1, "new-pass-123").await;
+    assert!(result.is_ok());
+}
