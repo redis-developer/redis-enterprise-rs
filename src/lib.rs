@@ -21,7 +21,7 @@
 //! Add to your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! redis-enterprise = "0.7"
+//! redis-enterprise = "0.8.7"
 //! tokio = { version = "1", features = ["full"] }
 //! ```
 //!

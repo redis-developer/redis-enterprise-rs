@@ -28,10 +28,10 @@ A comprehensive Rust client library for the Redis Enterprise REST API, with Pyth
 
 ```toml
 [dependencies]
-redis-enterprise = "0.7"
+redis-enterprise = "0.8.7"
 
 # Optional: Enable Tower service integration
-redis-enterprise = { version = "0.7", features = ["tower-integration"] }
+redis-enterprise = { version = "0.8.7", features = ["tower-integration"] }
 ```
 
 ## Quick Start
