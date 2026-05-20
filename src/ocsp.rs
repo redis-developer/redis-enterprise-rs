@@ -92,16 +92,25 @@ impl OcspHandler {
         self.client.get("/v1/ocsp/status").await
     }
 
-    /// Test OCSP connectivity
+    /// Test OCSP connectivity.
+    ///
+    /// `POST /v1/ocsp/test`. The REST API documents this verb as POST;
+    /// the previous implementation used GET, which is not in the spec
+    /// and returns 404/405 against modern clusters.
     pub async fn test(&self) -> Result<OcspTestResult> {
-        self.client.get("/v1/ocsp/test").await
-    }
-
-    /// Test OCSP via POST
-    pub async fn test_post(&self) -> Result<OcspTestResult> {
         self.client
             .post("/v1/ocsp/test", &serde_json::Value::Null)
             .await
+    }
+
+    /// Test OCSP via POST. Deprecated alias for [`Self::test`], which now
+    /// uses POST itself per the documented verb.
+    #[deprecated(
+        since = "0.9.0",
+        note = "use `test`; `test` now uses POST per the spec"
+    )]
+    pub async fn test_post(&self) -> Result<OcspTestResult> {
+        self.test().await
     }
 
     /// Trigger OCSP query
