@@ -86,14 +86,14 @@ fn test_shard_stats() -> serde_json::Value {
     json!({
         "intervals": [
             {
-                "time": "2023-01-01T12:00:00Z",
-                "metrics": {
-                    "used_memory": 524288,
-                    "total_req": 2500,
-                    "ops_per_sec": 50.0,
-                    "keyspace_hits": 2250,
-                    "keyspace_misses": 250
-                }
+                "stime": "2023-01-01T12:00:00Z",
+                "etime": "2023-01-01T12:01:00Z",
+                "interval": "1min",
+                "used_memory": 524288,
+                "total_req": 2500,
+                "ops_per_sec": 50.0,
+                "keyspace_hits": 2250,
+                "keyspace_misses": 250
             }
         ]
     })
@@ -136,6 +136,19 @@ fn test_database_last_stats() -> serde_json::Value {
         "ops_per_sec": 105.2,
         "hits": 4680,
         "misses": 520
+    })
+}
+
+fn test_shards_last_stats() -> serde_json::Value {
+    json!({
+        "1": {
+            "used_memory": 524288,
+            "ops_per_sec": 50.0
+        },
+        "2": {
+            "used_memory": 262144,
+            "ops_per_sec": 25.0
+        }
     })
 }
 
@@ -531,7 +544,7 @@ async fn test_stats_shard() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/shards/1/stats"))
+        .and(path("/v1/shards/stats/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_shard_stats()))
         .mount(&mock_server)
@@ -559,7 +572,7 @@ async fn test_stats_shard_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/shards/999/stats"))
+        .and(path("/v1/shards/stats/999"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Shard not found"))
         .mount(&mock_server)
@@ -585,12 +598,10 @@ async fn test_stats_shards() {
     Mock::given(method("GET"))
         .and(path("/v1/shards/stats"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!({
-            "stats": [
-                {"uid": 1, "intervals": []},
-                {"uid": 2, "intervals": []}
-            ]
-        })))
+        .respond_with(success_response(json!([
+            {"uid": 1, "intervals": []},
+            {"uid": 2, "intervals": []}
+        ])))
         .mount(&mock_server)
         .await;
 
@@ -609,4 +620,57 @@ async fn test_stats_shards() {
     assert_eq!(stats.stats.len(), 2);
     assert_eq!(stats.stats[0].uid, 1);
     assert_eq!(stats.stats[1].uid, 2);
+}
+
+#[tokio::test]
+async fn test_stats_shards_last() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/shards/stats/last"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(test_shards_last_stats()))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = StatsHandler::new(client);
+    let stats = handler.shards_last().await.unwrap();
+    assert_eq!(stats["1"]["ops_per_sec"], 50.0);
+    assert_eq!(stats["2"]["used_memory"], 262144);
+}
+
+#[tokio::test]
+async fn test_stats_shard_last() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/shards/stats/last/1"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({
+            "1": {
+                "used_memory": 524288,
+                "ops_per_sec": 50.0
+            }
+        })))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = StatsHandler::new(client);
+    let stats = handler.shard_last(1).await.unwrap();
+    assert_eq!(stats["1"]["used_memory"], 524288);
+    assert_eq!(stats["1"]["ops_per_sec"], 50.0);
 }

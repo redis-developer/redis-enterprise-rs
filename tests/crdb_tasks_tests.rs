@@ -360,8 +360,8 @@ async fn test_crdb_tasks_create_invalid() {
 async fn test_crdb_tasks_cancel() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("DELETE"))
-        .and(path("/v1/crdb_tasks/task-123"))
+    Mock::given(method("POST"))
+        .and(path("/v1/crdb_tasks/task-123/actions/cancel"))
         .and(basic_auth("admin", "password"))
         .respond_with(no_content_response())
         .mount(&mock_server)
@@ -384,8 +384,8 @@ async fn test_crdb_tasks_cancel() {
 async fn test_crdb_tasks_cancel_nonexistent() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("DELETE"))
-        .and(path("/v1/crdb_tasks/nonexistent"))
+    Mock::given(method("POST"))
+        .and(path("/v1/crdb_tasks/nonexistent/actions/cancel"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Task not found"))
         .mount(&mock_server)
@@ -408,8 +408,8 @@ async fn test_crdb_tasks_cancel_nonexistent() {
 async fn test_crdb_tasks_cancel_completed() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("DELETE"))
-        .and(path("/v1/crdb_tasks/task-789"))
+    Mock::given(method("POST"))
+        .and(path("/v1/crdb_tasks/task-789/actions/cancel"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(400, "Cannot cancel completed task"))
         .mount(&mock_server)
@@ -426,6 +426,31 @@ async fn test_crdb_tasks_cancel_completed() {
     let result = handler.cancel("task-789").await;
 
     assert!(result.is_err());
+}
+
+#[tokio::test]
+async fn test_crdb_tasks_cancel_force() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("POST"))
+        .and(path("/v1/crdb_tasks/task-123/actions/cancel"))
+        .and(wiremock::matchers::query_param("force", "true"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(no_content_response())
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = CrdbTasksHandler::new(client);
+    let result = handler.cancel_with_force("task-123", true).await;
+
+    assert!(result.is_ok());
 }
 
 #[tokio::test]
