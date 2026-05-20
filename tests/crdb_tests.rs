@@ -387,7 +387,7 @@ async fn test_crdb_update() {
         "eviction_policy": "volatile-lru"
     });
 
-    Mock::given(method("PUT"))
+    Mock::given(method("PATCH"))
         .and(path("/v1/crdbs/12345-abcdef-67890"))
         .and(basic_auth("admin", "password"))
         .and(body_json(&updates))
@@ -430,7 +430,7 @@ async fn test_crdb_update_nonexistent() {
         "memory_size": 2147483648u64
     });
 
-    Mock::given(method("PUT"))
+    Mock::given(method("PATCH"))
         .and(path("/v1/crdbs/nonexistent-guid"))
         .and(basic_auth("admin", "password"))
         .and(body_json(&updates))
