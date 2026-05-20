@@ -162,6 +162,7 @@ dbs = client.databases_sync()
 - `REDIS_ENTERPRISE_USER` - Username
 - `REDIS_ENTERPRISE_PASSWORD` - Password
 - `REDIS_ENTERPRISE_INSECURE` - Set to "true" for self-signed certs
+- `REDIS_ENTERPRISE_CA_CERT` - Path to a custom CA certificate PEM file
 
 ## API Coverage
 

@@ -32,6 +32,7 @@
 //! - `REDIS_ENTERPRISE_USER`: Username for authentication
 //! - `REDIS_ENTERPRISE_PASSWORD`: Password for authentication
 //! - `REDIS_ENTERPRISE_INSECURE`: Set to `true` to skip SSL verification (dev only)
+//! - `REDIS_ENTERPRISE_CA_CERT`: Path to a custom CA certificate PEM file
 //!
 //! # Module Organization
 //!
