@@ -210,10 +210,10 @@
 //! use redis_enterprise::EnterpriseClient;
 //!
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
-//! // Check active alerts
-//! let alerts = client.alerts().list().await?;
-//! for alert in alerts {
-//!     println!("Alert: {} - {}", alert.name, alert.severity);
+//! // Check active cluster-level alerts
+//! let alerts = client.alerts().list_cluster_alerts().await?;
+//! for (name, state) in alerts {
+//!     println!("Alert: {} - {:?}", name, state);
 //! }
 //!
 //! // Get cluster statistics

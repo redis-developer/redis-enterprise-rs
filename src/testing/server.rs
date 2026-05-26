@@ -195,24 +195,6 @@ impl MockEnterpriseServer {
 
     // Alert mocks
 
-    /// Mock GET /v1/alerts to return a list of alerts
-    pub async fn mock_alerts_list(&self, alerts: Vec<Value>) {
-        Mock::given(method("GET"))
-            .and(path("/v1/alerts"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(alerts))
-            .mount(&self.server)
-            .await;
-    }
-
-    /// Mock GET /v1/alerts/{uid} to return a specific alert
-    pub async fn mock_alert_get(&self, uid: &str, alert: Value) {
-        Mock::given(method("GET"))
-            .and(path(format!("/v1/alerts/{}", uid)))
-            .respond_with(ResponseTemplate::new(200).set_body_json(alert))
-            .mount(&self.server)
-            .await;
-    }
-
     /// Mock GET /v1/bdbs/{bdb_uid}/alerts to return alerts for a database
     pub async fn mock_database_alerts(&self, bdb_uid: u32, alerts: Vec<Value>) {
         Mock::given(method("GET"))
@@ -377,37 +359,6 @@ mod tests {
             })))
             .mount(server.inner())
             .await;
-    }
-
-    #[tokio::test]
-    async fn test_mock_alerts_list_with_handler() {
-        let server = MockEnterpriseServer::start().await;
-
-        server
-            .mock_alerts_list(vec![
-                AlertFixture::new("alert-1", "bdb_size")
-                    .severity("WARNING")
-                    .entity_type("bdb")
-                    .entity_uid("1")
-                    .build(),
-                AlertFixture::new("alert-2", "node_memory")
-                    .severity("CRITICAL")
-                    .entity_type("node")
-                    .entity_uid("2")
-                    .build(),
-            ])
-            .await;
-
-        let client = server.client();
-        let alerts = client.alerts().list().await.unwrap();
-
-        assert_eq!(alerts.len(), 2);
-        assert_eq!(alerts[0].uid, "alert-1");
-        assert_eq!(alerts[0].name, "bdb_size");
-        assert_eq!(alerts[0].severity, "WARNING");
-        assert_eq!(alerts[1].uid, "alert-2");
-        assert_eq!(alerts[1].name, "node_memory");
-        assert_eq!(alerts[1].severity, "CRITICAL");
     }
 
     #[tokio::test]

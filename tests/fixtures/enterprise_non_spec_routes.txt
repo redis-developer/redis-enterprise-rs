@@ -27,14 +27,6 @@
 DELETE /v1/actions/{}
 
 # ============================================================================
-# alerts — parallel alerting universe in src/alerts.rs (see #65)
-# ============================================================================
-DELETE /v1/alerts
-DELETE /v1/alerts/{}
-GET /v1/alerts
-GET /v1/alerts/{}
-
-# ============================================================================
 # bdb_groups — entire CRUD module is non-inventory (see #65)
 # ============================================================================
 DELETE /v1/bdb_groups/{}
