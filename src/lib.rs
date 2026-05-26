@@ -476,14 +476,10 @@ pub use migrations::{CreateMigrationRequest, Migration, MigrationEndpoint, Migra
 pub use roles::{BdbRole, CreateRoleRequest, RoleInfo, RolesHandler};
 
 // Services
-pub use services::{
-    NodeServiceStatus, Service, ServiceConfigRequest, ServiceStatus, ServicesHandler,
-};
+pub use services::{Service, ServicesHandler};
 
 // Suffixes
 pub use suffixes::{CreateSuffixRequest, Suffix, SuffixesHandler};
 
 // Usage report
-pub use usage_report::{
-    DatabaseUsage, NodeUsage, UsageReport, UsageReportConfig, UsageReportHandler, UsageSummary,
-};
+pub use usage_report::{DatabaseUsage, NodeUsage, UsageReport, UsageReportHandler, UsageSummary};
