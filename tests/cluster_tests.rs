@@ -338,3 +338,148 @@ async fn test_cluster_change_password_hashing_algorithm() {
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["algorithm"], "SHA-512");
 }
+
+// ===========================================================================
+// Closes #56: cluster SSO endpoints.
+// Verified against Redis Enterprise Software 8.0.10-81; GET /v1/cluster/sso
+// returns 200, GET .../saml/metadata/sp returns 406 missing_certificate
+// (cert not yet provisioned), POST .../saml/metadata/idp returns
+// 400 empty_request on an empty body. All confirm live routing.
+// ===========================================================================
+
+#[tokio::test]
+async fn test_cluster_sso_get() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/cluster/sso"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({
+            "saml": {"enabled": true, "issuer": "https://idp.example.com"}
+        })))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ClusterHandler::new(client);
+    let result = handler.sso().await.unwrap();
+    assert_eq!(result["saml"]["enabled"], true);
+}
+
+#[tokio::test]
+async fn test_cluster_sso_update() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/cluster/sso"))
+        .and(basic_auth("admin", "password"))
+        .and(wiremock::matchers::body_json(json!({
+            "saml": {"enabled": true}
+        })))
+        .respond_with(success_response(json!({"saml": {"enabled": true}})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ClusterHandler::new(client);
+    let result = handler
+        .update_sso(json!({"saml": {"enabled": true}}))
+        .await
+        .unwrap();
+    assert_eq!(result["saml"]["enabled"], true);
+}
+
+#[tokio::test]
+async fn test_cluster_sso_delete() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("DELETE"))
+        .and(path("/v1/cluster/sso"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(ResponseTemplate::new(200))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ClusterHandler::new(client);
+    assert!(handler.delete_sso().await.is_ok());
+}
+
+#[tokio::test]
+async fn test_cluster_sso_saml_metadata_sp() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/cluster/sso/saml/metadata/sp"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({
+            "metadata": "<EntityDescriptor entityID=\"https://example\" />"
+        })))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ClusterHandler::new(client);
+    let result = handler.sso_saml_metadata_sp().await.unwrap();
+    assert!(
+        result["metadata"]
+            .as_str()
+            .unwrap()
+            .contains("EntityDescriptor")
+    );
+}
+
+#[tokio::test]
+async fn test_cluster_sso_saml_metadata_idp() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("POST"))
+        .and(path("/v1/cluster/sso/saml/metadata/idp"))
+        .and(basic_auth("admin", "password"))
+        .and(wiremock::matchers::body_json(json!({
+            "metadata": "<EntityDescriptor entityID=\"idp\" />"
+        })))
+        .respond_with(success_response(json!({"status": "accepted"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ClusterHandler::new(client);
+    let result = handler
+        .sso_saml_metadata_idp(json!({
+            "metadata": "<EntityDescriptor entityID=\"idp\" />"
+        }))
+        .await
+        .unwrap();
+    assert_eq!(result["status"], "accepted");
+}
