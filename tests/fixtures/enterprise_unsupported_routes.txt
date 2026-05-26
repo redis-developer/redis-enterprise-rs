@@ -1,0 +1,91 @@
+# Documented Redis Enterprise REST API routes that the SDK does not
+# currently implement.
+#
+# Format: `METHOD /path/{}/segments` — one per line, matching the
+# normalization performed in tests/route_coverage.rs. Both `{param}`
+# and `<param>` placeholders are collapsed to `{}`.
+#
+# Entries should carry an inline comment explaining why the route is
+# excluded (which issue tracks it, or "out of scope") so a reviewer
+# can validate whether it's still relevant.
+#
+# This file plus enterprise_non_spec_routes.txt form the explicit
+# acknowledgement of the current state. The route-coverage test fails
+# if either list drifts (a route is implemented or stops being
+# implemented without updating the allowlist).
+
+# ============================================================================
+# Tracked under #56 — cluster SSO/SAML endpoints
+# ============================================================================
+GET /v1/cluster/sso
+PUT /v1/cluster/sso
+DELETE /v1/cluster/sso
+GET /v1/cluster/sso/saml/metadata/sp
+POST /v1/cluster/sso/saml/metadata/idp
+
+# ============================================================================
+# Tracked under #54 — CRDB write surface
+# ============================================================================
+PUT /v1/crdbs/{}/flush
+PUT /v1/crdbs/{}/purge
+GET /v1/crdbs/{}/health_report
+POST /v1/crdbs/{}/updates
+
+# ============================================================================
+# Tracked under #55 — user-defined modules
+# ============================================================================
+GET /v2/local/modules/user-defined/artifacts
+POST /v2/local/modules/user-defined/artifacts
+DELETE /v2/local/modules/user-defined/artifacts/{}/{}
+POST /v2/modules/user-defined
+DELETE /v2/modules/user-defined/{}
+
+# ============================================================================
+# Tracked under #57 — cluster password-hashing algorithm
+# ============================================================================
+PATCH /v1/cluster/change_password_hashing_algorithm
+
+# ============================================================================
+# Per-DB module ops + password rotation — referenced in #65 triage
+# ============================================================================
+POST /v1/bdbs/{}/modules/config
+POST /v1/bdbs/{}/modules/upgrade
+POST /v1/bdbs/{}/passwords
+PUT /v1/bdbs/{}/passwords
+
+# ============================================================================
+# BDB alert writer — referenced in #65 (alerts.rs has a parallel
+# universe of /v1/alerts paths that aren't in the docs; this writer
+# IS documented but we don't implement it).
+# ============================================================================
+POST /v1/bdbs/alerts/{}
+
+# ============================================================================
+# Generic-dispatch endpoints — we expose typed alternatives instead.
+# ============================================================================
+# PUT /v1/bdbs/{uid}/{action} — documented as the generic per-action
+# update endpoint. We expose the specific actions (flush,
+# reset_admin_pass, etc.) on BdbHandler directly. Adding a generic
+# dispatcher is intentionally out of scope.
+PUT /v1/bdbs/{}/{}
+
+# ============================================================================
+# Local-node endpoints — `LocalHandler` documents /v1/local/* but
+# the inventory has slightly different paths. Tracked under #65.
+# ============================================================================
+GET /v1/local/node/master_healthcheck
+GET /v1/local/services
+POST /v1/local/services
+
+# ============================================================================
+# Cluster certificates writer — not yet implemented.
+# ============================================================================
+PUT /v1/cluster/certificates
+
+# ============================================================================
+# Inventory CSV bug
+# ============================================================================
+# `GET /v1/boostrap` (sic) — typo in docs/api-inventory.csv that
+# should read /v1/bootstrap. We handle the correctly-spelled route.
+# Re-run scripts/export_api_inventory.py once the docs are fixed.
+GET /v1/boostrap

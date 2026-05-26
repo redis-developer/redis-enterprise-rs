@@ -1168,6 +1168,7 @@ dependencies = [
  "env_logger",
  "futures",
  "pretty_assertions",
+ "regex",
  "reqwest",
  "serde",
  "serde_json",
