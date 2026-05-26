@@ -106,7 +106,7 @@ pub struct CreateCrdbInstance {
     /// Cluster fully qualified name, used to uniquely identify the cluster
     #[builder(setter(into))]
     pub cluster: String,
-    /// Cluster access URL (e.g., 'https://cluster1.example.com:9443')
+    /// Cluster access URL (for example `https://cluster1.example.com:9443`)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub cluster_url: Option<String>,

@@ -28,10 +28,10 @@ A comprehensive Rust client library for the Redis Enterprise REST API, with Pyth
 
 ```toml
 [dependencies]
-redis-enterprise = "0.8.7"
+redis-enterprise = "0.9"
 
 # Optional: Enable Tower service integration
-redis-enterprise = { version = "0.8.7", features = ["tower-integration"] }
+redis-enterprise = { version = "0.9", features = ["tower-integration"] }
 ```
 
 ## Quick Start
@@ -41,29 +41,39 @@ use redis_enterprise::EnterpriseClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create client using builder pattern
-    let client = EnterpriseClient::builder()
-        .base_url("https://cluster.example.com:9443")
-        .username("admin@example.com")
-        .password("your-password")
-        .insecure(false) // Set to true for self-signed certificates
-        .build()?;
+    // Build from environment variables (REDIS_ENTERPRISE_URL/USER/PASSWORD/INSECURE)
+    let client = EnterpriseClient::from_env()?;
+
+    // Or build explicitly:
+    // let client = EnterpriseClient::builder()
+    //     .base_url("https://cluster.example.com:9443")
+    //     .username("admin@example.com")
+    //     .password("your-password")
+    //     .insecure(false) // Set to true for self-signed certificates
+    //     .build()?;
 
     // Get cluster information
     let cluster = client.cluster().info().await?;
-    println!("Cluster: {:?}", cluster);
+    println!("Cluster: {}", cluster.name);
 
     // List databases (BDBs)
     let databases = client.databases().list().await?;
-    println!("Databases: {:?}", databases);
+    for db in &databases {
+        println!("  {} (uid {})", db.name, db.uid);
+    }
 
-    // Get node statistics
+    // List nodes
     let nodes = client.nodes().list().await?;
-    println!("Nodes: {:?}", nodes);
+    for node in &nodes {
+        println!("  Node {}: {} ({})", node.uid, node.addr.as_deref().unwrap_or("?"), node.status);
+    }
 
     Ok(())
 }
 ```
+
+See the [`examples/`](examples) directory for end-to-end workflows: `basic_enterprise`,
+`cluster_setup_simple`, `crdb_basics`, and `database_actions`.
 
 ## Tower Integration
 
@@ -98,84 +108,46 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 This enables composition with Tower middleware like circuit breakers, retry, rate limiting, and more.
 
+## Environment Variables
+
+- `REDIS_ENTERPRISE_URL` — Base URL (default: `https://localhost:9443`)
+- `REDIS_ENTERPRISE_USER` — Username
+- `REDIS_ENTERPRISE_PASSWORD` — Password
+- `REDIS_ENTERPRISE_INSECURE` — Set to `true` to skip TLS verification (dev only)
+- `REDIS_ENTERPRISE_CA_CERT` — Path to a custom CA certificate PEM file
+
 ## Python Bindings
 
-This library also provides Python bindings via PyO3:
+A thin PyO3 binding covering a subset of read operations is published at
+[redis-enterprise on PyPI](https://pypi.org/project/redis-enterprise/).
+See [`python/README.md`](python/README.md) for the supported API.
 
-```bash
-pip install redis-enterprise
-```
-
-```python
-from redis_enterprise import EnterpriseClient
-
-# Create client
-client = EnterpriseClient(
-    base_url="https://cluster:9443",
-    username="admin@redis.local",
-    password="secret",
-    insecure=True  # For self-signed certs
-)
-
-# Or from environment variables
-client = EnterpriseClient.from_env()
-
-# Async usage
-async def main():
-    dbs = await client.databases()
-    for db in dbs:
-        print(db["name"], db["uid"])
-
-# Sync usage
-dbs = client.databases_sync()
-```
-
-### Python API
-
-- `EnterpriseClient(base_url, username, password, insecure=False, timeout_secs=None)`
-- `EnterpriseClient.from_env()` - Create from environment variables
-
-#### Cluster
-- `cluster_info()` / `cluster_info_sync()` - Get cluster info
-- `cluster_stats()` / `cluster_stats_sync()` - Get cluster statistics
-- `license()` / `license_sync()` - Get license info
-
-#### Databases
-- `databases()` / `databases_sync()` - List all databases
-- `database(uid)` / `database_sync(uid)` - Get database by UID
-
-#### Nodes
-- `nodes()` / `nodes_sync()` - List all nodes
-- `node(uid)` / `node_sync(uid)` - Get node by UID
-
-#### Users
-- `users()` / `users_sync()` - List all users
-
-#### Raw API
-- `get(path)` / `get_sync(path)` - Raw GET request
-- `post(path, body)` / `post_sync(path, body)` - Raw POST request
-- `delete(path)` / `delete_sync(path)` - Raw DELETE request
-
-### Environment Variables
-
-- `REDIS_ENTERPRISE_URL` - Base URL (default: https://localhost:9443)
-- `REDIS_ENTERPRISE_USER` - Username
-- `REDIS_ENTERPRISE_PASSWORD` - Password
-- `REDIS_ENTERPRISE_INSECURE` - Set to "true" for self-signed certs
-- `REDIS_ENTERPRISE_CA_CERT` - Path to a custom CA certificate PEM file
+The PyPI publish workflow has been failing since the `reqwest 0.13` upgrade
+([#25](https://github.com/redis-developer/redis-enterprise-rs/issues/25)) and the
+overall scope is still being scoped under
+[#51](https://github.com/redis-developer/redis-enterprise-rs/issues/51) — treat
+the Python surface as experimental for now.
 
 ## API Coverage
 
-This library provides 100% coverage of the Redis Enterprise REST API, including:
+The crate aims for comprehensive coverage of the documented Redis Enterprise
+REST API surface. Handler organization:
 
-- **Cluster Operations** - Bootstrap, configuration, topology
-- **Database Management** - CRUD operations, actions, statistics
-- **Node Management** - Add/remove nodes, statistics, actions
-- **Security** - Users, roles, ACLs, LDAP integration
-- **Modules** - Upload and manage Redis modules
-- **Monitoring** - Stats, alerts, logs, diagnostics
-- **Active-Active** - CRDB management and tasks
-- **Administration** - License, certificates, services
+- **Cluster** — bootstrap, info, topology, SSO/SAML, settings, license
+- **Databases (BDB)** — CRUD, actions (recover/export/import/flush/upgrade),
+  per-DB alerts, endpoints, stats
+- **Nodes** — list, get, stats, actions, snapshots, check
+- **Security** — users, roles, RBAC, LDAP mappings, redis_acls
+- **Modules** — v1 + v2 module management, user-defined module artifacts
+- **Active-Active (CRDB)** — list / create / update / delete / tasks plus
+  flush, health_report, purge, updates
+- **Monitoring** — stats, alerts, logs, diagnostics, job_scheduler
+- **Administration** — license, certificates, OCSP, debug info, services
+
+For an authoritative per-endpoint inventory see
+[`docs/api-inventory.csv`](docs/api-inventory.csv). For the historical audit
+of routes the SDK once exposed but the docs do not, see
+[`docs/api-gap-triage.md`](docs/api-gap-triage.md).
 
 ## Documentation
 

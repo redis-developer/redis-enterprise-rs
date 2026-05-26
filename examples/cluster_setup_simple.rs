@@ -1,138 +1,96 @@
-//! Simple cluster setup example
+//! Simple cluster + database setup using the typed fluent API.
 //!
-//! This example demonstrates the basic workflow for setting up a Redis Enterprise cluster.
+//! Creates a small disposable database, polls until it goes active, prints a
+//! few facts about it, then cleans up. Intended to be run against a local
+//! Redis Enterprise cluster brought up via the
+//! [live-validation runbook](../docs/live-validation.md).
 //!
 //! Run with:
 //! ```bash
+//! REDIS_ENTERPRISE_URL=https://localhost:9443 \
+//! REDIS_ENTERPRISE_USER=admin@redis.local \
+//! REDIS_ENTERPRISE_PASSWORD=Redis123! \
+//! REDIS_ENTERPRISE_INSECURE=true \
 //! cargo run --example cluster_setup_simple
 //! ```
 
-use redis_enterprise::{EnterpriseClient, bdb::DatabaseHandler};
-use serde_json::json;
+use redis_enterprise::{CreateDatabaseRequest, EnterpriseClient};
 use std::env;
+use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
+    let client = EnterpriseClient::from_env()?;
 
-    // Configuration from environment or defaults
-    let base_url =
-        env::var("REDIS_ENTERPRISE_URL").unwrap_or_else(|_| "https://localhost:9443".to_string());
-    let username =
-        env::var("REDIS_ENTERPRISE_USER").unwrap_or_else(|_| "admin@redis.local".to_string());
-    let password =
-        env::var("REDIS_ENTERPRISE_PASSWORD").unwrap_or_else(|_| "Redis123!".to_string());
-    let insecure = env::var("REDIS_ENTERPRISE_INSECURE")
-        .unwrap_or_else(|_| "true".to_string())
-        .parse::<bool>()
-        .unwrap_or(true);
+    println!("Redis Enterprise — disposable database walkthrough");
+    println!("===================================================\n");
 
-    println!("Redis Enterprise Cluster Setup");
-    println!("==============================");
-    println!("URL: {}", base_url);
-    println!("Username: {}", username);
+    // Step 1: Cluster status via the typed handler.
+    println!("Step 1: cluster status");
+    match client.cluster().info().await {
+        Ok(cluster) => println!("  ✓ cluster initialized: {}\n", cluster.name),
+        Err(e) => {
+            eprintln!("  ⚠ cluster info failed: {e}");
+            eprintln!("  → the cluster may need bootstrap; see docs/live-validation.md\n");
+            return Err(e.into());
+        }
+    }
+
+    let db_name = "redis-enterprise-example";
+    let db_port: u16 = 12000;
+    let db_password = env::var("REDIS_ENTERPRISE_DB_PASSWORD")
+        .unwrap_or_else(|_| "example-Redis123!".to_string());
+
+    // Step 2: Create a small database via the typed builder.
+    println!("Step 2: creating database \"{db_name}\" on port {db_port}");
+    let request = CreateDatabaseRequest::builder()
+        .name(db_name)
+        .memory_size(104_857_600) // 100 MiB
+        .port(db_port)
+        .replication(false)
+        .persistence("aof")
+        .eviction_policy("volatile-lru")
+        .authentication_redis_pass(&db_password)
+        .build();
+
+    let created = client.databases().create(request).await?;
+    let uid = created.uid;
+    println!("  ✓ created uid={uid}, status={:?}\n", created.status);
+
+    // Step 3: Poll until the new database goes active (or give up after ~30s).
+    println!("Step 3: waiting for database to become active");
+    let active = {
+        let mut info = created;
+        for _ in 0..15 {
+            if info.status.as_deref() == Some("active") {
+                break;
+            }
+            tokio::time::sleep(Duration::from_secs(2)).await;
+            info = client.databases().info(uid).await?;
+        }
+        info
+    };
+    println!(
+        "  ✓ status={:?}, memory_size={} bytes, port={:?}\n",
+        active.status,
+        active.memory_size.unwrap_or(0),
+        active.port
+    );
+
+    // Step 4: List all databases.
+    println!("Step 4: listing databases");
+    for db in client.databases().list().await? {
+        println!("  - {} (uid {}, port {:?})", db.name, db.uid, db.port);
+    }
     println!();
 
-    // Create client
-    let client = EnterpriseClient::builder()
-        .base_url(&base_url)
-        .username(&username)
-        .password(&password)
-        .insecure(insecure)
-        .build()?;
+    // Step 5: Clean up.
+    println!("Step 5: deleting \"{db_name}\"");
+    client.databases().delete(uid).await?;
+    println!("  ✓ deleted uid={uid}\n");
 
-    // Step 1: Check cluster status using raw API
-    println!("Step 1: Checking cluster status...");
-    match client.get::<serde_json::Value>("/v1/cluster").await {
-        Ok(cluster) => {
-            if let Some(name) = cluster.get("name") {
-                println!("✓ Cluster is initialized: {}", name);
-            }
-        }
-        Err(e) => {
-            println!("⚠ Cluster check failed: {}", e);
-            println!("→ You may need to bootstrap the cluster first");
-        }
-    }
-
-    // Step 2: Create a database using raw API
-    println!("\nStep 2: Creating database...");
-
-    let db_request = json!({
-        "name": "test-database",
-        "memory_size": 104857600, // 100 MB
-        "port": 12000,
-        "replication": false,
-        "persistence": "aof",
-        "eviction_policy": "volatile-lru",
-        "authentication_redis_pass": "testpass123"
-    });
-
-    match client
-        .post::<serde_json::Value, serde_json::Value>("/v1/bdbs", &db_request)
-        .await
-    {
-        Ok(db) => {
-            if let Some(uid) = db.get("uid") {
-                println!("✓ Database created with ID: {}", uid);
-
-                // Wait for database to be active
-                println!("→ Waiting for database to become active...");
-                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-
-                // Get database info
-                if let Ok(db_info) = client
-                    .get::<serde_json::Value>(&format!("/v1/bdbs/{}", uid))
-                    .await
-                    && let Some(status) = db_info.get("status")
-                {
-                    println!("✓ Database status: {}", status);
-                }
-            }
-        }
-        Err(e) => {
-            println!("⚠ Database creation failed: {}", e);
-        }
-    }
-
-    // Step 3: List databases using typed handler
-    println!("\nStep 3: Listing databases...");
-    let db_handler = DatabaseHandler::new(client.clone());
-
-    match db_handler.list().await {
-        Ok(databases) => {
-            println!("✓ Found {} database(s):", databases.len());
-            for db in databases {
-                println!("  - {} (ID: {}, Port: {:?})", db.name, db.uid, db.port);
-            }
-        }
-        Err(e) => {
-            println!("⚠ Failed to list databases: {}", e);
-        }
-    }
-
-    // Step 4: Get cluster stats
-    println!("\nStep 4: Cluster statistics...");
-    match client
-        .get::<serde_json::Value>("/v1/cluster/stats/last")
-        .await
-    {
-        Ok(stats) => {
-            println!("✓ Cluster stats retrieved");
-            if let Some(conns) = stats.get("conns") {
-                println!("  Connections: {}", conns);
-            }
-        }
-        Err(e) => {
-            println!("⚠ Could not get stats: {}", e);
-        }
-    }
-
-    println!("\n✓ Setup example complete!");
-    println!("\nNext steps:");
-    println!("1. Connect to your database: redis-cli -p 12000 -a testpass123");
-    println!("2. Explore the API using the client.get() and client.post() methods");
-    println!("3. Use typed handlers for common operations");
+    println!("Done. While the database existed, you could connect with:");
+    println!("  redis-cli -p {db_port} -a <password>");
 
     Ok(())
 }

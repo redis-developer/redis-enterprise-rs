@@ -5,9 +5,8 @@
 //! - Create and update configurations
 //! - Monitor status and metrics
 //!
-//! Example
-//! ```no_run
-//! ```
+//! See [`UserHandler`] for the full API. For a worked CRUD example use
+//! [`CreateUserRequest`] alongside `client.users().create(...)`.
 
 use crate::client::RestClient;
 use crate::error::Result;
