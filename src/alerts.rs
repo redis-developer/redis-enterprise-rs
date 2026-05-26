@@ -57,9 +57,8 @@ pub struct Alert {
 /// shape. The alert name itself lives in the map key, not in this
 /// struct.
 ///
-/// Distinct from [`Alert`], which models the documented alert object
-/// used by the `/v1/bdbs/{uid}/alerts` and `/v1/nodes/{uid}/alerts`
-/// endpoints and the catalog at `/v1/alerts`.
+/// Distinct from [`Alert`], which models the per-entity alert object
+/// returned by `/v1/bdbs/{uid}/alerts` and `/v1/nodes/{uid}/alerts`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClusterAlertState {
     /// Whether this alert is configured to fire.
@@ -251,16 +250,6 @@ impl AlertHandler {
         AlertHandler { client }
     }
 
-    /// List all alerts
-    pub async fn list(&self) -> Result<Vec<Alert>> {
-        self.client.get("/v1/alerts").await
-    }
-
-    /// Get specific alert
-    pub async fn get(&self, uid: &str) -> Result<Alert> {
-        self.client.get(&format!("/v1/alerts/{}", uid)).await
-    }
-
     /// List alerts for a specific database
     pub async fn list_by_database(&self, bdb_uid: u32) -> Result<Vec<Alert>> {
         self.client
@@ -281,9 +270,6 @@ impl AlertHandler {
     /// name (e.g. `cluster_multiple_nodes_down`), so the return type is
     /// `HashMap<String, ClusterAlertState>`. The alert name itself is
     /// the map key. See [`ClusterAlertState`] for the per-entry shape.
-    ///
-    /// Distinct from [`Self::list`], which returns the documented
-    /// `Alert` objects from `/v1/alerts`.
     pub async fn list_cluster_alerts(&self) -> Result<HashMap<String, ClusterAlertState>> {
         self.client.get("/v1/cluster/alerts").await
     }
@@ -340,15 +326,5 @@ impl AlertHandler {
         self.client
             .put("/v1/cluster/alert_settings", settings)
             .await
-    }
-
-    /// Clear/acknowledge an alert
-    pub async fn clear(&self, uid: &str) -> Result<()> {
-        self.client.delete(&format!("/v1/alerts/{}", uid)).await
-    }
-
-    /// Clear all alerts
-    pub async fn clear_all(&self) -> Result<()> {
-        self.client.delete("/v1/alerts").await
     }
 }
