@@ -78,8 +78,11 @@ use tokio::time::sleep;
 use typed_builder::TypedBuilder;
 
 // Aliases for easier use
+/// Alias for [`DatabaseInfo`]; the BDB ("Berkeley DB") naming is legacy Redis Enterprise terminology.
 pub type Database = DatabaseInfo;
+/// Alias for [`DatabaseHandler`]; retained for backwards compatibility.
 pub type BdbHandler = DatabaseHandler;
+/// Stream of database state updates yielded by the database watcher.
 pub type DatabaseWatchStream<'a> =
     Pin<Box<dyn Stream<Item = Result<(DatabaseInfo, Option<String>)>> + Send + 'a>>;
 
@@ -201,61 +204,100 @@ pub struct DatabaseUpgradeRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DatabaseInfo {
     // Core database identification and status
+    /// Database's unique ID (read-only).
     pub uid: u32,
+    /// Database name.
     pub name: String,
+    /// TCP port on which the database is available (read-only).
     pub port: Option<u16>,
+    /// Current status of the database (e.g. `"active"`, `"pending"`).
     pub status: Option<String>,
+    /// Database memory limit in bytes (0 for unlimited).
     pub memory_size: Option<u64>,
+    /// Current memory usage in bytes (read-only).
     pub memory_used: Option<u64>,
 
     /// Database type (e.g., "redis", "memcached")
     #[serde(rename = "type")]
     pub type_: Option<String>,
+    /// Database version (read-only).
     pub version: Option<String>,
 
     /// Account and action tracking
     pub account_id: Option<u32>,
+    /// UID of the most recent action affecting this database (read-only).
     pub action_uid: Option<String>,
 
     // Sharding and placement
+    /// Number of database shards.
     pub shards_count: Option<u32>,
+    /// List of shard UIDs that compose the database.
     pub shard_list: Option<Vec<u32>>,
+    /// Whether the database is sharded.
     pub sharding: Option<bool>,
+    /// Shard placement strategy (e.g. `"dense"`, `"sparse"`).
     pub shards_placement: Option<String>,
+    /// Whether in-memory replication is enabled.
     pub replication: Option<bool>,
 
     // Endpoints and networking
+    /// Endpoints exposed by this database. See [`EndpointInfo`].
     pub endpoints: Option<Vec<EndpointInfo>>,
+    /// Primary endpoint address (read-only).
     pub endpoint: Option<String>,
+    /// List of endpoint IP addresses (read-only).
     pub endpoint_ip: Option<Vec<String>>,
+    /// Node UID that currently hosts the endpoint (read-only).
     pub endpoint_node: Option<u32>,
+    /// DNS name pointing to the master endpoint (read-only).
     pub dns_address_master: Option<String>,
 
     // Data persistence and backup
+    /// Persistence policy (e.g. `"disabled"`, `"aof"`, `"snapshot"`).
     pub persistence: Option<String>,
+    /// Data persistence mode (alias for `persistence` on some API versions).
     pub data_persistence: Option<String>,
+    /// Eviction policy when the database reaches its memory limit (e.g. `"allkeys-lru"`).
     pub eviction_policy: Option<String>,
 
     // Timestamps
+    /// Timestamp when the database was created (ISO-8601).
     pub created_time: Option<String>,
+    /// Timestamp of the most recent configuration change (ISO-8601).
     pub last_changed_time: Option<String>,
+    /// Timestamp of the most recent successful backup (ISO-8601).
     pub last_backup_time: Option<String>,
+    /// Timestamp of the most recent successful export (ISO-8601).
     pub last_export_time: Option<String>,
 
     // Security and authentication
+    /// Whether weak hashing is permitted for mTLS connections.
     pub mtls_allow_weak_hashing: Option<bool>,
+    /// Whether outdated/expired certificates are permitted for mTLS connections.
     pub mtls_allow_outdated_certs: Option<bool>,
+    /// Redis password used for client authentication.
     pub authentication_redis_pass: Option<String>,
+    /// Admin password used for elevated authentication.
     pub authentication_admin_pass: Option<String>,
+    /// SASL password (Memcached databases).
     pub authentication_sasl_pass: Option<String>,
+    /// SASL username (Memcached databases).
     pub authentication_sasl_uname: Option<String>,
+    /// List of SSL client certificates accepted for authentication.
     pub authentication_ssl_client_certs: Option<Vec<Value>>,
+    /// List of SSL certificates trusted for CRDT (Active-Active) connections.
     pub authentication_ssl_crdt_certs: Option<Vec<Value>>,
+    /// List of authorized subjects for certificate-based authentication.
     pub authorized_subjects: Option<Vec<Value>>,
+    /// Whether inter-node data encryption is enabled.
     pub data_internode_encryption: Option<bool>,
+    /// Whether SSL/TLS is required for client connections.
     pub ssl: Option<bool>,
+    /// TLS mode for client connections (e.g. `"enabled"`, `"disabled"`).
     pub tls_mode: Option<String>,
+    /// Client certificate enforcement mode (e.g. `"enabled"`, `"disabled"`).
     pub enforce_client_authentication: Option<String>,
+    /// Whether the default Redis user is enabled.
     pub default_user: Option<bool>,
     /// ACL configuration
     pub acl: Option<Value>,
@@ -271,84 +313,147 @@ pub struct DatabaseInfo {
     pub redis_cluster_enabled: Option<bool>,
 
     // CRDT/Active-Active fields
+    /// Whether this database participates in a CRDT (Active-Active) deployment.
     pub crdt: Option<bool>,
+    /// Whether CRDT (Active-Active) functionality is enabled.
     pub crdt_enabled: Option<bool>,
+    /// CRDT configuration version.
     pub crdt_config_version: Option<u32>,
+    /// Replica ID assigned to this database in the CRDT cluster.
     pub crdt_replica_id: Option<u32>,
+    /// Comma-separated list of replica IDs that have been removed from the CRDT.
     pub crdt_ghost_replica_ids: Option<String>,
+    /// CRDT feature-set version.
     pub crdt_featureset_version: Option<u32>,
+    /// CRDT protocol version.
     pub crdt_protocol_version: Option<u32>,
+    /// Globally unique identifier for the CRDT.
     pub crdt_guid: Option<String>,
+    /// Modules configuration for the CRDT.
     pub crdt_modules: Option<String>,
+    /// Comma-separated list of CRDT replica endpoints.
     pub crdt_replicas: Option<String>,
+    /// List of CRDT replica sources.
     pub crdt_sources: Option<Vec<Value>>,
+    /// CRDT sync state (e.g. `"enabled"`, `"disabled"`).
     pub crdt_sync: Option<String>,
+    /// Seconds before a stalled CRDT sync connection raises an alarm.
     pub crdt_sync_connection_alarm_timeout_seconds: Option<u32>,
+    /// Whether CRDT sync is distributed across shards.
     pub crdt_sync_dist: Option<bool>,
+    /// Whether the CRDT syncer auto-unlatches on out-of-memory conditions.
     pub crdt_syncer_auto_oom_unlatch: Option<bool>,
+    /// XADD stream ID uniqueness mode for CRDT.
     pub crdt_xadd_id_uniqueness_mode: Option<String>,
+    /// Whether CRDT causal consistency is enabled.
     pub crdt_causal_consistency: Option<bool>,
+    /// Replication backlog size for CRDT (bytes, or `"auto"`).
     pub crdt_repl_backlog_size: Option<String>,
 
     // Replication settings
+    /// Whether persistence is enabled on the master shard.
     pub master_persistence: Option<bool>,
+    /// Whether slave (replica) high availability is enabled.
     pub slave_ha: Option<bool>,
+    /// Priority for slave HA replica selection.
     pub slave_ha_priority: Option<u32>,
+    /// Whether replica shards are read-only.
     pub replica_read_only: Option<bool>,
+    /// List of upstream replica sources for Replica-Of mode.
     pub replica_sources: Option<Vec<Value>>,
+    /// Replica sync state (e.g. `"enabled"`, `"paused"`).
     pub replica_sync: Option<String>,
+    /// Seconds before a stalled replica sync connection raises an alarm.
     pub replica_sync_connection_alarm_timeout_seconds: Option<u32>,
+    /// Whether replica sync is distributed across shards.
     pub replica_sync_dist: Option<bool>,
+    /// Replication backlog size (bytes, or `"auto"`).
     pub repl_backlog_size: Option<String>,
 
     // Connection and performance settings
+    /// Maximum number of client connections (alias for `maxclients` on some versions).
     pub max_connections: Option<u32>,
+    /// Maximum number of concurrent client connections.
     pub maxclients: Option<u32>,
+    /// Number of proxy connection threads.
     pub conns: Option<u32>,
+    /// Proxy connection type (e.g. `"per-thread"`, `"per-shard"`).
     pub conns_type: Option<String>,
+    /// Maximum number of pipelined commands per client.
     pub max_client_pipeline: Option<u32>,
+    /// Maximum number of pipelined commands.
     pub max_pipelined: Option<u32>,
 
     // AOF (Append Only File) settings
+    /// AOF (append-only file) fsync policy (e.g. `"appendfsync-every-sec"`).
     pub aof_policy: Option<String>,
+    /// Maximum AOF file size in bytes.
     pub max_aof_file_size: Option<u64>,
+    /// Maximum AOF load time in seconds.
     pub max_aof_load_time: Option<u32>,
 
     // Active defragmentation settings
+    /// Active defragmentation toggle (e.g. `"enabled"`, `"disabled"`).
     pub activedefrag: Option<String>,
+    /// Maximum CPU percentage used by active defrag.
     pub active_defrag_cycle_max: Option<u32>,
+    /// Minimum CPU percentage used by active defrag.
     pub active_defrag_cycle_min: Option<u32>,
+    /// Minimum amount of fragmentation waste (bytes) before defrag starts.
     pub active_defrag_ignore_bytes: Option<String>,
+    /// Maximum number of fields scanned per defrag cycle.
     pub active_defrag_max_scan_fields: Option<u32>,
+    /// Lower fragmentation threshold (percent) for active defrag.
     pub active_defrag_threshold_lower: Option<u32>,
+    /// Upper fragmentation threshold (percent) for active defrag.
     pub active_defrag_threshold_upper: Option<u32>,
 
     // Backup settings
+    /// Whether periodic backup is enabled.
     pub backup: Option<bool>,
+    /// Reason for the most recent backup failure (read-only).
     pub backup_failure_reason: Option<String>,
+    /// Number of backup snapshots retained.
     pub backup_history: Option<u32>,
+    /// Backup interval in seconds.
     pub backup_interval: Option<u32>,
+    /// Offset (in seconds) from midnight when scheduled backups run.
     pub backup_interval_offset: Option<u32>,
+    /// Backup destination location (URI or storage config object).
     pub backup_location: Option<Value>,
+    /// Percent progress (0–100) of the in-flight backup (read-only).
     pub backup_progress: Option<f64>,
+    /// Current backup status (e.g. `"idle"`, `"running"`, `"failed"`).
     pub backup_status: Option<String>,
 
     // Import/Export settings
+    /// List of dataset import source descriptors.
     pub dataset_import_sources: Option<Vec<Value>>,
+    /// Reason for the most recent import failure (read-only).
     pub import_failure_reason: Option<String>,
+    /// Percent progress (0–100) of the in-flight import (read-only).
     pub import_progress: Option<f64>,
+    /// Current import status (e.g. `"idle"`, `"running"`, `"failed"`).
     pub import_status: Option<String>,
+    /// Reason for the most recent export failure (read-only).
     pub export_failure_reason: Option<String>,
+    /// Percent progress (0–100) of the in-flight export (read-only).
     pub export_progress: Option<f64>,
+    /// Current export status (e.g. `"idle"`, `"running"`, `"failed"`).
     pub export_status: Option<String>,
+    /// Skip-analyze policy applied during import.
     pub skip_import_analyze: Option<String>,
 
     // Monitoring and metrics
+    /// Whether all metrics are exported.
     pub metrics_export_all: Option<bool>,
+    /// Whether the text monitor log is generated for this database.
     pub generate_text_monitor: Option<bool>,
+    /// Whether email alerts are enabled for this database.
     pub email_alerts: Option<bool>,
 
     // Modules and features
+    /// List of Redis modules loaded into the database.
     pub module_list: Option<Vec<Value>>,
     /// Search configuration - can be bool or object depending on API version
     #[serde(default)]
@@ -358,80 +463,129 @@ pub struct DatabaseInfo {
     pub timeseries: Option<Value>,
 
     // BigStore/Flash storage settings
+    /// Whether Redis on Flash (BigStore) is enabled.
     pub bigstore: Option<bool>,
+    /// RAM portion of the database (bytes) when BigStore is enabled.
     pub bigstore_ram_size: Option<u64>,
+    /// Maximum percentage of memory used by RAM in BigStore.
     pub bigstore_max_ram_ratio: Option<u32>,
+    /// Per-shard RAM weights for BigStore.
     pub bigstore_ram_weights: Option<Vec<Value>>,
+    /// BigStore version in use.
     pub bigstore_version: Option<u32>,
 
     // Network and proxy settings
+    /// Proxy policy (e.g. `"single"`, `"all-master-shards"`, `"all-nodes"`).
     pub proxy_policy: Option<String>,
+    /// Whether OSS-cluster API compatibility is enabled.
     pub oss_cluster: Option<bool>,
+    /// Preferred endpoint type advertised by the OSS-cluster API (e.g. `"hostname"`, `"ip"`).
     pub oss_cluster_api_preferred_endpoint_type: Option<String>,
+    /// Preferred IP type advertised by the OSS-cluster API (e.g. `"internal"`, `"external"`).
     pub oss_cluster_api_preferred_ip_type: Option<String>,
+    /// Whether OSS-style hash-slot sharding is enabled.
     pub oss_sharding: Option<bool>,
 
     // Redis-specific settings
+    /// Redis Enterprise database server version (read-only).
     pub redis_version: Option<String>,
+    /// Whether RESP3 protocol is enabled.
     pub resp3: Option<bool>,
+    /// Comma-separated list of disabled Redis commands.
     pub disabled_commands: Option<String>,
 
     // Clustering and sharding
+    /// Hash-slot policy (e.g. `"legacy"`, `"16k"`).
     pub hash_slots_policy: Option<String>,
+    /// List of regular expressions used to extract shard keys.
     pub shard_key_regex: Option<Vec<Value>>,
+    /// Whether cross-slot multi-key commands are blocked.
     pub shard_block_crossslot_keys: Option<bool>,
+    /// Whether commands referencing foreign keys are blocked.
     pub shard_block_foreign_keys: Option<bool>,
+    /// Whether implicit shard keys are used.
     pub implicit_shard_key: Option<bool>,
 
     // Node placement and rack awareness
+    /// List of node UIDs to avoid when placing shards.
     pub avoid_nodes: Option<Vec<String>>,
+    /// List of node UIDs preferred for placing shards.
     pub use_nodes: Option<Vec<String>>,
+    /// Whether rack-aware shard placement is enabled.
     pub rack_aware: Option<bool>,
 
     // Operational settings
+    /// Whether automatic Redis upgrades are enabled.
     pub auto_upgrade: Option<bool>,
+    /// Whether this is an internal/system database.
     pub internal: Option<bool>,
+    /// Whether database connection auditing is enabled.
     pub db_conns_auditing: Option<bool>,
+    /// Whether the replica flushes its dataset on full sync.
     pub flush_on_fullsync: Option<bool>,
+    /// Whether selective flush is used for replica sync.
     pub use_selective_flush: Option<bool>,
 
     // Sync and replication control
+    /// Database sync mode.
     pub sync: Option<String>,
+    /// List of sync sources for Replica-Of configurations.
     pub sync_sources: Option<Vec<Value>>,
+    /// Number of dedicated threads used by the syncer.
     pub sync_dedicated_threads: Option<u32>,
+    /// Syncer mode (e.g. `"distributed"`, `"centralized"`).
     pub syncer_mode: Option<String>,
+    /// Log level used by the syncer.
     pub syncer_log_level: Option<String>,
+    /// Whether the syncer supports on-the-fly reconfiguration.
     pub support_syncer_reconf: Option<bool>,
 
     // Gradual sync settings
+    /// Gradual-source sync mode.
     pub gradual_src_mode: Option<String>,
+    /// Maximum number of sources synced concurrently in gradual mode.
     pub gradual_src_max_sources: Option<u32>,
+    /// Gradual sync mode.
     pub gradual_sync_mode: Option<String>,
+    /// Maximum number of shards synced concurrently per source in gradual mode.
     pub gradual_sync_max_shards_per_source: Option<u32>,
 
     // Slave and buffer settings
+    /// Replica output buffer limits.
     pub slave_buffer: Option<String>,
 
     // Snapshot settings
+    /// Snapshot policy entries (RDB save points).
     pub snapshot_policy: Option<Vec<Value>>,
 
     // Scheduling and recovery
+    /// Proxy scheduling policy (e.g. `"cmp"`, `"mnp"`, `"mru"`).
     pub sched_policy: Option<String>,
+    /// Seconds to wait before automatic recovery (negative disables).
     pub recovery_wait_time: Option<i32>,
 
     // Performance and optimization
+    /// MULTI command optimization mode.
     pub multi_commands_opt: Option<String>,
+    /// Configured ingress throughput cap.
     pub throughput_ingress: Option<f64>,
+    /// Maximum number of keys tracked by the client-side caching tracking table.
     pub tracking_table_max_keys: Option<u32>,
+    /// Whether the WAIT command is allowed.
     pub wait_command: Option<bool>,
 
     // Legacy and deprecated fields
+    /// Background operations currently running on the database (read-only).
     pub background_op: Option<Vec<Value>>,
 
     // Advanced configuration
+    /// Whether MKMS (multi-key multi-slot) commands are allowed.
     pub mkms: Option<bool>,
+    /// Role-based permissions for the database.
     pub roles_permissions: Option<Vec<Value>>,
+    /// Free-form tags attached to the database.
     pub tags: Option<Vec<String>>,
+    /// Current topology epoch counter (read-only).
     pub topology_epoch: Option<u32>,
 }
 
@@ -461,8 +615,10 @@ pub struct EndpointInfo {
 /// Module configuration for database creation
 #[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct ModuleConfig {
+    /// Module name to load (e.g. `"search"`, `"timeseries"`, `"bf"`).
     #[builder(setter(into))]
     pub module_name: String,
+    /// Arguments passed to the module when it loads.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub module_args: Option<String>,
@@ -488,44 +644,58 @@ pub struct ModuleConfig {
 /// ```
 #[derive(Debug, Serialize, Deserialize, TypedBuilder)]
 pub struct CreateDatabaseRequest {
+    /// Database name.
     #[builder(setter(into))]
     pub name: String,
+    /// Database memory limit in bytes (0 for unlimited).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub memory_size: Option<u64>,
+    /// TCP port on which the database is available (read-only).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub port: Option<u16>,
+    /// Whether in-memory replication is enabled.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub replication: Option<bool>,
+    /// Persistence policy (e.g. `"disabled"`, `"aof"`, `"snapshot"`).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub persistence: Option<String>,
+    /// Eviction policy when the database reaches its memory limit (e.g. `"allkeys-lru"`).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub eviction_policy: Option<String>,
+    /// Whether the database is sharded.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub sharding: Option<bool>,
+    /// Number of database shards.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub shards_count: Option<u32>,
+    /// Shard count.
     #[serde(skip_serializing_if = "Option::is_none", alias = "shard_count")]
     #[builder(default, setter(strip_option))]
     pub shard_count: Option<u32>,
+    /// Proxy policy (e.g. `"single"`, `"all-master-shards"`, `"all-nodes"`).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub proxy_policy: Option<String>,
+    /// Whether rack-aware shard placement is enabled.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub rack_aware: Option<bool>,
+    /// List of Redis modules loaded into the database.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub module_list: Option<Vec<ModuleConfig>>,
+    /// Whether this database participates in a CRDT (Active-Active) deployment.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub crdt: Option<bool>,
+    /// Redis password used for client authentication.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub authentication_redis_pass: Option<String>,
@@ -537,6 +707,7 @@ pub struct DatabaseHandler {
 }
 
 impl DatabaseHandler {
+    /// New.
     pub fn new(client: RestClient) -> Self {
         DatabaseHandler { client }
     }

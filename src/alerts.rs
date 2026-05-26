@@ -246,6 +246,7 @@ pub struct AlertHandler {
 pub type AlertsHandler = AlertHandler;
 
 impl AlertHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         AlertHandler { client }
     }

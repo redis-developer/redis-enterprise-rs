@@ -124,22 +124,33 @@ pub struct Node {
 /// Node stats
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NodeStats {
+    /// Unique identifier (read-only).
     pub uid: u32,
+    /// User-mode CPU time fraction.
     pub cpu_user: Option<f64>,
+    /// System-mode CPU time fraction.
     pub cpu_system: Option<f64>,
+    /// Idle CPU time fraction.
     pub cpu_idle: Option<f64>,
+    /// Free memory in bytes.
     pub free_memory: Option<u64>,
+    /// Incoming network bytes.
     pub network_bytes_in: Option<u64>,
+    /// Outgoing network bytes.
     pub network_bytes_out: Option<u64>,
+    /// Free persistent storage in bytes.
     pub persistent_storage_free: Option<u64>,
+    /// Free ephemeral storage in bytes.
     pub ephemeral_storage_free: Option<u64>,
 }
 
 /// Node action request
 #[derive(Debug, Serialize, TypedBuilder)]
 pub struct NodeActionRequest {
+    /// Action name to execute.
     #[builder(setter(into))]
     pub action: String,
+    /// Node UID this entity belongs to.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub node_uid: Option<u32>,
@@ -154,6 +165,7 @@ pub struct NodeHandler {
 pub type NodesHandler = NodeHandler;
 
 impl NodeHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         NodeHandler { client }
     }

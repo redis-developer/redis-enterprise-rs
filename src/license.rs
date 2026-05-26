@@ -106,6 +106,7 @@ pub struct LicenseHandler {
 }
 
 impl LicenseHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         LicenseHandler { client }
     }

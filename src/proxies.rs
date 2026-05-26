@@ -13,8 +13,11 @@ use serde_json::Value;
 /// Response for a single metric query
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MetricResponse {
+    /// Interval label for the metric series.
     pub interval: String,
+    /// List of Unix-epoch timestamps for the data points.
     pub timestamps: Vec<i64>,
+    /// List of metric values, aligned to `timestamps`.
     pub values: Vec<Value>,
 }
 
@@ -40,12 +43,16 @@ pub struct Proxy {
     /// Current proxy status (e.g. `"active"`, `"deactivated"`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
+    /// Address.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub addr: Option<String>,
+    /// TCP port.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub port: Option<u16>,
+    /// Maximum number of client connections.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_connections: Option<u32>,
+    /// Number of worker threads.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub threads: Option<u32>,
 
@@ -150,14 +157,20 @@ pub struct Proxy {
 /// Proxy stats information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProxyStats {
+    /// Unique identifier (read-only).
     pub uid: u32,
+    /// Per-interval metric series for the resource.
     pub intervals: Vec<StatsInterval>,
 }
 
+/// One interval of statistics, with aligned timestamps and values.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatsInterval {
+    /// Interval label for the metric series.
     pub interval: String,
+    /// List of Unix-epoch timestamps for the data points.
     pub timestamps: Vec<i64>,
+    /// List of metric values, aligned to `timestamps`.
     pub values: Vec<Value>,
 }
 
@@ -167,6 +180,7 @@ pub struct ProxyHandler {
 }
 
 impl ProxyHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         ProxyHandler { client }
     }
@@ -230,8 +244,10 @@ impl ProxyHandler {
 /// Proxy update body
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProxyUpdate {
+    /// Maximum number of client connections.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_connections: Option<u32>,
+    /// Number of worker threads.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub threads: Option<u32>,
 }

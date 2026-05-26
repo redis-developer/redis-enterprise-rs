@@ -146,6 +146,7 @@ pub struct BootstrapHandler {
 }
 
 impl BootstrapHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         BootstrapHandler { client }
     }

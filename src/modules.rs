@@ -25,19 +25,33 @@ pub struct PlatformInfo {
 /// Module information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Module {
+    /// Unique identifier (read-only).
     pub uid: String,
+    /// Module name (e.g. `"search"`, `"timeseries"`).
     pub module_name: Option<String>,
+    /// Version (read-only).
     pub version: Option<u32>,
+    /// Semantic version string.
     pub semantic_version: Option<String>,
+    /// Author name.
     pub author: Option<String>,
+    /// Human-readable description.
     pub description: Option<String>,
+    /// Homepage URL.
     pub homepage: Option<String>,
+    /// License identifier.
     pub license: Option<String>,
+    /// Default command-line arguments.
     pub command_line_args: Option<String>,
+    /// List of module capabilities.
     pub capabilities: Option<Vec<String>>,
+    /// Minimum compatible Redis version.
     pub min_redis_version: Option<String>,
+    /// Compatible Redis version range.
     pub compatible_redis_version: Option<String>,
+    /// Display name shown in the UI.
     pub display_name: Option<String>,
+    /// Whether the module is bundled with Redis Enterprise.
     pub is_bundled: Option<bool>,
 
     // Additional fields from API audit
@@ -82,6 +96,7 @@ pub struct ModuleHandler {
 pub type ModulesHandler = ModuleHandler;
 
 impl ModuleHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         ModuleHandler { client }
     }

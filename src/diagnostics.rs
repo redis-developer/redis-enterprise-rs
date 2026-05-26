@@ -79,6 +79,7 @@ pub struct DiagnosticsHandler {
 }
 
 impl DiagnosticsHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         DiagnosticsHandler { client }
     }

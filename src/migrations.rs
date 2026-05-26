@@ -85,6 +85,7 @@ pub struct MigrationsHandler {
 }
 
 impl MigrationsHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         MigrationsHandler { client }
     }

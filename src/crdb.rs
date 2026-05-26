@@ -137,6 +137,7 @@ pub struct CrdbHandler {
 }
 
 impl CrdbHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         CrdbHandler { client }
     }

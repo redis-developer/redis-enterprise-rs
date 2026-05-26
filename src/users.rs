@@ -18,6 +18,7 @@ use typed_builder::TypedBuilder;
 /// User information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
+    /// Unique identifier (read-only).
     pub uid: u32,
     /// User's email address (used as login identifier) - was incorrectly named 'username'
     pub email: String,
@@ -151,9 +152,13 @@ pub struct UpdateUserRequest {
 /// Role information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Role {
+    /// Unique identifier (read-only).
     pub uid: u32,
+    /// Name.
     pub name: String,
+    /// Management permission level (e.g. `"admin"`, `"db_member"`).
     pub management: Option<String>,
+    /// Data access permission level.
     pub data_access: Option<String>,
 }
 
@@ -166,6 +171,7 @@ pub struct UserHandler {
 pub type UsersHandler = UserHandler;
 
 impl UserHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         UserHandler { client }
     }
@@ -252,40 +258,57 @@ impl UserHandler {
     }
 }
 
+/// Request body for `POST /v1/users/authorize` (user login).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthRequest {
+    /// Email address (used as login identifier).
     pub email: String,
+    /// Password.
     pub password: String,
 }
 
+/// Response from `POST /v1/users/authorize` containing the issued JWT.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthResponse {
+    /// Encoded JWT.
     pub jwt: String,
+    /// Expiration timestamp (ISO-8601).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<String>,
 }
 
+/// Request body for `POST /v1/users/password` (set a user's password).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PasswordSet {
+    /// Email address (used as login identifier).
     pub email: String,
+    /// Password.
     pub password: String,
 }
 
+/// Request body for `PUT /v1/users/password` (update a user's password).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PasswordUpdate {
+    /// Current password (required for self-service password change).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub current_password: Option<String>,
+    /// New password.
     pub new_password: String,
 }
 
+/// Request body for `POST /v1/users/refresh_jwt`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JwtRefreshRequest {
+    /// Encoded JWT.
     pub jwt: String,
 }
 
+/// Response from `POST /v1/users/refresh_jwt` containing the new JWT.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JwtRefreshResponse {
+    /// Encoded JWT.
     pub jwt: String,
+    /// Expiration timestamp (ISO-8601).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<String>,
 }
@@ -296,6 +319,7 @@ pub struct RoleHandler {
 }
 
 impl RoleHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         RoleHandler { client }
     }

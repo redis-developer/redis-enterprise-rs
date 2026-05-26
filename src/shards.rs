@@ -13,25 +13,37 @@ use serde_json::Value;
 /// Response for a single metric query
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MetricResponse {
+    /// Interval label for the metric series.
     pub interval: String,
+    /// List of Unix-epoch timestamps for the data points.
     pub timestamps: Vec<i64>,
+    /// List of metric values, aligned to `timestamps`.
     pub values: Vec<Value>,
 }
 
 /// Shard information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Shard {
+    /// Unique identifier (read-only).
     pub uid: String,
+    /// Database (BDB) UID this entity belongs to.
     pub bdb_uid: u32,
+    /// Node UID this entity belongs to.
     pub node_uid: String,
+    /// Role.
     pub role: String,
+    /// Current status.
     pub status: String,
+    /// Hash slot range owned by this shard.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub slots: Option<String>,
+    /// Used memory in bytes.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub used_memory: Option<u64>,
+    /// Percent progress (0-100) of in-flight backup.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub backup_progress: Option<f64>,
+    /// Percent progress (0-100) of in-flight import.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub import_progress: Option<f64>,
     /// All nodes that this shard is associated with
@@ -49,14 +61,20 @@ pub struct Shard {
 /// Shard stats information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShardStats {
+    /// Unique identifier (read-only).
     pub uid: String,
+    /// Per-interval metric series for the resource.
     pub intervals: Vec<StatsInterval>,
 }
 
+/// One interval of statistics, with aligned timestamps and values.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatsInterval {
+    /// Interval label for the metric series.
     pub interval: String,
+    /// List of Unix-epoch timestamps for the data points.
     pub timestamps: Vec<i64>,
+    /// List of metric values, aligned to `timestamps`.
     pub values: Vec<Value>,
 }
 
@@ -66,6 +84,7 @@ pub struct ShardHandler {
 }
 
 impl ShardHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         ShardHandler { client }
     }
@@ -135,15 +154,20 @@ impl ShardHandler {
     }
 }
 
+/// Request body for shard action endpoints (failover, migrate).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShardActionRequest {
+    /// List of shard UIDs targeted by this action.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub shard_uids: Option<Vec<String>>,
 }
 
+/// Response from a shard action endpoint with the tracking UID.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Action {
+    /// Action UID for tracking async operations (read-only).
     pub action_uid: String,
+    /// Current status.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
 }

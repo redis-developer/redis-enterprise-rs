@@ -12,14 +12,20 @@ use typed_builder::TypedBuilder;
 /// Role information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RoleInfo {
+    /// Unique identifier (read-only).
     pub uid: u32,
+    /// Name.
     pub name: String,
+    /// Management permission level (e.g. `"admin"`, `"db_member"`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub management: Option<String>,
+    /// Data access permission level.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data_access: Option<String>,
+    /// Per-database role permissions. See [`BdbRole`].
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bdb_roles: Option<Vec<BdbRole>>,
+    /// List of cluster-wide role names.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cluster_roles: Option<Vec<String>>,
 }
@@ -27,9 +33,12 @@ pub struct RoleInfo {
 /// Database-specific role permissions
 #[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct BdbRole {
+    /// Database (BDB) UID this entity belongs to.
     pub bdb_uid: u32,
+    /// Role.
     #[builder(setter(into))]
     pub role: String,
+    /// UID of the Redis ACL associated with this role binding.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub redis_acl_uid: Option<u32>,
@@ -55,17 +64,22 @@ pub struct BdbRole {
 /// ```
 #[derive(Debug, Clone, Serialize, Deserialize, TypedBuilder)]
 pub struct CreateRoleRequest {
+    /// Name.
     #[builder(setter(into))]
     pub name: String,
+    /// Management permission level (e.g. `"admin"`, `"db_member"`).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub management: Option<String>,
+    /// Data access permission level.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub data_access: Option<String>,
+    /// Per-database role permissions. See [`BdbRole`].
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub bdb_roles: Option<Vec<BdbRole>>,
+    /// List of cluster-wide role names.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub cluster_roles: Option<Vec<String>>,

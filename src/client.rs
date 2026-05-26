@@ -43,6 +43,7 @@ use tracing::{debug, trace};
 const DEFAULT_USER_AGENT: &str = concat!("redis-enterprise/", env!("CARGO_PKG_VERSION"));
 
 // Legacy alias for backwards compatibility during migration
+/// Legacy alias for [`EnterpriseClientBuilder`]; retained for backwards compatibility.
 pub type RestConfig = EnterpriseClientBuilder;
 
 /// Builder for EnterpriseClient
@@ -247,6 +248,7 @@ pub struct EnterpriseClient {
 }
 
 // Alias for backwards compatibility
+/// Alias for [`EnterpriseClient`]; retained for backwards compatibility.
 pub type RestClient = EnterpriseClient;
 
 impl EnterpriseClient {
