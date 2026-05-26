@@ -500,6 +500,23 @@ impl ClusterHandler {
         self.client.get("/v1/cluster/check").await
     }
 
+    /// Change the cluster's password hashing algorithm.
+    ///
+    /// `PATCH /v1/cluster/change_password_hashing_algorithm`. The request
+    /// body shape is intentionally `serde_json::Value` because the
+    /// documented payload is just a single `algorithm` field whose set of
+    /// accepted values is version-dependent and best left untyped. Send
+    /// something like `json!({"algorithm": "SHA-512"})`.
+    ///
+    /// Verified live against Redis Enterprise Software 8.0.10-81: an
+    /// empty body returns `400 empty_request`, confirming the route is
+    /// served by the cluster.
+    pub async fn change_password_hashing_algorithm(&self, body: Value) -> Result<Value> {
+        self.client
+            .patch_raw("/v1/cluster/change_password_hashing_algorithm", body)
+            .await
+    }
+
     /// Get cluster stats (CLUSTER.STATS)
     pub async fn stats(&self) -> Result<Value> {
         self.client.get("/v1/cluster/stats").await
