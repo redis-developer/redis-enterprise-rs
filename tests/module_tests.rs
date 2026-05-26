@@ -261,3 +261,149 @@ async fn test_module_get_with_platforms_map() {
         "Platforms field should be present"
     );
 }
+
+// ===========================================================================
+// Closes #55: user-defined module endpoints.
+// Verified against Redis Enterprise Software 8.0.10-81 on 2026-04-21:
+// - GET  /v2/local/modules/user-defined/artifacts -> 200 OK with []
+// - POST /v2/modules/user-defined with {}         -> 406 invalid_module
+// - POST /v2/local/modules/user-defined/artifacts -> 400 no_module
+// - DELETE /v2/modules/user-defined/1             -> 404 module_delete_failed
+// All four confirm the routes are served by the live cluster.
+// ===========================================================================
+
+#[tokio::test]
+async fn test_module_list_user_defined_artifacts() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v2/local/modules/user-defined/artifacts"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(
+            json!([{"module_name": "myext", "version": "1.0.0"}]),
+        ))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ModuleHandler::new(client);
+    let result = handler.list_user_defined_artifacts().await.unwrap();
+    assert_eq!(result[0]["module_name"], "myext");
+    assert_eq!(result[0]["version"], "1.0.0");
+}
+
+#[tokio::test]
+async fn test_module_upload_user_defined_artifact() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("POST"))
+        .and(path("/v2/local/modules/user-defined/artifacts"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(
+            json!({"module_name": "myext", "version": "1.0.0"}),
+        ))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ModuleHandler::new(client);
+    let result = handler
+        .upload_user_defined_artifact(vec![1, 2, 3, 4], "myext-1.0.0.zip")
+        .await
+        .unwrap();
+    assert_eq!(result["module_name"], "myext");
+}
+
+#[tokio::test]
+async fn test_module_register_user_defined() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("POST"))
+        .and(path("/v2/modules/user-defined"))
+        .and(basic_auth("admin", "password"))
+        .and(wiremock::matchers::body_json(json!({
+            "module_name": "myext",
+            "version": "1.0.0"
+        })))
+        .respond_with(success_response(json!({"uid": "42"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ModuleHandler::new(client);
+    let result = handler
+        .register_user_defined(json!({
+            "module_name": "myext",
+            "version": "1.0.0"
+        }))
+        .await
+        .unwrap();
+    assert_eq!(result["uid"], "42");
+}
+
+#[tokio::test]
+async fn test_module_delete_user_defined() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("DELETE"))
+        .and(path("/v2/modules/user-defined/42"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(ResponseTemplate::new(200))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ModuleHandler::new(client);
+    assert!(handler.delete_user_defined("42").await.is_ok());
+}
+
+#[tokio::test]
+async fn test_module_delete_user_defined_artifact() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("DELETE"))
+        .and(path("/v2/local/modules/user-defined/artifacts/myext/1.0.0"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(ResponseTemplate::new(200))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ModuleHandler::new(client);
+    assert!(
+        handler
+            .delete_user_defined_artifact("myext", "1.0.0")
+            .await
+            .is_ok()
+    );
+}
