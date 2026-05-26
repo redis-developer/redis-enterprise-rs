@@ -38,9 +38,6 @@ PUT /v1/bdb_groups/{}
 # ============================================================================
 # bdbs subresources — many real endpoints not in the inventory
 # (stats, endpoints, proxies, alert_settings, flush, reset_admin_pass).
-# `actions/backup` and `actions/restore` are not in the docs — flagged
-# under #65 for triage; comment in src/bdb.rs acknowledges they may be
-# fictional.
 # ============================================================================
 GET /v1/bdbs/metrics/{}
 GET /v1/bdbs/{}/alert_settings
@@ -49,9 +46,6 @@ GET /v1/bdbs/{}/endpoints
 GET /v1/bdbs/{}/proxies
 GET /v1/bdbs/{}/stats
 GET /v1/bdbs/{}/stats/last
-POST /v1/bdbs/{}/actions/backup
-POST /v1/bdbs/{}/actions/restore
-POST /v1/bdbs/{}/actions/upgrade
 PUT /v1/bdbs/{}/alert_settings
 PUT /v1/bdbs/{}/flush
 PUT /v1/bdbs/{}/reset_admin_pass

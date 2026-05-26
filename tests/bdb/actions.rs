@@ -43,58 +43,6 @@ async fn test_database_import() {
 }
 
 #[tokio::test]
-async fn test_database_backup() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("POST"))
-        .and(path("/v1/bdbs/1/actions/backup"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!({"backup_id": "backup-789"})))
-        .mount(&mock_server)
-        .await;
-
-    let client = test_client(&mock_server);
-    let result = client.databases().backup(1).await;
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_database_restore() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("POST"))
-        .and(path("/v1/bdbs/1/actions/restore"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(success_response(
-            json!({"action_uid": "act-restore-1", "status": "restored"}),
-        ))
-        .mount(&mock_server)
-        .await;
-
-    let client = test_client(&mock_server);
-    let result = client.databases().restore(1, Some("backup-789")).await;
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_database_upgrade_module() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("POST"))
-        .and(path("/v1/bdbs/1/actions/upgrade"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(success_response(
-            json!({"action_uid": "act-up-1", "status": "upgraded"}),
-        ))
-        .mount(&mock_server)
-        .await;
-
-    let client = test_client(&mock_server);
-    let result = client.databases().upgrade(1, "search", "2.0").await;
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
 async fn test_database_optimize_shards_placement_status() {
     let mock_server = MockServer::start().await;
 

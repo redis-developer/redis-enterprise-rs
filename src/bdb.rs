@@ -33,10 +33,6 @@
 //! # async fn example(client: EnterpriseClient) -> Result<(), Box<dyn std::error::Error>> {
 //! let db_id = 1;
 //!
-//! // Backup database
-//! let backup = client.databases().backup(db_id).await?;
-//! println!("Backup started: {:?}", backup.action_uid);
-//!
 //! // Export to remote location
 //! let export = client.databases().export(db_id, "ftp://backup.site/db.rdb").await?;
 //! println!("Export initiated: {:?}", export.action_uid);
@@ -93,16 +89,6 @@ pub struct DatabaseActionResponse {
     pub action_uid: String,
     /// Description of the action
     pub description: Option<String>,
-}
-
-/// Response from backup operation
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BackupResponse {
-    /// The action UID for tracking the backup operation
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub action_uid: Option<String>,
-    /// Backup UID if available
-    pub backup_uid: Option<String>,
 }
 
 /// Response from import operation
@@ -793,32 +779,6 @@ impl DatabaseHandler {
         serde_json::from_value(response).map_err(Into::into)
     }
 
-    /// Backup database (BDB.BACKUP)
-    pub async fn backup(&self, uid: u32) -> Result<BackupResponse> {
-        self.client
-            .post(
-                &format!("/v1/bdbs/{}/actions/backup", uid),
-                &serde_json::json!({}),
-            )
-            .await
-    }
-
-    /// Restore database from backup (BDB.RESTORE)
-    pub async fn restore(
-        &self,
-        uid: u32,
-        backup_uid: Option<&str>,
-    ) -> Result<DatabaseActionResponse> {
-        let body = if let Some(backup_id) = backup_uid {
-            serde_json::json!({ "backup_uid": backup_id })
-        } else {
-            serde_json::json!({})
-        };
-        self.client
-            .post(&format!("/v1/bdbs/{}/actions/restore", uid), &body)
-            .await
-    }
-
     /// Get database shards (BDB.SHARDS)
     pub async fn shards(&self, uid: u32) -> Result<Value> {
         self.client.get(&format!("/v1/bdbs/{}/shards", uid)).await
@@ -1072,22 +1032,6 @@ impl DatabaseHandler {
                 "/v1/bdbs/replica_sources/alerts/{}/{}/{}",
                 uid, source_id, alert
             ))
-            .await
-    }
-
-    /// Upgrade database with new module version (BDB.UPGRADE)
-    pub async fn upgrade(
-        &self,
-        uid: u32,
-        module_name: &str,
-        new_version: &str,
-    ) -> Result<DatabaseActionResponse> {
-        let body = serde_json::json!({
-            "module_name": module_name,
-            "new_version": new_version
-        });
-        self.client
-            .post(&format!("/v1/bdbs/{}/actions/upgrade", uid), &body)
             .await
     }
 
