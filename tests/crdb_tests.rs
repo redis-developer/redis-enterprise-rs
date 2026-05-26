@@ -582,3 +582,136 @@ async fn test_crdb_tasks_nonexistent() {
 
     assert!(result.is_err());
 }
+
+// ===========================================================================
+// Closes #54: flush / health_report / purge / updates.
+// Verified against Redis Enterprise Software 8.0.10-81; an invalid GUID
+// returns 400 schema-validation on each route rather than route-level 404.
+// ===========================================================================
+
+#[tokio::test]
+async fn test_crdb_flush() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/crdbs/test-guid/flush"))
+        .and(basic_auth("admin", "password"))
+        .and(body_json(json!({})))
+        .respond_with(success_response(json!({"task_id": "flush-123"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = CrdbHandler::new(client);
+    let result = handler.flush("test-guid", json!({})).await.unwrap();
+    assert_eq!(result["task_id"], "flush-123");
+}
+
+#[tokio::test]
+async fn test_crdb_health_report() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/crdbs/test-guid/health_report"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(
+            json!([{"instance_id": 1, "status": "active"}]),
+        ))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = CrdbHandler::new(client);
+    let result = handler.health_report("test-guid").await.unwrap();
+    assert_eq!(result[0]["instance_id"], 1);
+    assert_eq!(result[0]["status"], "active");
+}
+
+#[tokio::test]
+async fn test_crdb_purge() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/crdbs/test-guid/purge"))
+        .and(basic_auth("admin", "password"))
+        .and(body_json(json!({"instance_id": 2})))
+        .respond_with(success_response(json!({"task_id": "purge-456"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = CrdbHandler::new(client);
+    let result = handler
+        .purge("test-guid", json!({"instance_id": 2}))
+        .await
+        .unwrap();
+    assert_eq!(result["task_id"], "purge-456");
+}
+
+#[tokio::test]
+async fn test_crdb_updates() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("POST"))
+        .and(path("/v1/crdbs/test-guid/updates"))
+        .and(basic_auth("admin", "password"))
+        .and(body_json(json!({"memory_size": 2_000_000_000_u64})))
+        .respond_with(success_response(json!({"task_id": "update-789"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = CrdbHandler::new(client);
+    let result = handler
+        .updates("test-guid", json!({"memory_size": 2_000_000_000_u64}))
+        .await
+        .unwrap();
+    assert_eq!(result["task_id"], "update-789");
+}
+
+#[tokio::test]
+async fn test_crdb_flush_nonexistent() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PUT"))
+        .and(path("/v1/crdbs/nonexistent-guid/flush"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(error_response(404, "CRDB not found"))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = CrdbHandler::new(client);
+    let result = handler.flush("nonexistent-guid", json!({})).await;
+    assert!(result.is_err());
+}

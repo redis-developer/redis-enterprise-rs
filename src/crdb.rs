@@ -185,4 +185,49 @@ impl CrdbHandler {
     pub async fn tasks(&self, guid: &str) -> Result<Value> {
         self.client.get(&format!("/v1/crdbs/{}/tasks", guid)).await
     }
+
+    /// Flush all data from an Active-Active database.
+    ///
+    /// `PUT /v1/crdbs/{crdb_guid}/flush`. The request body is intentionally
+    /// `serde_json::Value` because the documented payload is a small set of
+    /// optional flags (e.g. `{}` for the default flush) whose accepted shape
+    /// is version-specific; pass `json!({})` for the common case.
+    pub async fn flush(&self, guid: &str, body: Value) -> Result<Value> {
+        self.client
+            .put_raw(&format!("/v1/crdbs/{}/flush", guid), body)
+            .await
+    }
+
+    /// Retrieve the health report for an Active-Active database.
+    ///
+    /// `GET /v1/crdbs/{crdb_guid}/health_report`. The response is returned
+    /// as `serde_json::Value` because the report is a richly structured
+    /// document whose shape evolves across cluster versions.
+    pub async fn health_report(&self, guid: &str) -> Result<Value> {
+        self.client
+            .get(&format!("/v1/crdbs/{}/health_report", guid))
+            .await
+    }
+
+    /// Purge data from an instance that was forcibly removed from an
+    /// Active-Active database.
+    ///
+    /// `PUT /v1/crdbs/{crdb_guid}/purge`. The body identifies the
+    /// instance(s) to purge; pass a `Value` matching the documented
+    /// shape for the cluster version under test.
+    pub async fn purge(&self, guid: &str, body: Value) -> Result<Value> {
+        self.client
+            .put_raw(&format!("/v1/crdbs/{}/purge", guid), body)
+            .await
+    }
+
+    /// Submit a configuration update against an Active-Active database.
+    ///
+    /// `POST /v1/crdbs/{crdb_guid}/updates`. The body shape is version-
+    /// specific; pass a `Value` with the desired field changes.
+    pub async fn updates(&self, guid: &str, body: Value) -> Result<Value> {
+        self.client
+            .post_raw(&format!("/v1/crdbs/{}/updates", guid), body)
+            .await
+    }
 }
