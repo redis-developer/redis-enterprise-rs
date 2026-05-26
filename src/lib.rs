@@ -319,6 +319,11 @@
 //! - **Modules**: Redis module management
 //! - **Maintenance**: Upgrades, migrations, debug info
 
+// Every public item must carry a docstring. Closed the 490 existing
+// gaps under #67 (#85); this lint keeps the bar from regressing.
+#![deny(missing_docs)]
+#![deny(rustdoc::broken_intra_doc_links)]
+
 #[macro_use]
 mod macros;
 
