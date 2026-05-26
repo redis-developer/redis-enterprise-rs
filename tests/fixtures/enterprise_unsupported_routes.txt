@@ -41,11 +41,6 @@ POST /v2/modules/user-defined
 DELETE /v2/modules/user-defined/{}
 
 # ============================================================================
-# Tracked under #57 — cluster password-hashing algorithm
-# ============================================================================
-PATCH /v1/cluster/change_password_hashing_algorithm
-
-# ============================================================================
 # Per-DB module ops + password rotation — referenced in #65 triage
 # ============================================================================
 POST /v1/bdbs/{}/modules/config

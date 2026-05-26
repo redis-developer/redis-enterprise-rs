@@ -306,3 +306,35 @@ async fn test_cluster_recover() {
     let result = handler.recover().await;
     assert!(result.is_ok());
 }
+
+#[tokio::test]
+async fn test_cluster_change_password_hashing_algorithm() {
+    // Closes #57: PATCH /v1/cluster/change_password_hashing_algorithm.
+    // Verified live against Enterprise 8.0.10-81; an empty body returns
+    // 400 empty_request from the cluster.
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("PATCH"))
+        .and(path("/v1/cluster/change_password_hashing_algorithm"))
+        .and(basic_auth("admin", "password"))
+        .and(wiremock::matchers::body_json(json!({
+            "algorithm": "SHA-512"
+        })))
+        .respond_with(success_response(json!({"algorithm": "SHA-512"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = ClusterHandler::new(client);
+    let result = handler
+        .change_password_hashing_algorithm(json!({"algorithm": "SHA-512"}))
+        .await;
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap()["algorithm"], "SHA-512");
+}
