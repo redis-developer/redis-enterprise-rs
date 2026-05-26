@@ -408,7 +408,7 @@ pub use crdb::{Crdb, CrdbHandler, CrdbInstance, CreateCrdbInstance, CreateCrdbRe
 pub use stats::{StatsHandler, StatsInterval, StatsQuery, StatsResponse};
 
 // Alerts
-pub use alerts::{Alert, AlertHandler, AlertSettings};
+pub use alerts::{Alert, AlertHandler, AlertSettings, ClusterAlertState};
 
 // Redis ACLs
 pub use redis_acls::{CreateRedisAclRequest, RedisAcl, RedisAclHandler};

@@ -50,17 +50,6 @@ fn test_database_alert() -> serde_json::Value {
     })
 }
 
-fn test_cluster_alert() -> serde_json::Value {
-    json!({
-        "uid": "alert-789",
-        "name": "cluster_memory_usage",
-        "severity": "low",
-        "state": "resolved",
-        "entity_type": "cluster",
-        "description": "Cluster memory usage warning"
-    })
-}
-
 #[tokio::test]
 async fn test_alerts_list() {
     let mock_server = MockServer::start().await;
@@ -273,12 +262,27 @@ async fn test_alerts_list_by_node_nonexistent() {
 
 #[tokio::test]
 async fn test_alerts_list_cluster_alerts() {
+    // Regression guard for #62: cluster alerts are returned as a map
+    // keyed by alert name, not as a bare array of Alert objects.
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
         .and(path("/v1/cluster/alerts"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([test_cluster_alert()])))
+        .respond_with(success_response(json!({
+            "cluster_multiple_nodes_down": {
+                "enabled": true,
+                "state": false,
+                "severity": "WARNING",
+                "change_time": "2026-05-20T00:00:00Z",
+                "change_value": { "dead_nodes": [], "state": false }
+            },
+            "cluster_ram_overcommit": {
+                "enabled": false,
+                "state": false,
+                "severity": "INFO"
+            }
+        })))
         .mount(&mock_server)
         .await;
 
@@ -290,13 +294,17 @@ async fn test_alerts_list_cluster_alerts() {
         .unwrap();
 
     let handler = AlertHandler::new(client);
-    let result = handler.list_cluster_alerts().await;
+    let alerts = handler.list_cluster_alerts().await.unwrap();
 
-    assert!(result.is_ok());
-    let alerts = result.unwrap();
-    assert_eq!(alerts.len(), 1);
-    assert_eq!(alerts[0].uid, "alert-789");
-    assert_eq!(alerts[0].entity_type.as_ref().unwrap(), "cluster");
+    assert_eq!(alerts.len(), 2);
+    let multi = alerts.get("cluster_multiple_nodes_down").unwrap();
+    assert!(multi.enabled);
+    assert!(!multi.state);
+    assert_eq!(multi.severity, "WARNING");
+
+    let overcommit = alerts.get("cluster_ram_overcommit").unwrap();
+    assert!(!overcommit.enabled);
+    assert!(overcommit.change_time.is_none());
 }
 
 #[tokio::test]
@@ -515,4 +523,49 @@ async fn test_alerts_get_settings_nonexistent() {
     let result = handler.get_settings("nonexistent_alert").await;
 
     assert!(result.is_err());
+}
+
+#[tokio::test]
+async fn test_cluster_alerts_decodes_recorded_fixture() {
+    // Regression guard for #62: the recorded fixture has the real
+    // wire shape — a top-level map keyed by alert name where each
+    // entry exposes enabled/state/severity/change_time/change_value.
+    let mock_server = MockServer::start().await;
+
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/cluster_alerts.json"))
+            .expect("fixture should be valid JSON");
+
+    Mock::given(method("GET"))
+        .and(path("/v1/cluster/alerts"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(fixture))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let handler = AlertHandler::new(client);
+    let alerts = handler
+        .list_cluster_alerts()
+        .await
+        .expect("fixture should decode");
+
+    // The recorded fixture has 12 cluster alerts.
+    assert_eq!(alerts.len(), 12);
+
+    let nodes_down = alerts
+        .get("cluster_even_node_count")
+        .expect("fixture has cluster_even_node_count");
+    assert_eq!(nodes_down.severity, "WARNING");
+    assert!(
+        nodes_down.state,
+        "cluster_even_node_count is firing in the fixture"
+    );
+    assert!(!nodes_down.enabled);
 }
