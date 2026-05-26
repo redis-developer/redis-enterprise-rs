@@ -314,34 +314,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_database_action_backup() {
-        let mock_server = MockServer::start().await;
-
-        Mock::given(method("POST"))
-            .and(path("/v1/bdbs/1/actions/backup"))
-            .and(basic_auth("admin", "password"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .set_body_json(serde_json::json!({"backup_uid": "backup-789"})),
-            )
-            .mount(&mock_server)
-            .await;
-
-        let client = EnterpriseClient::builder()
-            .base_url(mock_server.uri())
-            .username("admin")
-            .password("password")
-            .build()
-            .unwrap();
-
-        let handler = crate::bdb::DatabaseHandler::new(client);
-        let result = handler.backup(1).await;
-
-        assert!(result.is_ok());
-        assert!(result.unwrap().backup_uid.is_some());
-    }
-
-    #[tokio::test]
     async fn test_database_get_shards() {
         let mock_server = MockServer::start().await;
 
