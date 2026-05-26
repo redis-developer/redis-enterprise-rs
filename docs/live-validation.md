@@ -60,6 +60,38 @@ The init profile configures:
 If you prefer, you can also initialize through the UI on the configured admin
 UI port, such as `https://localhost:8443`.
 
+## Licensing for local validation
+
+Redis Enterprise runs in trial mode by default when no license is uploaded. The
+trial allows enough shards and features for SDK validation against every
+endpoint covered by `live_enterprise_smoke.rs`. There is no need to apply for a
+trial key to bring up the local validation cluster.
+
+If you do need to test license-gated behavior, the Admin UI accepts a license
+file via Cluster -> License. Treat that license file the same way as any other
+credential — never commit it to the repository.
+
+## TLS
+
+The local Redis Enterprise cluster ships with a self-signed certificate. You
+have three options for talking to it from this SDK:
+
+1. **Insecure mode (recommended for the local runbook)** — set
+   `REDIS_ENTERPRISE_INSECURE=true`. The client skips certificate validation.
+   Use only against trusted local development clusters.
+2. **Trust the self-signed cert** — set `REDIS_ENTERPRISE_CA_CERT` to a PEM
+   file containing the cluster's self-signed CA. Recommended whenever you need
+   to validate the full TLS path (for example when reproducing a TLS-related
+   bug). The cluster exposes its CA through the Admin UI under Cluster ->
+   Security, or directly via `docker compose exec redis-enterprise
+   /opt/redislabs/bin/openssl s_client -showcerts -connect 127.0.0.1:9443`.
+3. **Real TLS** — for cloud or shared clusters, configure the cluster with a
+   certificate signed by a CA your client already trusts and leave both
+   `REDIS_ENTERPRISE_INSECURE` and `REDIS_ENTERPRISE_CA_CERT` unset.
+
+Production deployments should never use option 1. Bias toward option 2 in
+shared dev environments so that a misconfigured DNS name fails loudly.
+
 ## Smoke Checks
 
 Export the client environment variables:
@@ -84,6 +116,37 @@ Run the opt-in live smoke test:
 
 ```bash
 cargo test --test live_enterprise_smoke -- --ignored
+```
+
+## Teardown and cleanup
+
+The validation cluster is fully disposable. Tear it down with:
+
+```bash
+docker compose down -v
+```
+
+`-v` removes the named volume that holds the cluster state (license,
+configuration, databases). Re-running `docker compose up -d` after a `-v`
+teardown starts from a fresh, uninitialized cluster, so the `init` profile
+must run again.
+
+If you want to keep cluster state between runs (faster iteration, but cluster
+config drifts as you make changes), drop the `-v`:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+To rebuild the entire local environment from scratch (for example after a
+Redis Enterprise image bump), remove the image as well:
+
+```bash
+docker compose down -v --rmi local
+docker image rm "${REDIS_ENTERPRISE_IMAGE:-redislabs/redis:8.0.10-81}"
+docker compose pull
+docker compose up -d
 ```
 
 ## Current Validation Snapshot

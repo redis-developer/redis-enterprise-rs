@@ -181,6 +181,7 @@ This library provides 100% coverage of the Redis Enterprise REST API, including:
 
 - [API Documentation](https://docs.rs/redis-enterprise)
 - [Redis Enterprise REST API Reference](https://docs.redis.com/latest/rs/references/rest-api/)
+- [Local live-validation runbook](docs/live-validation.md) — bring up a disposable Redis Enterprise cluster via Docker Compose for SDK validation against the real API.
 
 ## License
 
