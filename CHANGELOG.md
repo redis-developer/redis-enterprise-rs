@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.7...v0.9.0) - 2026-05-26
+
+### Added
+
+- *(modules)* add user-defined module management endpoints ([#90](https://github.com/redis-developer/redis-enterprise-rs/pull/90))
+- *(cluster)* add SSO and SAML metadata endpoints ([#89](https://github.com/redis-developer/redis-enterprise-rs/pull/89))
+- *(crdb)* add flush, health_report, purge, and updates endpoints ([#88](https://github.com/redis-developer/redis-enterprise-rs/pull/88))
+- *(cluster)* add change_password_hashing_algorithm endpoint ([#87](https://github.com/redis-developer/redis-enterprise-rs/pull/87))
+- *(cluster, nodes, users)* add check() endpoints and RBAC-friendly user role/role_uids ([#72](https://github.com/redis-developer/redis-enterprise-rs/pull/72))
+
+### Fixed
+
+- *(alerts)* list_cluster_alerts returns HashMap<String, ClusterAlertState> ([#83](https://github.com/redis-developer/redis-enterprise-rs/pull/83))
+- *(bootstrap)* reshape status response to match the documented spec wrapper ([#82](https://github.com/redis-developer/redis-enterprise-rs/pull/82))
+- *(types)* unwrap {crdbs} / {bdb_groups} wrappers on list endpoints ([#81](https://github.com/redis-developer/redis-enterprise-rs/pull/81))
+- *(proxies)* make optional fields Optional and widen maxmemory_clients to u64 ([#80](https://github.com/redis-developer/redis-enterprise-rs/pull/80))
+- *(actions)* correctly decode the {actions, state-machines} wrapper; string-typed progress/node_uid ([#79](https://github.com/redis-developer/redis-enterprise-rs/pull/79))
+- *(builder)* reject missing credentials ([#44](https://github.com/redis-developer/redis-enterprise-rs/pull/44))
+- *(ocsp)* test() uses POST (the documented verb), not GET ([#78](https://github.com/redis-developer/redis-enterprise-rs/pull/78))
+- *(nodes)* execute_action POSTs to /v1/nodes/{uid}/actions/{action}, the documented path ([#77](https://github.com/redis-developer/redis-enterprise-rs/pull/77))
+- *(bdb)* flush() and reset_admin_pass() use the documented PUT path-segment endpoints ([#76](https://github.com/redis-developer/redis-enterprise-rs/pull/76))
+- *(crdb)* UPDATE uses PATCH verb (the documented one), not PUT ([#75](https://github.com/redis-developer/redis-enterprise-rs/pull/75))
+- *(stats, crdb_tasks)* handle real-API response shapes and use the documented action endpoints ([#71](https://github.com/redis-developer/redis-enterprise-rs/pull/71))
+
+### Other
+
+- README + examples refresh for v0.9.0 ([#96](https://github.com/redis-developer/redis-enterprise-rs/pull/96))
+- remove fictional services / jsonschema / usage_report routes ([#95](https://github.com/redis-developer/redis-enterprise-rs/pull/95))
+- *(bdb)* remove fictional actions/{backup,restore,upgrade} ([#94](https://github.com/redis-developer/redis-enterprise-rs/pull/94))
+- *(alerts)* remove fictional /v1/alerts* top-level routes ([#93](https://github.com/redis-developer/redis-enterprise-rs/pull/93))
+- *(audit)* per-route triage for the 122 non-spec SDK routes ([#92](https://github.com/redis-developer/redis-enterprise-rs/pull/92))
+- *(live-validation)* add TLS, licensing, and teardown sections; link from README ([#91](https://github.com/redis-developer/redis-enterprise-rs/pull/91))
+- enforce #![deny(missing_docs)] and rustdoc::broken_intra_doc_links ([#86](https://github.com/redis-developer/redis-enterprise-rs/pull/86))
+- *(missing-docs)* document fields and enum variants across the crate ([#85](https://github.com/redis-developer/redis-enterprise-rs/pull/85))
+- *(coverage)* add route-coverage test against the docs API inventory ([#84](https://github.com/redis-developer/redis-enterprise-rs/pull/84))
+- update dependency versions ([#46](https://github.com/redis-developer/redis-enterprise-rs/pull/46))
+- *(env)* document CA cert variable ([#45](https://github.com/redis-developer/redis-enterprise-rs/pull/45))
+- *(live)* add opt-in live integration smoke tests against a real Redis Enterprise cluster ([#74](https://github.com/redis-developer/redis-enterprise-rs/pull/74))
+- *(infra)* add API audit docs + scripts and modernize docker-compose ([#70](https://github.com/redis-developer/redis-enterprise-rs/pull/70))
+
 ## [0.8.7](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.8.6...v0.8.7) - 2026-03-19
 
 ### Fixed
