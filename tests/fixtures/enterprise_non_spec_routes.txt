@@ -144,19 +144,6 @@ POST /v1/job_scheduler/{}/trigger
 PUT /v1/job_scheduler/{}
 
 # ============================================================================
-# jsonschema — handler exposes per-resource schemas (bdb / cluster /
-# crdb / node / user) plus a generic `/v1/jsonschema/{}` accessor and
-# a validate endpoint. Inventory only carries the top page.
-# ============================================================================
-GET /v1/jsonschema/{}
-GET /v1/jsonschema/bdb
-GET /v1/jsonschema/cluster
-GET /v1/jsonschema/crdb
-GET /v1/jsonschema/node
-GET /v1/jsonschema/user
-POST /v1/jsonschema/{}/validate
-
-# ============================================================================
 # license / migrations
 # ============================================================================
 GET /v1/license/usage
@@ -218,19 +205,6 @@ GET /v1/roles/{}/users
 GET /v1/roles/builtin
 
 # ============================================================================
-# services — handler exposes GET/PUT/restart/stop/start variants;
-# inventory only documents `POST /v1/services`. Mostly fictional or
-# operator-internal per #65 triage.
-# ============================================================================
-GET /v1/services
-GET /v1/services/{}
-GET /v1/services/{}/status
-POST /v1/services/{}/restart
-POST /v1/services/{}/start
-POST /v1/services/{}/stop
-PUT /v1/services/{}
-
-# ============================================================================
 # shards — stats subresources.
 # ============================================================================
 GET /v1/shards/{}/stats
@@ -243,15 +217,6 @@ DELETE /v1/suffix/{}
 POST /v1/suffix
 PUT /v1/suffix/{}
 
-# ============================================================================
-# usage_report
-# ============================================================================
-GET /v1/usage_report/config
-GET /v1/usage_report/latest
-GET /v1/usage_report/{}
-GET /v1/usage_report/{}/csv
-POST /v1/usage_report/generate
-PUT /v1/usage_report/config
 
 # ============================================================================
 # users — password mgmt + permissions; auth/refresh_jwt are in

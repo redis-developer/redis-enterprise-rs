@@ -1,14 +1,17 @@
-//! Usage reporting and telemetry
+//! Usage reporting
 //!
-//! ## Overview
-//! - Generate usage reports
-//! - Configure telemetry settings
-//! - Export usage data
+//! The Redis Enterprise REST API documents `GET /v1/usage_report` only.
+//! Earlier revisions of this module exposed `/latest`, `/generate`, `/config`,
+//! per-report `/{uid}` and `/{uid}/csv` endpoints at paths the docs never
+//! define; those have been removed.
+//!
+//! Note: the live cluster response is a streaming NDJSON document and the
+//! `Vec<UsageReport>` shape modeled by `list()` is a best-effort buffered
+//! decode. A streaming reshape is tracked as a follow-up to the #65 audit.
 
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 /// Usage report
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -86,25 +89,6 @@ pub struct UsageSummary {
     pub shard_count: u32,
 }
 
-/// Usage report configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UsageReportConfig {
-    /// Whether usage reporting is enabled
-    pub enabled: bool,
-    /// Email addresses to send usage reports to
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub email_recipients: Option<Vec<String>>,
-    /// Frequency of report generation (e.g., "daily", "weekly", "monthly")
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub frequency: Option<String>,
-    /// Whether to include database usage information in reports
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include_databases: Option<bool>,
-    /// Whether to include node usage information in reports
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include_nodes: Option<bool>,
-}
-
 /// Usage report handler
 pub struct UsageReportHandler {
     client: RestClient,
@@ -116,44 +100,13 @@ impl UsageReportHandler {
         UsageReportHandler { client }
     }
 
-    /// Get latest usage report
-    pub async fn latest(&self) -> Result<UsageReport> {
-        self.client.get("/v1/usage_report/latest").await
-    }
-
-    /// List all usage reports
+    /// List usage reports - GET /v1/usage_report.
+    ///
+    /// The live cluster returns a streaming NDJSON document; this method
+    /// buffers and decodes the whole payload, which is fine for short
+    /// reporting periods but should not be relied on for cluster-wide
+    /// scans. A streaming reshape is a #65 follow-up.
     pub async fn list(&self) -> Result<Vec<UsageReport>> {
         self.client.get("/v1/usage_report").await
-    }
-
-    /// Get specific usage report
-    pub async fn get(&self, report_id: &str) -> Result<UsageReport> {
-        self.client
-            .get(&format!("/v1/usage_report/{}", report_id))
-            .await
-    }
-
-    /// Generate new usage report
-    pub async fn generate(&self) -> Result<UsageReport> {
-        self.client
-            .post("/v1/usage_report/generate", &Value::Null)
-            .await
-    }
-
-    /// Get usage report configuration
-    pub async fn get_config(&self) -> Result<UsageReportConfig> {
-        self.client.get("/v1/usage_report/config").await
-    }
-
-    /// Update usage report configuration
-    pub async fn update_config(&self, config: UsageReportConfig) -> Result<UsageReportConfig> {
-        self.client.put("/v1/usage_report/config", &config).await
-    }
-
-    /// Download usage report as CSV
-    pub async fn download_csv(&self, report_id: &str) -> Result<String> {
-        self.client
-            .get_text(&format!("/v1/usage_report/{}/csv", report_id))
-            .await
     }
 }
