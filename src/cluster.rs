@@ -61,12 +61,19 @@ pub struct ClusterActionResponse {
 /// Node information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClusterNode {
+    /// Node ID.
     pub id: u32,
+    /// Node address (hostname or IP).
     pub address: String,
+    /// Node status.
     pub status: String,
+    /// Node role (e.g. `"master"`, `"slave"`).
     pub role: Option<String>,
+    /// Total memory available on the node in bytes.
     pub total_memory: Option<u64>,
+    /// Used memory on the node in bytes.
     pub used_memory: Option<u64>,
+    /// Number of CPU cores on the node.
     pub cpu_cores: Option<u32>,
 }
 
@@ -339,8 +346,11 @@ pub struct ClusterSettings {
 
     /// BigStore migration thresholds
     pub bigstore_migrate_node_threshold: Option<u32>,
+    /// Percent threshold for BigStore node migration.
     pub bigstore_migrate_node_threshold_p: Option<u32>,
+    /// Bytes threshold for BigStore node provisioning.
     pub bigstore_provision_node_threshold: Option<u32>,
+    /// Percent threshold for BigStore node provisioning.
     pub bigstore_provision_node_threshold_p: Option<u32>,
 
     /// Default BigStore version
@@ -360,10 +370,12 @@ pub struct ClusterSettings {
 
     /// Default proxy policies
     pub default_non_sharded_proxy_policy: Option<String>,
+    /// Default proxy policy for sharded databases.
     pub default_sharded_proxy_policy: Option<String>,
 
     /// OSS cluster defaults
     pub default_oss_cluster: Option<bool>,
+    /// Default OSS-style hash-slot sharding setting for new databases.
     pub default_oss_sharding: Option<bool>,
 
     /// Default Redis version for new databases
@@ -380,40 +392,64 @@ pub struct ClusterSettings {
 
     /// Additional cluster-wide settings
     pub email_alerts: Option<bool>,
+    /// Whether endpoint rebinding is enabled.
     pub endpoint_rebind_enabled: Option<bool>,
+    /// Failure detection sensitivity (e.g. `"low"`, `"high"`).
     pub failure_detection_sensitivity: Option<String>,
+    /// Gossip Envoy admin port.
     pub gossip_envoy_admin_port: Option<u32>,
+    /// Gossip Envoy listener port.
     pub gossip_envoy_port: Option<u32>,
+    /// Whether gossip uses Envoy proxy mode.
     pub gossip_envoy_proxy_mode: Option<bool>,
+    /// Whether hot-spare nodes are allowed.
     pub hot_spare: Option<bool>,
+    /// Maximum number of events retained per event type.
     pub max_saved_events_per_type: Option<u32>,
+    /// Maximum number of concurrent backups across the cluster.
     pub max_simultaneous_backups: Option<u32>,
+    /// Maximum number of shards upgraded in parallel.
     pub parallel_shards_upgrade: Option<u32>,
+    /// Whether removed nodes are persistently excluded.
     pub persistent_node_removal: Option<bool>,
+    /// Whether rack-aware shard placement is enabled.
     pub rack_aware: Option<bool>,
+    /// Bytes threshold for Redis node migration.
     pub redis_migrate_node_threshold: Option<String>,
+    /// Percent threshold for Redis node migration.
     pub redis_migrate_node_threshold_p: Option<u32>,
+    /// Bytes threshold for Redis node provisioning.
     pub redis_provision_node_threshold: Option<String>,
+    /// Percent threshold for Redis node provisioning.
     pub redis_provision_node_threshold_p: Option<u32>,
+    /// Cluster-wide Redis upgrade policy (e.g. `"major"`, `"latest"`).
     pub redis_upgrade_policy: Option<String>,
+    /// Whether RESP3 is enabled by default for new databases.
     pub resp3_default: Option<bool>,
+    /// Whether internal databases are shown in listings.
     pub show_internals: Option<bool>,
+    /// Whether master shards use slave I/O threads.
     pub slave_threads_when_master: Option<bool>,
+    /// Whether empty shards still produce backup snapshots.
     pub use_empty_shard_backups: Option<bool>,
 }
 
 /// Bootstrap request for creating a new cluster
 #[derive(Debug, Serialize, TypedBuilder)]
 pub struct BootstrapRequest {
+    /// Bootstrap action (e.g. `"create_cluster"`, `"join_cluster"`).
     #[builder(setter(into))]
     pub action: String,
+    /// Cluster identification used during bootstrap. See [`ClusterBootstrapInfo`].
     pub cluster: ClusterBootstrapInfo,
+    /// Credentials used during bootstrap. See [`BootstrapCredentials`].
     pub credentials: BootstrapCredentials,
 }
 
 /// Cluster information for bootstrap
 #[derive(Debug, Serialize, TypedBuilder)]
 pub struct ClusterBootstrapInfo {
+    /// Cluster name (fully qualified domain name).
     #[builder(setter(into))]
     pub name: String,
 }
@@ -421,8 +457,10 @@ pub struct ClusterBootstrapInfo {
 /// Credentials for bootstrap
 #[derive(Debug, Serialize, TypedBuilder)]
 pub struct BootstrapCredentials {
+    /// Admin username used during bootstrap.
     #[builder(setter(into))]
     pub username: String,
+    /// Admin password used during bootstrap.
     #[builder(setter(into))]
     pub password: String,
 }
@@ -433,6 +471,7 @@ pub struct ClusterHandler {
 }
 
 impl ClusterHandler {
+    /// New.
     pub fn new(client: RestClient) -> Self {
         ClusterHandler { client }
     }
@@ -652,21 +691,33 @@ impl ClusterHandler {
 /// Node information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NodeInfo {
+    /// Node's unique ID (read-only).
     pub uid: u32,
+    /// Node address (hostname or IP).
     pub address: String,
+    /// Node status.
     pub status: String,
+    /// Node role (e.g. `"master"`, `"slave"`).
     pub role: Option<String>,
+    /// List of shard UIDs hosted on this node (read-only).
     pub shards: Option<Vec<u32>>,
+    /// Total memory available on the node in bytes.
     pub total_memory: Option<u64>,
+    /// Used memory on the node in bytes.
     pub used_memory: Option<u64>,
 }
 
 /// License information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LicenseInfo {
+    /// License type (e.g. `"production"`, `"trial"`).
     pub license_type: Option<String>,
+    /// Whether the license has expired.
     pub expired: Option<bool>,
+    /// License expiration date (ISO-8601).
     pub expiration_date: Option<String>,
+    /// Maximum number of shards permitted by the license.
     pub shards_limit: Option<u32>,
+    /// List of licensed feature names.
     pub features: Option<Vec<String>>,
 }

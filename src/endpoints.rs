@@ -13,17 +13,26 @@ use serde_json::Value;
 /// Endpoint information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Endpoint {
+    /// Unique identifier (read-only).
     pub uid: String,
+    /// Database (BDB) UID this entity belongs to.
     pub bdb_uid: u32,
+    /// Node UID this entity belongs to.
     pub node_uid: u32,
+    /// Address.
     pub addr: String,
+    /// TCP port.
     pub port: u16,
+    /// DNS name.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dns_name: Option<String>,
+    /// Role.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub role: Option<String>,
+    /// Whether SSL/TLS is enabled.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ssl: Option<bool>,
+    /// Current status.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
     /// Description of the endpoint
@@ -37,14 +46,20 @@ pub struct Endpoint {
 /// Endpoint statistics
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EndpointStats {
+    /// Unique identifier (read-only).
     pub uid: String,
+    /// Per-interval metric series for the resource.
     pub intervals: Vec<StatsInterval>,
 }
 
+/// One interval of statistics, with aligned timestamps and values.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatsInterval {
+    /// Interval label for the metric series.
     pub interval: String,
+    /// List of Unix-epoch timestamps for the data points.
     pub timestamps: Vec<i64>,
+    /// List of metric values, aligned to `timestamps`.
     pub values: Vec<Value>,
 }
 
@@ -54,6 +69,7 @@ pub struct EndpointsHandler {
 }
 
 impl EndpointsHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         EndpointsHandler { client }
     }

@@ -52,6 +52,7 @@ pub struct LogsHandler {
 }
 
 impl LogsHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         LogsHandler { client }
     }

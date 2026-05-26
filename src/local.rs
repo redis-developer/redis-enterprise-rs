@@ -9,11 +9,13 @@ use crate::client::RestClient;
 use crate::error::Result;
 use serde_json::Value;
 
+/// Handler for local-node operations (`/v1/local/...`).
 pub struct LocalHandler {
     client: RestClient,
 }
 
 impl LocalHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         LocalHandler { client }
     }

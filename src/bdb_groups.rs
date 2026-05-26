@@ -42,6 +42,7 @@ pub struct BdbGroupsHandler {
 }
 
 impl BdbGroupsHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         BdbGroupsHandler { client }
     }
@@ -56,20 +57,24 @@ impl BdbGroupsHandler {
         Ok(resp.bdb_groups)
     }
 
+    /// Get a single database group by UID.
     pub async fn get(&self, uid: u32) -> Result<BdbGroup> {
         self.client.get(&format!("/v1/bdb_groups/{}", uid)).await
     }
 
+    /// Create a new database group.
     pub async fn create(&self, body: CreateBdbGroupRequest) -> Result<BdbGroup> {
         self.client.post("/v1/bdb_groups", &body).await
     }
 
+    /// Update an existing database group.
     pub async fn update(&self, uid: u32, body: UpdateBdbGroupRequest) -> Result<BdbGroup> {
         self.client
             .put(&format!("/v1/bdb_groups/{}", uid), &body)
             .await
     }
 
+    /// Delete a database group.
     pub async fn delete(&self, uid: u32) -> Result<()> {
         self.client.delete(&format!("/v1/bdb_groups/{}", uid)).await
     }
@@ -78,12 +83,14 @@ impl BdbGroupsHandler {
 /// Request to create a new database group
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateBdbGroupRequest {
+    /// Name.
     pub name: String,
 }
 
 /// Request to update an existing database group
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateBdbGroupRequest {
+    /// Name.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
 }

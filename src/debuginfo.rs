@@ -73,6 +73,7 @@ pub struct DebugInfoHandler {
 }
 
 impl DebugInfoHandler {
+    /// Create a new handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         DebugInfoHandler { client }
     }

@@ -94,6 +94,7 @@ pub struct ActionHandler {
 }
 
 impl ActionHandler {
+    /// Create a new action handler bound to the given REST client.
     pub fn new(client: RestClient) -> Self {
         ActionHandler { client }
     }
@@ -161,15 +162,18 @@ impl ActionHandler {
     }
 
     // Versioned sub-handlers for clearer API
+    /// Returns a v1-scoped sub-handler for `/v1/actions` endpoints.
     pub fn v1(&self) -> v1::ActionsV1 {
         v1::ActionsV1::new(self.client.clone())
     }
 
+    /// Returns a v2-scoped sub-handler for `/v2/actions` endpoints.
     pub fn v2(&self) -> v2::ActionsV2 {
         v2::ActionsV2::new(self.client.clone())
     }
 }
 
+/// V1 action endpoints (`/v1/actions`).
 pub mod v1 {
     use super::{Action, ActionsListResponse, RestClient};
     use crate::error::Result;
@@ -219,10 +223,12 @@ pub mod v1 {
     }
 }
 
+/// V2 action endpoints (`/v2/actions`).
 pub mod v2 {
     use super::{Action, RestClient};
     use crate::error::Result;
 
+    /// V2 sub-handler for `/v2/actions` endpoints.
     pub struct ActionsV2 {
         client: RestClient,
     }
@@ -232,10 +238,12 @@ pub mod v2 {
             Self { client }
         }
 
+        /// List all v2 actions.
         pub async fn list(&self) -> Result<Vec<Action>> {
             self.client.get("/v2/actions").await
         }
 
+        /// Get a single v2 action by UID.
         pub async fn get(&self, action_uid: &str) -> Result<Action> {
             self.client
                 .get(&format!("/v2/actions/{}", action_uid))

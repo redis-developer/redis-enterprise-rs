@@ -12,9 +12,13 @@ use typed_builder::TypedBuilder;
 /// Redis ACL information
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RedisAcl {
+    /// Unique identifier (read-only).
     pub uid: u32,
+    /// Name.
     pub name: String,
+    /// Redis ACL definition string.
     pub acl: String,
+    /// Human-readable description.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// List of database UIDs this ACL is associated with
@@ -25,10 +29,13 @@ pub struct RedisAcl {
 /// Create or update Redis ACL request
 #[derive(Debug, Serialize, Deserialize, TypedBuilder)]
 pub struct CreateRedisAclRequest {
+    /// Name.
     #[builder(setter(into))]
     pub name: String,
+    /// Redis ACL definition string.
     #[builder(setter(into))]
     pub acl: String,
+    /// Human-readable description.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(into, strip_option))]
     pub description: Option<String>,
@@ -58,9 +65,12 @@ impl RedisAclHandler {
     }
 }
 
+/// Result of validating a Redis ACL payload.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AclValidation {
+    /// Whether the ACL is valid.
     pub valid: bool,
+    /// Validation message describing the result.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
