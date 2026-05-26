@@ -169,4 +169,77 @@ impl ModuleHandler {
             .post(&format!("/v1/modules/config/bdb/{}", bdb_uid), &config)
             .await
     }
+
+    /// List custom module artifacts on the local node.
+    ///
+    /// `GET /v2/local/modules/user-defined/artifacts`. Live verification on
+    /// Redis Enterprise Software 8.0.10-81 returned `200 OK` with `[]` on a
+    /// cluster with no custom modules uploaded.
+    pub async fn list_user_defined_artifacts(&self) -> Result<Value> {
+        self.client
+            .get("/v2/local/modules/user-defined/artifacts")
+            .await
+    }
+
+    /// Upload a custom module artifact to the local node.
+    ///
+    /// `POST /v2/local/modules/user-defined/artifacts`. The endpoint expects
+    /// a multipart upload; the file is sent under the `module` form field
+    /// to match the existing v1/v2 module upload behaviour. Live
+    /// verification on 8.0.10-81 returned `400 no_module` when an empty
+    /// body was sent.
+    pub async fn upload_user_defined_artifact(
+        &self,
+        module_data: Vec<u8>,
+        file_name: &str,
+    ) -> Result<Value> {
+        self.client
+            .post_multipart(
+                "/v2/local/modules/user-defined/artifacts",
+                module_data,
+                "module",
+                file_name,
+            )
+            .await
+    }
+
+    /// Register a previously-uploaded artifact as a cluster-wide
+    /// user-defined module configuration.
+    ///
+    /// `POST /v2/modules/user-defined`. The body shape is version-specific
+    /// (it must reference an artifact that has already been uploaded via
+    /// [`upload_user_defined_artifact`](Self::upload_user_defined_artifact)
+    /// and describe how the cluster should load it); pass a `Value`
+    /// matching the documented payload. Live verification on 8.0.10-81
+    /// returned `406 invalid_module` when an empty body was sent.
+    pub async fn register_user_defined(&self, body: Value) -> Result<Value> {
+        self.client.post_raw("/v2/modules/user-defined", body).await
+    }
+
+    /// Delete a custom module configuration cluster-wide.
+    ///
+    /// `DELETE /v2/modules/user-defined/{uid}`. Live verification on
+    /// 8.0.10-81 returned `404 module_delete_failed` against a uid that
+    /// does not exist on the cluster.
+    pub async fn delete_user_defined(&self, uid: &str) -> Result<()> {
+        self.client
+            .delete(&format!("/v2/modules/user-defined/{}", uid))
+            .await
+    }
+
+    /// Delete a custom module artifact from the local node.
+    ///
+    /// `DELETE /v2/local/modules/user-defined/artifacts/{module_name}/{version}`.
+    pub async fn delete_user_defined_artifact(
+        &self,
+        module_name: &str,
+        version: &str,
+    ) -> Result<()> {
+        self.client
+            .delete(&format!(
+                "/v2/local/modules/user-defined/artifacts/{}/{}",
+                module_name, version
+            ))
+            .await
+    }
 }

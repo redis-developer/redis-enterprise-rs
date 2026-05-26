@@ -15,15 +15,6 @@
 # implemented without updating the allowlist).
 
 # ============================================================================
-# Tracked under #55 — user-defined modules
-# ============================================================================
-GET /v2/local/modules/user-defined/artifacts
-POST /v2/local/modules/user-defined/artifacts
-DELETE /v2/local/modules/user-defined/artifacts/{}/{}
-POST /v2/modules/user-defined
-DELETE /v2/modules/user-defined/{}
-
-# ============================================================================
 # Per-DB module ops + password rotation — referenced in #65 triage
 # ============================================================================
 POST /v1/bdbs/{}/modules/config
