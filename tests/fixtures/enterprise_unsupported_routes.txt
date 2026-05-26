@@ -24,14 +24,6 @@ GET /v1/cluster/sso/saml/metadata/sp
 POST /v1/cluster/sso/saml/metadata/idp
 
 # ============================================================================
-# Tracked under #54 — CRDB write surface
-# ============================================================================
-PUT /v1/crdbs/{}/flush
-PUT /v1/crdbs/{}/purge
-GET /v1/crdbs/{}/health_report
-POST /v1/crdbs/{}/updates
-
-# ============================================================================
 # Tracked under #55 — user-defined modules
 # ============================================================================
 GET /v2/local/modules/user-defined/artifacts
