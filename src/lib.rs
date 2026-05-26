@@ -432,8 +432,8 @@ pub use local::LocalHandler;
 
 // Bootstrap
 pub use bootstrap::{
-    BootstrapConfig, BootstrapHandler, BootstrapStatus, ClusterBootstrap, CredentialsBootstrap,
-    NodeBootstrap, NodePaths,
+    BootstrapConfig, BootstrapHandler, BootstrapStatus, BootstrapStatusResponse, ClusterBootstrap,
+    CredentialsBootstrap, NodeBootstrap, NodePaths,
 };
 
 // Cluster Manager settings
