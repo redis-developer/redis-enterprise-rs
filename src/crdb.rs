@@ -120,6 +120,17 @@ pub struct CreateCrdbInstance {
     pub password: Option<String>,
 }
 
+/// Response wrapper for `GET /v1/crdbs`.
+///
+/// The API returns `{"crdbs": [...]}`. Kept private to the module since
+/// [`CrdbHandler::list`] unwraps it; only exposed in the public API via
+/// the flat `Vec<Crdb>` return.
+#[derive(Debug, Clone, Deserialize)]
+struct CrdbsListResponse {
+    #[serde(default)]
+    crdbs: Vec<Crdb>,
+}
+
 /// CRDB handler for managing Active-Active databases
 pub struct CrdbHandler {
     client: RestClient,
@@ -130,9 +141,14 @@ impl CrdbHandler {
         CrdbHandler { client }
     }
 
-    /// List all CRDBs
+    /// List all CRDBs.
+    ///
+    /// `GET /v1/crdbs`. The API wraps the array under a `crdbs` key
+    /// (`{"crdbs": [...]}`); this method unwraps it so callers get a
+    /// flat `Vec<Crdb>`.
     pub async fn list(&self) -> Result<Vec<Crdb>> {
-        self.client.get("/v1/crdbs").await
+        let resp: CrdbsListResponse = self.client.get("/v1/crdbs").await?;
+        Ok(resp.crdbs)
     }
 
     /// Get specific CRDB

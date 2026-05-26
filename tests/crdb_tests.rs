@@ -92,13 +92,13 @@ fn test_crdb_tasks_data() -> serde_json::Value {
 async fn test_crdbs_list() {
     let mock_server = MockServer::start().await;
 
+    // Regression guard for #62: real API wraps the list under `crdbs`.
     Mock::given(method("GET"))
         .and(path("/v1/crdbs"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([
-            test_crdb_full(),
-            test_crdb_simple()
-        ])))
+        .respond_with(success_response(json!({
+            "crdbs": [test_crdb_full(), test_crdb_simple()]
+        })))
         .mount(&mock_server)
         .await;
 
@@ -129,7 +129,7 @@ async fn test_crdbs_list_empty() {
     Mock::given(method("GET"))
         .and(path("/v1/crdbs"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
+        .respond_with(success_response(json!({ "crdbs": [] })))
         .mount(&mock_server)
         .await;
 

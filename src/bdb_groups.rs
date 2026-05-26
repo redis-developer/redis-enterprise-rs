@@ -25,6 +25,17 @@ pub struct BdbGroup {
     pub members: Option<Vec<String>>,
 }
 
+/// Response wrapper for `GET /v1/bdb_groups`.
+///
+/// The API returns `{"bdb_groups": [...]}`. Kept private; consumers go
+/// through [`BdbGroupsHandler::list`] which unwraps to a flat
+/// `Vec<BdbGroup>`.
+#[derive(Debug, Clone, Deserialize)]
+struct BdbGroupsListResponse {
+    #[serde(default)]
+    bdb_groups: Vec<BdbGroup>,
+}
+
 /// Handler for database group operations
 pub struct BdbGroupsHandler {
     client: RestClient,
@@ -35,8 +46,14 @@ impl BdbGroupsHandler {
         BdbGroupsHandler { client }
     }
 
+    /// List all database groups.
+    ///
+    /// `GET /v1/bdb_groups`. The API wraps the array under a
+    /// `bdb_groups` key; this method unwraps the wrapper so callers
+    /// get a flat `Vec<BdbGroup>`.
     pub async fn list(&self) -> Result<Vec<BdbGroup>> {
-        self.client.get("/v1/bdb_groups").await
+        let resp: BdbGroupsListResponse = self.client.get("/v1/bdb_groups").await?;
+        Ok(resp.bdb_groups)
     }
 
     pub async fn get(&self, uid: u32) -> Result<BdbGroup> {
