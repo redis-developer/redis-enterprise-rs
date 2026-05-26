@@ -703,6 +703,54 @@ impl ClusterHandler {
             .get(&format!("/v1/cluster/alerts/{}", alert))
             .await
     }
+
+    /// Get the current cluster single-sign-on (SSO) configuration.
+    ///
+    /// `GET /v1/cluster/sso`. Returned as `serde_json::Value` because the
+    /// SSO config schema is version-specific and includes optional SAML,
+    /// OIDC, and certificate fields.
+    pub async fn sso(&self) -> Result<Value> {
+        self.client.get("/v1/cluster/sso").await
+    }
+
+    /// Set or update the cluster SSO configuration.
+    ///
+    /// `PUT /v1/cluster/sso`. Pass a `Value` matching the documented
+    /// SSO config shape for the cluster version under test.
+    pub async fn update_sso(&self, body: Value) -> Result<Value> {
+        self.client.put_raw("/v1/cluster/sso", body).await
+    }
+
+    /// Clear the cluster SSO configuration.
+    ///
+    /// `DELETE /v1/cluster/sso`.
+    pub async fn delete_sso(&self) -> Result<()> {
+        self.client.delete("/v1/cluster/sso").await
+    }
+
+    /// Fetch the SAML service-provider metadata for the cluster.
+    ///
+    /// `GET /v1/cluster/sso/saml/metadata/sp`. The cluster returns the SP
+    /// metadata document so callers can register it with their identity
+    /// provider. Returned as `Value` because the wire format varies by
+    /// cluster version. Live verification on 8.0.10-81 produced
+    /// `406 missing_certificate` until a SAML signing certificate is
+    /// provisioned on the cluster.
+    pub async fn sso_saml_metadata_sp(&self) -> Result<Value> {
+        self.client.get("/v1/cluster/sso/saml/metadata/sp").await
+    }
+
+    /// Upload SAML identity-provider metadata to the cluster.
+    ///
+    /// `POST /v1/cluster/sso/saml/metadata/idp`. The body shape is
+    /// version-specific (typically a wrapper around the IdP metadata
+    /// document); pass a `Value` matching the documented payload for the
+    /// cluster version under test.
+    pub async fn sso_saml_metadata_idp(&self, body: Value) -> Result<Value> {
+        self.client
+            .post_raw("/v1/cluster/sso/saml/metadata/idp", body)
+            .await
+    }
 }
 
 /// Node information

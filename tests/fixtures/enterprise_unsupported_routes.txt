@@ -15,15 +15,6 @@
 # implemented without updating the allowlist).
 
 # ============================================================================
-# Tracked under #56 — cluster SSO/SAML endpoints
-# ============================================================================
-GET /v1/cluster/sso
-PUT /v1/cluster/sso
-DELETE /v1/cluster/sso
-GET /v1/cluster/sso/saml/metadata/sp
-POST /v1/cluster/sso/saml/metadata/idp
-
-# ============================================================================
 # Tracked under #55 — user-defined modules
 # ============================================================================
 GET /v2/local/modules/user-defined/artifacts
