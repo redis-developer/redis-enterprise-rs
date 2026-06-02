@@ -118,15 +118,20 @@ This enables composition with Tower middleware like circuit breakers, retry, rat
 
 ## Python Bindings
 
-A thin PyO3 binding covering a subset of read operations is published at
+A PyO3-based convenience layer published at
 [redis-enterprise on PyPI](https://pypi.org/project/redis-enterprise/).
-See [`python/README.md`](python/README.md) for the supported API.
 
-The PyPI publish workflow has been failing since the `reqwest 0.13` upgrade
-([#25](https://github.com/redis-developer/redis-enterprise-rs/issues/25)) and the
-overall scope is still being scoped under
-[#51](https://github.com/redis-developer/redis-enterprise-rs/issues/51) — treat
-the Python surface as experimental for now.
+The bindings cover the most common read and inspection operations — cluster info,
+databases, nodes, users — and include raw HTTP pass-through methods (`get`, `post`,
+`delete`) for anything else. Every method is available in both an `async`/`await`
+form and a blocking `_sync` form that works without an event loop.
+
+```bash
+pip install redis-enterprise
+```
+
+See [`python/README.md`](python/README.md) for the full API reference, error handling,
+planned expansion, and packaging notes.
 
 ## API Coverage
 
