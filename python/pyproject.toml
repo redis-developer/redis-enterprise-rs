@@ -38,6 +38,7 @@ Documentation = "https://docs.rs/redis-enterprise"
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
+    "pytest-httpserver>=1.0",
 ]
 
 [tool.maturin]
