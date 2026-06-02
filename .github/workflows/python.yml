@@ -35,18 +35,15 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install maturin
-        run: pip install maturin
-
-      - name: Build and install extension (maturin develop)
-        run: maturin develop
+      - name: Build and install extension + test deps
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install maturin "pytest>=7.0" "pytest-asyncio>=0.21" "pytest-httpserver>=1.0"
+          .venv/bin/maturin develop
         working-directory: python
 
-      - name: Install test dependencies
-        run: pip install "pytest>=7.0" "pytest-asyncio>=0.21" "pytest-httpserver>=1.0"
-
       - name: Run unit tests
-        run: pytest -v
+        run: .venv/bin/pytest -v
         working-directory: python
 
   build:
