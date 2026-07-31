@@ -47,6 +47,7 @@ jobs:
 
       - name: Check generated API coverage audit
         run: |
+          python3 -m unittest discover -s scripts/tests -p 'test_*.py'
           python3 scripts/audit_api_coverage.py
           git diff --exit-code -- docs/api-coverage-audit.csv docs/api-coverage-audit.md
 

@@ -16,6 +16,9 @@ fn require_client() -> EnterpriseClient {
 #[tokio::test]
 #[ignore = "requires a live Redis Enterprise cluster configured via REDIS_ENTERPRISE_* env vars"]
 async fn live_cluster_nodes_and_databases_smoke() {
+    // api-audit-live: GET /v1/cluster
+    // api-audit-live: GET /v1/nodes
+    // api-audit-live: GET /v1/bdbs
     let client = require_client();
 
     let cluster = client
@@ -51,6 +54,7 @@ async fn live_cluster_nodes_and_databases_smoke() {
 #[tokio::test]
 #[ignore = "requires a live Redis Enterprise cluster configured via REDIS_ENTERPRISE_* env vars"]
 async fn live_typed_and_raw_nodes_counts_match() {
+    // api-audit-live: GET /v1/nodes
     let client = require_client();
 
     let typed_nodes = client
@@ -76,6 +80,13 @@ async fn live_typed_and_raw_nodes_counts_match() {
 #[tokio::test]
 #[ignore = "requires a live Redis Enterprise cluster configured via REDIS_ENTERPRISE_* env vars"]
 async fn live_cluster_check_and_shard_stats_smoke() {
+    // api-audit-live: GET /v1/cluster/check
+    // api-audit-live: GET /v1/nodes
+    // api-audit-live: GET /v1/nodes/check/{uid}
+    // api-audit-live: GET /v1/shards
+    // api-audit-live: GET /v1/shards/stats/{uid}
+    // api-audit-live: GET /v1/shards/stats/last/{uid}
+    // api-audit-live: GET /v1/shards/stats/last
     let client = require_client();
 
     let check = client
@@ -151,6 +162,10 @@ async fn live_cluster_check_and_shard_stats_smoke() {
 #[tokio::test]
 #[ignore = "requires a live Redis Enterprise cluster configured via REDIS_ENTERPRISE_* env vars"]
 async fn live_user_create_get_delete_round_trip() {
+    // api-audit-live: GET /v1/roles
+    // api-audit-live: POST /v1/users
+    // api-audit-live: GET /v1/users/{uid}
+    // api-audit-live: DELETE /v1/users/{uid}
     let client = require_client();
 
     let admin_role_uid = client

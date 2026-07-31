@@ -35,6 +35,7 @@ async fn get_metrics_config_uses_documented_route_and_response_shape() {
         .and(path("/v1/metrics_config"))
         .and(basic_auth("admin", "password"))
         .respond_with(ResponseTemplate::new(200).set_body_json(metrics_config_response()))
+        .expect(1)
         .mount(&mock_server)
         .await;
 
@@ -70,6 +71,7 @@ async fn update_metrics_config_serializes_only_supplied_fields() {
             "max_requests_in_flight": 4
         })))
         .respond_with(ResponseTemplate::new(200).set_body_json(metrics_config_response()))
+        .expect(1)
         .mount(&mock_server)
         .await;
 
