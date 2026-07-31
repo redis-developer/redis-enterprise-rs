@@ -45,6 +45,11 @@ jobs:
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+      - name: Check generated API coverage audit
+        run: |
+          python3 scripts/audit_api_coverage.py
+          git diff --exit-code -- docs/api-coverage-audit.csv docs/api-coverage-audit.md
+
   test:
     name: Test
     needs: check

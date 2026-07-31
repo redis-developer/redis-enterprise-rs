@@ -41,6 +41,7 @@ def write_csv(rows: list[dict[str, str]], path: Path) -> None:
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(
             handle,
+            lineterminator="\n",
             fieldnames=[
                 "method",
                 "path",

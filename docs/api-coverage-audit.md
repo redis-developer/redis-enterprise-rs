@@ -5,11 +5,11 @@ evidence found in `src/` and `tests/`.
 
 ## Summary
 
-- Total documented endpoints audited: `206`
-- `implemented_and_tested`: `66`
-- `implemented_no_test_path_evidence`: `120`
+- Total documented endpoints audited: `209`
+- `implemented_and_tested`: `77`
+- `implemented_no_test_path_evidence`: `127`
 - `test_only_path_evidence`: `0`
-- `docs_only`: `20`
+- `docs_only`: `5`
 
 ## Notes
 
@@ -30,21 +30,6 @@ evidence found in `src/` and `tests/`.
 - `POST /v1/bdbs/{uid}/modules/config` from `bdbs/modules/config`
 - `POST /v1/bdbs/{uid}/modules/upgrade` from `bdbs/modules/upgrade`
 - `GET /v1/boostrap` from `bootstrap` (module guess: `bootstrap`)
-- `PATCH /v1/cluster/change_password_hashing_algorithm` from `cluster/change_password_hashing_algorithm`
-- `GET /v1/cluster/sso` from `cluster/sso`
-- `PUT /v1/cluster/sso` from `cluster/sso`
-- `DELETE /v1/cluster/sso` from `cluster/sso`
-- `GET /v1/cluster/sso/saml/metadata/sp` from `cluster/sso`
-- `POST /v1/cluster/sso/saml/metadata/idp` from `cluster/sso`
-- `PUT /v1/crdbs/{crdb_guid}/flush` from `crdbs/flush`
-- `GET /v1/crdbs/{crdb_guid}/health_report` from `crdbs/health_report`
-- `PUT /v1/crdbs/{crdb_guid}/purge` from `crdbs/purge`
-- `POST /v1/crdbs/{crdb_guid}/updates` from `crdbs/updates`
-- `GET /v2/local/modules/user-defined/artifacts` from `modules/user-defined`
-- `POST /v2/modules/user-defined` from `modules/user-defined`
-- `POST /v2/local/modules/user-defined/artifacts` from `modules/user-defined`
-- `DELETE /v2/modules/user-defined/<uid>` from `modules/user-defined`
-- `DELETE /v2/local/modules/user-defined/artifacts/<module_name>/<version>` from `modules/user-defined`
 
 ## Artifacts
 

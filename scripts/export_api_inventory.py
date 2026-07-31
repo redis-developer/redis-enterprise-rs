@@ -40,6 +40,7 @@ MODULE_GUESSES = {
     "cm_settings": "cm_settings",
     "crdb_tasks": "crdb_tasks",
     "crdbs": "crdb",
+    "crdbs/upgrade": "crdb",
     "debuginfo": "debuginfo",
     "diagnostics": "diagnostics",
     "endpoints-stats": "endpoints",
@@ -48,6 +49,7 @@ MODULE_GUESSES = {
     "ldap_mappings": "ldap_mappings",
     "license": "license",
     "logs": "logs",
+    "metrics_config": "metrics_config",
     "migrations": "migrations",
     "modules": "modules",
     "node_master_healthcheck": "local",
@@ -194,6 +196,7 @@ def export_inventory(output_path: Path) -> tuple[int, int]:
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(
             handle,
+            lineterminator="\n",
             fieldnames=[
                 "page",
                 "title",

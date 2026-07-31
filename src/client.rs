@@ -19,6 +19,7 @@ use crate::ldap_mappings::LdapMappingHandler;
 use crate::license::LicenseHandler;
 use crate::local::LocalHandler;
 use crate::logs::LogsHandler;
+use crate::metrics_config::MetricsConfigHandler;
 use crate::migrations::MigrationsHandler;
 use crate::modules::ModuleHandler;
 use crate::nodes::NodeHandler;
@@ -889,6 +890,12 @@ impl EnterpriseClient {
     #[must_use]
     pub fn logs(&self) -> LogsHandler {
         LogsHandler::new(self.clone())
+    }
+
+    /// Get a handler for cluster-wide metrics configuration operations.
+    #[must_use]
+    pub fn metrics_config(&self) -> MetricsConfigHandler {
+        MetricsConfigHandler::new(self.clone())
     }
 
     /// Get a handler for migration operations
