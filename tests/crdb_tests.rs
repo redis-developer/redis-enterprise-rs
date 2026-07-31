@@ -1,6 +1,9 @@
 //! Active-Active (CRDB) endpoint tests for Redis Enterprise
 
-use redis_enterprise::{CrdbHandler, CreateCrdbInstance, CreateCrdbRequest, EnterpriseClient};
+use redis_enterprise::{
+    CrdbHandler, CrdbModuleUpgrade, CrdbUpgradeRequest, CreateCrdbInstance, CreateCrdbRequest,
+    EnterpriseClient,
+};
 use serde_json::json;
 use wiremock::matchers::{basic_auth, body_json, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -691,6 +694,65 @@ async fn test_crdb_updates() {
         .await
         .unwrap();
     assert_eq!(result["task_id"], "update-789");
+}
+
+#[tokio::test]
+async fn test_crdb_upgrade() {
+    let mock_server = MockServer::start().await;
+    let request = CrdbUpgradeRequest::builder()
+        .force_restart(true)
+        .keep_crdt_protocol_version(false)
+        .modules(vec![
+            CrdbModuleUpgrade::builder()
+                .current_module("module-1")
+                .new_module("module-2")
+                .new_module_args("PARTITIONS AUTO")
+                .build(),
+        ])
+        .parallel_shards_upgrade(2)
+        .preserve_roles(true)
+        .redis_version("8.0.10")
+        .build();
+
+    Mock::given(method("POST"))
+        .and(path("/v1/crdbs/test-guid/upgrade"))
+        .and(basic_auth("admin", "password"))
+        .and(body_json(json!({
+            "force_restart": true,
+            "keep_crdt_protocol_version": false,
+            "modules": [{
+                "current_module": "module-1",
+                "new_module": "module-2",
+                "new_module_args": "PARTITIONS AUTO"
+            }],
+            "parallel_shards_upgrade": 2,
+            "preserve_roles": true,
+            "redis_version": "8.0.10"
+        })))
+        .respond_with(success_response(json!({
+            "id": "upgrade-101",
+            "crdb_guid": "test-guid",
+            "operation": "upgrade",
+            "status": "queued"
+        })))
+        .mount(&mock_server)
+        .await;
+
+    let client = EnterpriseClient::builder()
+        .base_url(mock_server.uri())
+        .username("admin")
+        .password("password")
+        .build()
+        .unwrap();
+
+    let result = CrdbHandler::new(client)
+        .upgrade("test-guid", request)
+        .await
+        .unwrap();
+
+    assert_eq!(result["id"], "upgrade-101");
+    assert_eq!(result["crdb_guid"], "test-guid");
+    assert_eq!(result["status"], "queued");
 }
 
 #[tokio::test]

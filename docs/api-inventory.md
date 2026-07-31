@@ -5,7 +5,14 @@ REST API, so this repo maintains a generated inventory seed based on the
 official Redis request-reference pages.
 
 The generated CSV lives at
-[api-inventory.csv](/Users/josh.rotenberg/Code/active/redis-enterprise-rs/docs/api-inventory.csv).
+[api-inventory.csv](./api-inventory.csv).
+
+## Snapshot Metadata
+
+- Refreshed: `2026-07-31`
+- Source selector: Redis Software REST request reference under
+  `https://redis.io/docs/latest/operate/rs/references/rest-api/requests/`
+- Documentation version currently selected by `latest`: Redis Software `7.22`
 
 ## What The Inventory Contains
 

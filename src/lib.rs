@@ -347,6 +347,7 @@ pub mod ldap_mappings;
 pub mod license;
 pub mod local;
 pub mod logs;
+pub mod metrics_config;
 pub mod migrations;
 pub mod modules;
 pub mod nodes;
@@ -406,8 +407,14 @@ pub use actions::{Action, ActionHandler};
 // Logs
 pub use logs::{LogEntry, LogsHandler, LogsQuery};
 
+// Metrics configuration
+pub use metrics_config::{MetricsConfig, MetricsConfigHandler, MetricsConfigUpdate};
+
 // Active-Active databases
-pub use crdb::{Crdb, CrdbHandler, CrdbInstance, CreateCrdbInstance, CreateCrdbRequest};
+pub use crdb::{
+    Crdb, CrdbHandler, CrdbInstance, CrdbModuleUpgrade, CrdbUpgradeRequest, CreateCrdbInstance,
+    CreateCrdbRequest,
+};
 
 // Statistics
 pub use stats::{StatsHandler, StatsInterval, StatsQuery, StatsResponse};
