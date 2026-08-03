@@ -167,4 +167,4 @@ read-only flow, but it does not yet establish full endpoint completeness.
 - Expand the ignored live smoke suite beyond cluster, node, and database reads
 - Add disposable-resource CRUD flows for higher-confidence validation
 - Compare live responses against the generated API inventory in
-  [api-inventory.md](/Users/josh.rotenberg/Code/active/redis-enterprise-rs/docs/api-inventory.md)
+  [api-inventory.md](./api-inventory.md)

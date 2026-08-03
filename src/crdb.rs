@@ -120,6 +120,64 @@ pub struct CreateCrdbInstance {
     pub password: Option<String>,
 }
 
+/// Module version change requested as part of a CRDB upgrade.
+///
+/// The module UIDs are deprecated by Redis Enterprise Software 7.8.2 and
+/// later, but remain part of the documented request contract for older
+/// supported cluster versions.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, TypedBuilder)]
+pub struct CrdbModuleUpgrade {
+    /// UID of the currently installed module version.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub current_module: Option<String>,
+    /// UID of the module version to install.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub new_module: Option<String>,
+    /// Arguments to pass to the upgraded module.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub new_module_args: Option<String>,
+}
+
+/// Request for upgrading an Active-Active database.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, TypedBuilder)]
+pub struct CrdbUpgradeRequest {
+    /// Allow the upgrade to discard data when required.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub force_discard: Option<bool>,
+    /// Restart the database even when an in-place upgrade is possible.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub force_restart: Option<bool>,
+    /// Retain the current CRDT protocol version after upgrading.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub keep_crdt_protocol_version: Option<bool>,
+    /// Confirm that data loss is acceptable when required by the upgrade.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub may_discard_data: Option<bool>,
+    /// Module changes to apply during the upgrade.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub modules: Option<Vec<CrdbModuleUpgrade>>,
+    /// Maximum number of shards to upgrade in parallel.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub parallel_shards_upgrade: Option<u64>,
+    /// Preserve existing database roles during the upgrade.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub preserve_roles: Option<bool>,
+    /// Redis version to install.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub redis_version: Option<String>,
+}
+
 /// Response wrapper for `GET /v1/crdbs`.
 ///
 /// The API returns `{"crdbs": [...]}`. Kept private to the module since
@@ -228,6 +286,18 @@ impl CrdbHandler {
     pub async fn updates(&self, guid: &str, body: Value) -> Result<Value> {
         self.client
             .post_raw(&format!("/v1/crdbs/{}/updates", guid), body)
+            .await
+    }
+
+    /// Upgrade an Active-Active database.
+    ///
+    /// Calls `POST /v1/crdbs/{crdb_guid}/upgrade`. The response is returned
+    /// as `serde_json::Value` because the currently documented CRDB task
+    /// object differs from the crate's legacy task model and varies across
+    /// supported cluster versions.
+    pub async fn upgrade(&self, guid: &str, request: CrdbUpgradeRequest) -> Result<Value> {
+        self.client
+            .post(&format!("/v1/crdbs/{}/upgrade", guid), &request)
             .await
     }
 }
