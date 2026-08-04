@@ -254,7 +254,6 @@ read-only flow, but it does not yet establish full endpoint completeness.
 
 This snapshot is historical evidence, not the complete support matrix. Record
 future runs with the exact product version, image tag, date, and test scope.
-
 ## Remaining Coverage
 
 The matrix starts with all safe reads and a disposable user CRUD lifecycle.
