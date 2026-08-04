@@ -213,11 +213,12 @@ and reviewed independently.
 
 ## Non-Inventory Route Matrix
 
-The SDK also contains method/path pairs that are absent from the generated
-public-doc inventory. The ignored `live_non_inventory_options_audit` validates
-those paths without executing writes. It sends `OPTIONS` to a concrete form of
-each path and compares the returned `Allow` header with the reviewed evidence
-for the exact server version:
+The SDK also retains intentional compatibility routes that are absent from the
+generated public-doc inventory. The ignored `live_non_inventory_options_audit`
+validates those active paths without executing writes. It sends `OPTIONS` to a
+concrete form of each path and compares the returned `Allow` header with the
+reviewed evidence for the exact server version. Invalid historical paths are
+stored separately as retired evidence and are not sent by the SDK.
 
 ```bash
 REDIS_ENTERPRISE_EXPECTED_VERSION="8.2.0-25" \

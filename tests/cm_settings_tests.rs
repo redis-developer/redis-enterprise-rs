@@ -17,10 +17,6 @@ fn error_response(code: u16, message: &str) -> ResponseTemplate {
     }))
 }
 
-fn no_content_response() -> ResponseTemplate {
-    ResponseTemplate::new(204)
-}
-
 fn test_cm_settings_full() -> serde_json::Value {
     json!({
         "cm_port": 8080,
@@ -311,54 +307,6 @@ async fn test_cm_settings_update_invalid() {
 
     let handler = CmSettingsHandler::new(client);
     let result = handler.update(settings).await;
-
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_cm_settings_reset() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("DELETE"))
-        .and(path("/v1/cm_settings"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(no_content_response())
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = CmSettingsHandler::new(client);
-    let result = handler.reset().await;
-
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_cm_settings_reset_error() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("DELETE"))
-        .and(path("/v1/cm_settings"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(error_response(403, "Reset not allowed"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = CmSettingsHandler::new(client);
-    let result = handler.reset().await;
 
     assert!(result.is_err());
 }

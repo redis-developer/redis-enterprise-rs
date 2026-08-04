@@ -120,6 +120,18 @@ fn load_non_inventory_registry() -> BTreeSet<String> {
         .collect()
 }
 
+fn load_retired_route_registry() -> BTreeSet<String> {
+    let registry: serde_json::Value = serde_json::from_str(NON_INVENTORY_REGISTRY)
+        .expect("non-inventory route registry should be valid JSON");
+    registry
+        .get("retired_routes")
+        .and_then(serde_json::Value::as_object)
+        .expect("non-inventory route registry should contain a retired_routes object")
+        .keys()
+        .cloned()
+        .collect()
+}
+
 /// Walk `src/` (excluding the testing-only modules) and return every
 /// `*.rs` path. The `client.rs`, `lib.rs`, and `macros.rs` files don't
 /// host handler routes; skip them to keep extraction noise-free.
@@ -329,6 +341,7 @@ fn test_non_spec_handler_routes_are_explicitly_allowlisted() {
     let documented = documented_routes();
     let extracted = extracted_handler_routes();
     let allowlist = load_non_inventory_registry();
+    let retired = load_retired_route_registry();
 
     let non_spec: BTreeSet<_> = extracted
         .iter()
@@ -352,5 +365,14 @@ fn test_non_spec_handler_routes_are_explicitly_allowlisted() {
         "Found stale entries in live_non_inventory_routes.json that the handler \
          no longer calls. Remove them from the evidence registry:\n\n{}",
         stale.join("\n")
+    );
+
+    let reactivated: Vec<_> = retired.intersection(&extracted).cloned().collect();
+    assert!(
+        reactivated.is_empty(),
+        "Found retired invalid routes that an HTTP handler calls again. Use a \
+         documented replacement or move the route back to the active evidence \
+         registry only after new live verification:\n\n{}",
+        reactivated.join("\n")
     );
 }

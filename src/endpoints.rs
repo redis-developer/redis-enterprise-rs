@@ -74,14 +74,16 @@ impl EndpointsHandler {
         EndpointsHandler { client }
     }
 
-    /// List all endpoints
+    /// Retired endpoint-list helper.
+    #[deprecated(note = "Redis Software only exposes the endpoint statistics collection")]
     pub async fn list(&self) -> Result<Vec<Endpoint>> {
-        self.client.get("/v1/endpoints").await
+        crate::error::unsupported_operation("list endpoints")
     }
 
-    /// Get specific endpoint
-    pub async fn get(&self, uid: &str) -> Result<Endpoint> {
-        self.client.get(&format!("/v1/endpoints/{}", uid)).await
+    /// Retired endpoint lookup helper.
+    #[deprecated(note = "Redis Software only exposes the endpoint statistics collection")]
+    pub async fn get(&self, _uid: &str) -> Result<Endpoint> {
+        crate::error::unsupported_operation("get endpoint")
     }
 
     /// Get statistics for one endpoint from the canonical global collection.
@@ -98,17 +100,15 @@ impl EndpointsHandler {
         self.client.get("/v1/endpoints/stats").await
     }
 
-    /// Get endpoints for a specific database
-    pub async fn list_by_database(&self, bdb_uid: u32) -> Result<Vec<Endpoint>> {
-        self.client
-            .get(&format!("/v1/bdbs/{}/endpoints", bdb_uid))
-            .await
+    /// Retired database endpoint-list helper.
+    #[deprecated(note = "Redis Software does not register database-scoped endpoint routes")]
+    pub async fn list_by_database(&self, _bdb_uid: u32) -> Result<Vec<Endpoint>> {
+        crate::error::unsupported_operation("list database endpoints")
     }
 
-    /// Get endpoints for a specific node
-    pub async fn list_by_node(&self, node_uid: u32) -> Result<Vec<Endpoint>> {
-        self.client
-            .get(&format!("/v1/nodes/{}/endpoints", node_uid))
-            .await
+    /// Retired node endpoint-list helper.
+    #[deprecated(note = "Redis Software does not register node-scoped endpoint routes")]
+    pub async fn list_by_node(&self, _node_uid: u32) -> Result<Vec<Endpoint>> {
+        crate::error::unsupported_operation("list node endpoints")
     }
 }

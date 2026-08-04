@@ -195,16 +195,16 @@ impl ProxyHandler {
         self.client.get(&format!("/v1/proxies/{}", uid)).await
     }
 
-    /// Get proxy statistics
-    pub async fn stats(&self, uid: u32) -> Result<ProxyStats> {
-        self.client.get(&format!("/v1/proxies/{}/stats", uid)).await
+    /// Retired proxy statistics helper.
+    #[deprecated(note = "Redis Software does not register proxy statistics routes")]
+    pub async fn stats(&self, _uid: u32) -> Result<ProxyStats> {
+        crate::error::unsupported_operation("get proxy statistics")
     }
 
-    /// Get proxy statistics for a specific metric
-    pub async fn stats_metric(&self, uid: u32, metric: &str) -> Result<MetricResponse> {
-        self.client
-            .get(&format!("/v1/proxies/{}/stats/{}", uid, metric))
-            .await
+    /// Retired per-metric proxy statistics helper.
+    #[deprecated(note = "Redis Software does not register proxy statistics routes")]
+    pub async fn stats_metric(&self, _uid: u32, _metric: &str) -> Result<MetricResponse> {
+        crate::error::unsupported_operation("get proxy metric")
     }
 
     /// Get proxies for a specific database.
@@ -233,11 +233,10 @@ impl ProxyHandler {
             .collect())
     }
 
-    /// Reload proxy configuration
-    pub async fn reload(&self, uid: u32) -> Result<()> {
-        self.client
-            .post_action(&format!("/v1/proxies/{}/actions/reload", uid), &Value::Null)
-            .await
+    /// Retired proxy reload helper.
+    #[deprecated(note = "Redis Software does not register proxy reload actions")]
+    pub async fn reload(&self, _uid: u32) -> Result<()> {
+        crate::error::unsupported_operation("reload proxy")
     }
 
     /// Update proxies (bulk) - PUT /v1/proxies

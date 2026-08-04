@@ -66,9 +66,10 @@ impl SuffixesHandler {
         self.client.get(&format!("/v1/suffix/{}", name)).await
     }
 
-    /// Create a new suffix
-    pub async fn create(&self, request: CreateSuffixRequest) -> Result<Suffix> {
-        self.client.post("/v1/suffix", &request).await
+    /// Retired suffix creation helper.
+    #[deprecated(note = "supported Redis Software versions do not register suffix creation")]
+    pub async fn create(&self, _request: CreateSuffixRequest) -> Result<Suffix> {
+        crate::error::unsupported_operation("create suffix")
     }
 
     /// Update a suffix with the method registered by Redis Software 8.0+.

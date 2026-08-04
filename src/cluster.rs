@@ -580,14 +580,16 @@ impl ClusterHandler {
 
     // raw variant removed: use recover()
 
-    /// Get cluster settings (CLUSTER.SETTINGS)
+    /// Retired cluster settings alias.
+    #[deprecated(note = "Redis Software does not register /v1/cluster/settings")]
     pub async fn settings(&self) -> Result<Value> {
-        self.client.get("/v1/cluster/settings").await
+        crate::error::unsupported_operation("get cluster settings alias")
     }
 
-    /// Get cluster topology (CLUSTER.TOPOLOGY)
+    /// Retired cluster topology alias.
+    #[deprecated(note = "Redis Software does not register /v1/cluster/topology")]
     pub async fn topology(&self) -> Result<Value> {
-        self.client.get("/v1/cluster/topology").await
+        crate::error::unsupported_operation("get cluster topology alias")
     }
 
     /// List available cluster actions - GET /v1/cluster/actions

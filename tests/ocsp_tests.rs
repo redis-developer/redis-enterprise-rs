@@ -10,10 +10,6 @@ fn success_response(body: serde_json::Value) -> ResponseTemplate {
     ResponseTemplate::new(200).set_body_json(body)
 }
 
-fn no_content_response() -> ResponseTemplate {
-    ResponseTemplate::new(204)
-}
-
 fn error_response(code: u16, message: &str) -> ResponseTemplate {
     ResponseTemplate::new(code).set_body_json(json!({
         "error": message,
@@ -419,102 +415,6 @@ async fn test_ocsp_test_not_configured() {
 
     let handler = OcspHandler::new(client);
     let result = handler.test().await;
-
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_ocsp_query() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("POST"))
-        .and(path("/v1/ocsp/query"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(no_content_response())
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = OcspHandler::new(client);
-    let result = handler.query().await;
-
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_ocsp_query_not_configured() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("POST"))
-        .and(path("/v1/ocsp/query"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(error_response(400, "OCSP not enabled"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = OcspHandler::new(client);
-    let result = handler.query().await;
-
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_ocsp_clear_cache() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("DELETE"))
-        .and(path("/v1/ocsp/cache"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(no_content_response())
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = OcspHandler::new(client);
-    let result = handler.clear_cache().await;
-
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_ocsp_clear_cache_error() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("DELETE"))
-        .and(path("/v1/ocsp/cache"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(error_response(500, "Failed to clear OCSP cache"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = OcspHandler::new(client);
-    let result = handler.clear_cache().await;
 
     assert!(result.is_err());
 }

@@ -15,6 +15,8 @@ A comprehensive Rust client library for the Redis Enterprise REST API, with Pyth
 - Async/await support with tokio
 - Strong typing for API requests and responses
 - Comprehensive error handling
+- Version-audited route coverage: fictional legacy methods are deprecated and
+  fail locally instead of sending unsupported requests
 - Optional Tower service integration for middleware composition
 - Coverage across Redis Enterprise feature areas including:
   - Cluster management and bootstrap

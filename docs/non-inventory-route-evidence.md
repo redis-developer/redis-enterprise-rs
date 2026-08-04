@@ -1,11 +1,11 @@
 # Non-Inventory Route Evidence
 
 The SDK originally contained 95 method/path pairs that were not present in the
-generated public Redis Software REST API inventory. The remaining entries are
-tracked in the machine-readable
+generated public Redis Software REST API inventory. Active compatibility routes
+and the retired invalid paths are tracked separately in the machine-readable
 [`live_non_inventory_routes.json`](../tests/fixtures/live_non_inventory_routes.json)
-registry. A route's presence in that registry is not evidence that it is a
-supported public API.
+registry. A route's presence in the active registry is not evidence that it is
+a supported public API.
 
 ## Reviewed dispositions
 
@@ -13,26 +13,23 @@ supported public API.
 |---|---:|---|
 | `verified_undocumented` | 13 | The exact method/path is registered by at least one current 8.x family, but is absent from the public-doc inventory. Keep it visible as an intentional compatibility exception while documentation and behavioral coverage are evaluated. |
 | `compatibility_legacy` | 9 | The method/path is registered in 7.4, 7.8, and 7.22, but not in 8.0 or 8.2. Keep only for the crate's older supported families and do not recommend it for new integrations. |
-| `invalid` | 49 | None of the five supported families registers the claimed method/path. Treat the handler as a removal, deprecation, or canonical-path correction candidate. |
+| retired `invalid` | 59 | None of the five supported families registers the claimed method/path. These entries are historical evidence, not active HTTP routes. |
 
-Seven original invalid routes have already left the registry because their
-public methods now use the documented collection-first alert and statistics
-paths, and node removal now uses the documented node action. Six more live
-routes are recognized as literal values of documented `{action}` templates
-instead of false non-inventory positives. The shard stats handler was also
-moved to its documented collection-first path. The registry therefore contains
-81 exceptions and cleanup candidates at the first checkpoint. Six additional
-invented aliases or relationship paths now delegate to canonical collection
-routes: cluster license, cluster suffixes, CRDB tasks by CRDB, proxies by
-database or node, and shards by node. The registry therefore contains 75
-exceptions and cleanup candidates at the second checkpoint. Database metrics
-and users-by-role now also delegate to their canonical statistics and users
-collections. The registry therefore contains 73 current exceptions and cleanup
-candidates at the third checkpoint. Per-endpoint statistics now select from the
-documented global endpoint-statistics collection, leaving 72 current exceptions
-and cleanup candidates at the fourth checkpoint. Single-metric shard statistics
-now select the requested values from the documented shard-statistics response,
-leaving 71 current exceptions and cleanup candidates.
+The 95 original entries now have a durable outcome:
+
+| Outcome | Count |
+|---|---:|
+| Resolved before registry schema v2: canonical paths, documented action-template specializations, and shard stats correction | 14 |
+| Active verified-undocumented compatibility routes | 13 |
+| Active legacy compatibility routes | 9 |
+| Retired wrong paths whose public methods now use canonical operations | 12 |
+| Retired fictional operations whose deprecated methods return `RestError::UnsupportedOperation` locally | 47 |
+| **Total** | **95** |
+
+The local-error shims preserve source compatibility while ensuring the client
+cannot send a request that every supported Redis Software family rejects. Their
+old paths live under `retired_routes`; the active `routes` object contains only
+the 22 intentional compatibility operations.
 
 The 13 current compatibility exceptions are:
 
@@ -56,13 +53,15 @@ pairs and tested versions are in the registry.
 The review used exact Docker images from the
 [version support policy](./version-support.md):
 
-| Redis Software | Claimed method registered | Claimed method absent |
+| Redis Software | Active method registered | Active method absent |
 |---|---:|---:|
-| 7.4.6-272 | 17 | 54 |
-| 7.8.6-286 | 21 | 50 |
-| 7.22.2-170 | 21 | 50 |
-| 8.0.20-68 | 13 | 58 |
-| 8.2.0-25 | 13 | 58 |
+| 7.4.6-272 | 17 | 5 |
+| 7.8.6-286 | 21 | 1 |
+| 7.22.2-170 | 21 | 1 |
+| 8.0.20-68 | 13 | 9 |
+| 8.2.0-25 | 13 | 9 |
+
+All 59 retired invalid method/path pairs were absent on all five versions.
 
 The runs were completed on August 4, 2026. Every path was probed with
 `OPTIONS`; no route mutation was executed. Redis Software returns `404` for an
@@ -78,17 +77,19 @@ or side effects. Those require self-cleaning live lifecycles or safe read probes
 ## Keeping the registry honest
 
 `tests/route_coverage.rs` compares source-extracted handlers to the public-doc
-inventory and the evidence registry. A new unexplained handler route fails the
-test, and a registry entry becomes stale when its handler is removed or moved
-to a documented canonical path.
+inventory and the active evidence registry. A new unexplained handler route
+fails the test, an active registry entry becomes stale when its handler is
+removed or canonicalized, and any HTTP handler that reintroduces a retired path
+also fails.
 
 `tests/live_non_inventory_routes.rs` validates registry shape and dispositions
 in normal test runs. Its ignored live test reruns the non-mutating `OPTIONS`
-matrix against one exact supported version and fails on either kind of drift:
-a reviewed route disappearing or a reviewed invalid route unexpectedly
-appearing.
+matrix against one exact supported version and fails when a reviewed active
+route's method registration changes. Retired routes are not reprobed on every
+run because the SDK no longer sends them; their five-version evidence remains
+checked into the same file.
 
-The next cleanup step is to correct, deprecate, or remove the 49 invalid
-handlers module by module, checking downstream redisctl use before making a
-breaking API change. The registry should shrink as those decisions land; it is
-not a permanent exceptions budget.
+The next cleanup step is to migrate downstream redisctl commands away from the
+47 deprecated local-error shims, then remove those shims in an explicitly
+breaking release. The 22 active compatibility routes should receive behavioral
+tests or documented replacements; they are not a permanent exceptions budget.

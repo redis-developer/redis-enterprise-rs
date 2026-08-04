@@ -49,15 +49,6 @@ fn test_role_minimal() -> serde_json::Value {
     })
 }
 
-fn test_built_in_role() -> serde_json::Value {
-    json!({
-        "uid": 10,
-        "name": "Admin",
-        "management": "admin",
-        "data_access": "full"
-    })
-}
-
 fn test_user(uid: u32, role_uids: Vec<u32>) -> serde_json::Value {
     json!({
         "uid": uid,
@@ -424,60 +415,6 @@ async fn test_role_delete_nonexistent() {
     let result = handler.delete(999).await;
 
     assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_roles_built_in() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("GET"))
-        .and(path("/v1/roles/builtin"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([test_built_in_role()])))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = RolesHandler::new(client);
-    let result = handler.built_in().await;
-
-    assert!(result.is_ok());
-    let roles = result.unwrap();
-    assert_eq!(roles.len(), 1);
-    assert_eq!(roles[0].uid, 10);
-    assert_eq!(roles[0].name, "Admin");
-}
-
-#[tokio::test]
-async fn test_roles_built_in_empty() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("GET"))
-        .and(path("/v1/roles/builtin"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = RolesHandler::new(client);
-    let result = handler.built_in().await;
-
-    assert!(result.is_ok());
-    let roles = result.unwrap();
-    assert_eq!(roles.len(), 0);
 }
 
 #[tokio::test]

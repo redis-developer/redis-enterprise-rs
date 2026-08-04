@@ -74,9 +74,10 @@ impl CrdbTasksHandler {
             .await
     }
 
-    /// Create a new CRDB task
-    pub async fn create(&self, request: CreateCrdbTaskRequest) -> Result<CrdbTask> {
-        self.client.post("/v1/crdb_tasks", &request).await
+    /// Retired direct CRDB task creation helper.
+    #[deprecated(note = "CRDB tasks are created by CRDB operations, not POST /v1/crdb_tasks")]
+    pub async fn create(&self, _request: CreateCrdbTaskRequest) -> Result<CrdbTask> {
+        crate::error::unsupported_operation("create CRDB task directly")
     }
 
     /// Cancel a CRDB task

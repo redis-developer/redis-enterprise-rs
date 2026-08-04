@@ -100,9 +100,10 @@ impl_crud!(RolesHandler {
 
 // Custom methods
 impl RolesHandler {
-    /// Get built-in roles
+    /// Retired built-in role alias.
+    #[deprecated(note = "Redis Software does not register /v1/roles/builtin")]
     pub async fn built_in(&self) -> Result<Vec<RoleInfo>> {
-        self.client.get("/v1/roles/builtin").await
+        crate::error::unsupported_operation("list built-in roles")
     }
 
     /// Get user UIDs assigned to a role.

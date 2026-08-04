@@ -118,7 +118,7 @@ pub struct BootstrapStatus {
     pub end_time: Option<String>,
 }
 
-/// Response wrapper for `GET /v1/bootstrap` (and `POST /v1/bootstrap` /
+/// Response wrapper for `GET /v1/bootstrap` (and `POST /v1/bootstrap/{action}` /
 /// `POST /v1/bootstrap/join`).
 ///
 /// The Redis Enterprise API wraps the bootstrap state in a top-level
@@ -153,10 +153,12 @@ impl BootstrapHandler {
 
     /// Initialize cluster bootstrap.
     ///
-    /// `POST /v1/bootstrap`. Returns the [`BootstrapStatusResponse`]
+    /// `POST /v1/bootstrap/{action}`. Returns the [`BootstrapStatusResponse`]
     /// wrapper (`bootstrap_status` + optional `local_node_info`).
     pub async fn create(&self, config: BootstrapConfig) -> Result<BootstrapStatusResponse> {
-        self.client.post("/v1/bootstrap", &config).await
+        self.client
+            .post(&format!("/v1/bootstrap/{}", config.action), &config)
+            .await
     }
 
     /// Get current bootstrap status.
@@ -175,9 +177,11 @@ impl BootstrapHandler {
         self.client.post("/v1/bootstrap/join", &config).await
     }
 
-    /// Reset bootstrap (dangerous operation)
+    /// Reset the cluster through the documented cluster reset action.
     pub async fn reset(&self) -> Result<()> {
-        self.client.delete("/v1/bootstrap").await
+        self.client
+            .post_action("/v1/cluster/actions/reset", &serde_json::json!({}))
+            .await
     }
 
     /// Validate bootstrap for a specific UID - POST /v1/bootstrap/validate/{uid}

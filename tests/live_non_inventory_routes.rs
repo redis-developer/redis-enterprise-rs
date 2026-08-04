@@ -29,6 +29,7 @@ struct RouteRegistry {
     evidence: String,
     tested_versions: Vec<String>,
     routes: BTreeMap<String, RouteEvidence>,
+    retired_routes: BTreeMap<String, RouteEvidence>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -36,6 +37,14 @@ struct RouteEvidence {
     module: String,
     present_versions: Vec<String>,
     disposition: RouteDisposition,
+    decision: Option<RetiredDecision>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum RetiredDecision {
+    Canonicalized,
+    DeprecatedLocalError,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -171,7 +180,7 @@ async fn server_version(client: &Client, base_url: &str, user: &str, password: &
 #[test]
 fn route_registry_is_complete_and_consistent() {
     let registry = load_registry();
-    assert_eq!(registry.schema_version, 1);
+    assert_eq!(registry.schema_version, 2);
     assert_eq!(registry.verified_at, "2026-08-04");
     assert_eq!(
         registry.evidence,
@@ -191,8 +200,8 @@ fn route_registry_is_complete_and_consistent() {
     let routes = load_routes(&registry);
     assert_eq!(
         routes.len(),
-        71,
-        "issue #105's registry shrinks as routes move to documented canonical paths"
+        22,
+        "only intentional compatibility routes remain active"
     );
 
     let mut dispositions = BTreeMap::new();
@@ -219,6 +228,11 @@ fn route_registry_is_complete_and_consistent() {
         assert!(
             !route.evidence.module.trim().is_empty(),
             "route module is required for {}",
+            route.key()
+        );
+        assert!(
+            route.evidence.decision.is_none(),
+            "active route must not have a retirement decision: {}",
             route.key()
         );
         assert!(
@@ -262,7 +276,33 @@ fn route_registry_is_complete_and_consistent() {
         dispositions.get(&RouteDisposition::CompatibilityLegacy),
         Some(&9)
     );
-    assert_eq!(dispositions.get(&RouteDisposition::Invalid), Some(&49));
+    assert_eq!(dispositions.get(&RouteDisposition::Invalid), None);
+
+    assert_eq!(registry.retired_routes.len(), 59);
+    let mut retirement_decisions = BTreeMap::new();
+    for (key, evidence) in &registry.retired_routes {
+        assert!(
+            !evidence.module.trim().is_empty(),
+            "module required for {key}"
+        );
+        assert!(
+            evidence.present_versions.is_empty(),
+            "retired invalid route must be absent from all tested versions: {key}"
+        );
+        assert_eq!(evidence.disposition, RouteDisposition::Invalid);
+        let decision = evidence
+            .decision
+            .expect("retired route must record its implementation decision");
+        *retirement_decisions.entry(decision).or_insert(0usize) += 1;
+    }
+    assert_eq!(
+        retirement_decisions.get(&RetiredDecision::Canonicalized),
+        Some(&12)
+    );
+    assert_eq!(
+        retirement_decisions.get(&RetiredDecision::DeprecatedLocalError),
+        Some(&47)
+    );
 }
 
 #[tokio::test]

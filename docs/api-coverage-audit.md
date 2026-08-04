@@ -11,19 +11,19 @@ validation annotations.
 - Unique documented operations: `203`
 - Collapsed duplicate aliases: `6`
 - Handler declarations: `195`
-- Wiremock method/path matchers: `137`
+- Wiremock method/path matchers: `140`
 - Explicit Wiremock call-count expectations: `2`
-- Request body matchers: `25`
+- Request body matchers: `27`
 - Query matchers: `6`
-- Response fixtures: `125`
+- Response fixtures: `128`
 - Explicit fixture-deserialization evidence: `7`
 - Explicit live evidence: `13`
 
 ### Dispositions
 
 - `handler_with_asserted_mock`: `2`
-- `handler_with_mock_evidence`: `135`
-- `handler_without_mock_evidence`: `58`
+- `handler_with_mock_evidence`: `138`
+- `handler_without_mock_evidence`: `55`
 - `mock_without_handler`: `0`
 - `docs_only`: `8`
 

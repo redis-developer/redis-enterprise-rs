@@ -10,10 +10,6 @@ fn success_response(body: serde_json::Value) -> ResponseTemplate {
     ResponseTemplate::new(200).set_body_json(body)
 }
 
-fn no_content_response() -> ResponseTemplate {
-    ResponseTemplate::new(204)
-}
-
 fn test_action() -> serde_json::Value {
     // Note: real API returns progress as a string, not a number — the
     // type matches what `cat tests/fixtures/actions_list.json` shows.
@@ -226,56 +222,6 @@ async fn test_action_get_failed() {
         Some("Connection timeout to new node".to_string())
     );
     assert!(action.end_time.is_some());
-}
-
-#[tokio::test]
-async fn test_action_cancel() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("DELETE"))
-        .and(path("/v1/actions/action-123-abc"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(no_content_response())
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = ActionHandler::new(client);
-    let result = handler.cancel("action-123-abc").await;
-
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn test_action_cancel_nonexistent() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("DELETE"))
-        .and(path("/v1/actions/nonexistent-action"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(ResponseTemplate::new(404).set_body_json(json!({
-            "error": "Action not found"
-        })))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = ActionHandler::new(client);
-    let result = handler.cancel("nonexistent-action").await;
-
-    assert!(result.is_err());
 }
 
 #[tokio::test]

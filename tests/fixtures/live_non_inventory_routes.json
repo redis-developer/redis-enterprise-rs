@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "verified_at": "2026-08-04",
   "evidence": "OPTIONS path registration and Allow header",
   "tested_versions": [
@@ -10,11 +10,6 @@
     "8.2.0-25"
   ],
   "routes": {
-    "DELETE /v1/actions/{}": {
-      "module": "actions",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "DELETE /v1/bdb_groups/{}": {
       "module": "bdb_groups",
       "present_versions": [
@@ -26,31 +21,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "DELETE /v1/bootstrap": {
-      "module": "bootstrap",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "DELETE /v1/cm_settings": {
-      "module": "cm_settings",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "DELETE /v1/debuginfo/{}": {
-      "module": "debuginfo",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "DELETE /v1/job_scheduler/{}": {
-      "module": "job_scheduler",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "DELETE /v1/migrations/{}": {
-      "module": "migrations",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "DELETE /v1/modules/{}": {
       "module": "modules",
       "present_versions": [
@@ -59,11 +29,6 @@
         "7.22.2-170"
       ],
       "disposition": "compatibility_legacy"
-    },
-    "DELETE /v1/ocsp/cache": {
-      "module": "ocsp",
-      "present_versions": [],
-      "disposition": "invalid"
     },
     "DELETE /v1/suffix/{}": {
       "module": "suffixes",
@@ -107,16 +72,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "GET /v1/bdbs/{}/alert_settings": {
-      "module": "bdb",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/bdbs/{}/endpoints": {
-      "module": "bdb",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "GET /v1/bootstrap": {
       "module": "bootstrap",
       "present_versions": [
@@ -128,26 +83,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "GET /v1/cluster/alert_settings": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/cluster/alert_settings/{}": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/cluster/settings": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/cluster/topology": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "GET /v1/cluster/witness_disk": {
       "module": "cluster",
       "present_versions": [
@@ -157,71 +92,6 @@
         "8.2.0-25"
       ],
       "disposition": "verified_undocumented"
-    },
-    "GET /v1/debuginfo": {
-      "module": "debuginfo",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/debuginfo/{}": {
-      "module": "debuginfo",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/debuginfo/{}/download": {
-      "module": "debuginfo",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/diagnostics/checks": {
-      "module": "diagnostics",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/diagnostics/last": {
-      "module": "diagnostics",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/diagnostics/reports": {
-      "module": "diagnostics",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/diagnostics/reports/{}": {
-      "module": "diagnostics",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/endpoints": {
-      "module": "endpoints",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/endpoints/{}": {
-      "module": "endpoints",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/job_scheduler/{}": {
-      "module": "job_scheduler",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/job_scheduler/{}/history": {
-      "module": "job_scheduler",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/license/usage": {
-      "module": "license",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/migrations": {
-      "module": "migrations",
-      "present_versions": [],
-      "disposition": "invalid"
     },
     "GET /v1/nodes/wd_status": {
       "module": "nodes",
@@ -233,11 +103,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "GET /v1/nodes/{}/endpoints": {
-      "module": "nodes",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "GET /v1/nodes/{}/wd_status": {
       "module": "nodes",
       "present_versions": [
@@ -247,21 +112,6 @@
         "8.2.0-25"
       ],
       "disposition": "verified_undocumented"
-    },
-    "GET /v1/proxies/{}/stats": {
-      "module": "proxies",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/proxies/{}/stats/{}": {
-      "module": "proxies",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/roles/builtin": {
-      "module": "roles",
-      "present_versions": [],
-      "disposition": "invalid"
     },
     "GET /v1/users/permissions": {
       "module": "users",
@@ -300,61 +150,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "POST /v1/bootstrap": {
-      "module": "bootstrap",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/crdb_tasks": {
-      "module": "crdb_tasks",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/debuginfo": {
-      "module": "debuginfo",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/diagnostics": {
-      "module": "diagnostics",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/job_scheduler": {
-      "module": "job_scheduler",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/job_scheduler/{}/trigger": {
-      "module": "job_scheduler",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/license/validate": {
-      "module": "license",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/migrations": {
-      "module": "migrations",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/migrations/{}/pause": {
-      "module": "migrations",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/migrations/{}/resume": {
-      "module": "migrations",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/migrations/{}/start": {
-      "module": "migrations",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "POST /v1/modules": {
       "module": "modules",
       "present_versions": [
@@ -374,16 +169,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "POST /v1/ocsp/query": {
-      "module": "ocsp",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "POST /v1/proxies/{}/actions/reload": {
-      "module": "proxies",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "POST /v1/redis_acls/validate": {
       "module": "redis_acls",
       "present_versions": [
@@ -392,11 +177,6 @@
         "7.22.2-170"
       ],
       "disposition": "compatibility_legacy"
-    },
-    "POST /v1/suffix": {
-      "module": "suffixes",
-      "present_versions": [],
-      "disposition": "invalid"
     },
     "POST /v1/users/password": {
       "module": "users",
@@ -427,21 +207,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "PUT /v1/bdbs/{}/alert_settings": {
-      "module": "bdb",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "PUT /v1/cluster/alert_settings": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "PUT /v1/cluster/alert_settings/{}": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "PUT /v1/cluster/policy/restore_default": {
       "module": "cluster",
       "present_versions": [
@@ -453,16 +218,6 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "PUT /v1/job_scheduler/{}": {
-      "module": "job_scheduler",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "PUT /v1/modules/{}": {
-      "module": "modules",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "PUT /v1/users/password": {
       "module": "users",
       "present_versions": [
@@ -471,6 +226,362 @@
         "7.22.2-170"
       ],
       "disposition": "compatibility_legacy"
+    }
+  },
+  "retired_routes": {
+    "DELETE /v1/actions/{}": {
+      "module": "actions",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "DELETE /v1/bootstrap": {
+      "module": "bootstrap",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "DELETE /v1/cm_settings": {
+      "module": "cm_settings",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "DELETE /v1/debuginfo/{}": {
+      "module": "debuginfo",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "DELETE /v1/job_scheduler/{}": {
+      "module": "job_scheduler",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "DELETE /v1/migrations/{}": {
+      "module": "migrations",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "DELETE /v1/ocsp/cache": {
+      "module": "ocsp",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/bdbs/metrics/{}": {
+      "module": "bdb",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/bdbs/{}/alert_settings": {
+      "module": "bdb",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/bdbs/{}/endpoints": {
+      "module": "bdb",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/bdbs/{}/proxies": {
+      "module": "bdb",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/cluster/alert_settings": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/cluster/alert_settings/{}": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/cluster/license": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/cluster/settings": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/cluster/suffixes": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/cluster/topology": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/crdbs/{}/tasks": {
+      "module": "crdb",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/debuginfo": {
+      "module": "debuginfo",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/debuginfo/{}": {
+      "module": "debuginfo",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/debuginfo/{}/download": {
+      "module": "debuginfo",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/diagnostics/checks": {
+      "module": "diagnostics",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/diagnostics/last": {
+      "module": "diagnostics",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/diagnostics/reports": {
+      "module": "diagnostics",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/diagnostics/reports/{}": {
+      "module": "diagnostics",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/endpoints": {
+      "module": "endpoints",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/endpoints/{}": {
+      "module": "endpoints",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/endpoints/{}/stats": {
+      "module": "endpoints",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/job_scheduler/{}": {
+      "module": "job_scheduler",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/job_scheduler/{}/history": {
+      "module": "job_scheduler",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/license/usage": {
+      "module": "license",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/migrations": {
+      "module": "migrations",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/nodes/{}/endpoints": {
+      "module": "nodes",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/nodes/{}/proxies": {
+      "module": "nodes",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/nodes/{}/shards": {
+      "module": "nodes",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/proxies/{}/stats": {
+      "module": "proxies",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/proxies/{}/stats/{}": {
+      "module": "proxies",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/roles/builtin": {
+      "module": "roles",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "GET /v1/roles/{}/users": {
+      "module": "roles",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "GET /v1/shards/{}/stats/{}": {
+      "module": "shards",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "POST /v1/bootstrap": {
+      "module": "bootstrap",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "canonicalized"
+    },
+    "POST /v1/crdb_tasks": {
+      "module": "crdb_tasks",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/debuginfo": {
+      "module": "debuginfo",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/diagnostics": {
+      "module": "diagnostics",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/job_scheduler": {
+      "module": "job_scheduler",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/job_scheduler/{}/trigger": {
+      "module": "job_scheduler",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/license/validate": {
+      "module": "license",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/migrations": {
+      "module": "migrations",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/migrations/{}/pause": {
+      "module": "migrations",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/migrations/{}/resume": {
+      "module": "migrations",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/migrations/{}/start": {
+      "module": "migrations",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/ocsp/query": {
+      "module": "ocsp",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/proxies/{}/actions/reload": {
+      "module": "proxies",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "POST /v1/suffix": {
+      "module": "suffixes",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "PUT /v1/bdbs/{}/alert_settings": {
+      "module": "bdb",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "PUT /v1/cluster/alert_settings": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "PUT /v1/cluster/alert_settings/{}": {
+      "module": "cluster",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "PUT /v1/job_scheduler/{}": {
+      "module": "job_scheduler",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
+    },
+    "PUT /v1/modules/{}": {
+      "module": "modules",
+      "present_versions": [],
+      "disposition": "invalid",
+      "decision": "deprecated_local_error"
     }
   }
 }

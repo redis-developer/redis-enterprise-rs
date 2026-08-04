@@ -126,17 +126,16 @@ impl LicenseHandler {
         self.get().await
     }
 
-    /// Get license usage statistics
+    /// Retired license-usage helper.
+    #[deprecated(note = "Redis Software does not register /v1/license/usage")]
     pub async fn usage(&self) -> Result<LicenseUsage> {
-        self.client.get("/v1/license/usage").await
+        crate::error::unsupported_operation("get license usage")
     }
 
-    /// Validate a license key
-    pub async fn validate(&self, license_key: &str) -> Result<License> {
-        let request = LicenseUpdateRequest {
-            license: license_key.to_string(),
-        };
-        self.client.post("/v1/license/validate", &request).await
+    /// Retired standalone license-validation helper.
+    #[deprecated(note = "install with update and inspect the canonical license resource")]
+    pub async fn validate(&self, _license_key: &str) -> Result<License> {
+        crate::error::unsupported_operation("validate license without installing it")
     }
 
     /// Get the cluster license through the canonical license endpoint.

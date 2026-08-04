@@ -787,11 +787,10 @@ impl DatabaseHandler {
         self.client.get(&format!("/v1/bdbs/{}/shards", uid)).await
     }
 
-    /// Get database endpoints (BDB.ENDPOINTS)
-    pub async fn endpoints(&self, uid: u32) -> Result<Vec<EndpointInfo>> {
-        self.client
-            .get(&format!("/v1/bdbs/{}/endpoints", uid))
-            .await
+    /// Retired database endpoints helper.
+    #[deprecated(note = "Redis Software does not register database-scoped endpoint routes")]
+    pub async fn endpoints(&self, _uid: u32) -> Result<Vec<EndpointInfo>> {
+        crate::error::unsupported_operation("list database endpoints")
     }
 
     /// Optimize shards placement (status) - GET

@@ -78,33 +78,34 @@ impl DebugInfoHandler {
         DebugInfoHandler { client }
     }
 
-    /// Start debug info collection
-    pub async fn create(&self, request: DebugInfoRequest) -> Result<DebugInfoStatus> {
-        self.client.post("/v1/debuginfo", &request).await
+    /// Retired task-style debug info creation helper.
+    #[deprecated(note = "use the documented cluster, node, or database debuginfo methods")]
+    pub async fn create(&self, _request: DebugInfoRequest) -> Result<DebugInfoStatus> {
+        crate::error::unsupported_operation("create generic debuginfo task")
     }
 
-    /// Get debug info collection status
-    pub async fn status(&self, task_id: &str) -> Result<DebugInfoStatus> {
-        self.client.get(&format!("/v1/debuginfo/{}", task_id)).await
+    /// Retired task-style debug info status helper.
+    #[deprecated(note = "Redis Software does not register task-style debuginfo routes")]
+    pub async fn status(&self, _task_id: &str) -> Result<DebugInfoStatus> {
+        crate::error::unsupported_operation("get generic debuginfo task status")
     }
 
-    /// List all debug info tasks
+    /// Retired task-style debug info list helper.
+    #[deprecated(note = "Redis Software does not register task-style debuginfo routes")]
     pub async fn list(&self) -> Result<Vec<DebugInfoStatus>> {
-        self.client.get("/v1/debuginfo").await
+        crate::error::unsupported_operation("list generic debuginfo tasks")
     }
 
-    /// Download debug info package
-    pub async fn download(&self, task_id: &str) -> Result<Vec<u8>> {
-        self.client
-            .get_binary(&format!("/v1/debuginfo/{}/download", task_id))
-            .await
+    /// Retired task-style debug info download helper.
+    #[deprecated(note = "use the documented cluster, node, or database debuginfo methods")]
+    pub async fn download(&self, _task_id: &str) -> Result<Vec<u8>> {
+        crate::error::unsupported_operation("download generic debuginfo task")
     }
 
-    /// Cancel debug info collection
-    pub async fn cancel(&self, task_id: &str) -> Result<()> {
-        self.client
-            .delete(&format!("/v1/debuginfo/{}", task_id))
-            .await
+    /// Retired task-style debug info cancellation helper.
+    #[deprecated(note = "Redis Software does not register task-style debuginfo routes")]
+    pub async fn cancel(&self, _task_id: &str) -> Result<()> {
+        crate::error::unsupported_operation("cancel generic debuginfo task")
     }
 
     /// Get all debug info across nodes - GET /v1/debuginfo/all (DEPRECATED)
