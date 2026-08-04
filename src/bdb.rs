@@ -620,6 +620,7 @@ pub struct ModuleConfig {
 /// let request = CreateDatabaseRequest::builder()
 ///     .name("my-database")
 ///     .memory_size(1024 * 1024 * 1024) // 1GB
+///     .redis_version("7.4") // Optional; choose a version advertised by /v1/nodes
 ///     .port(12000)
 ///     .replication(true)
 ///     .persistence("aof")
@@ -637,6 +638,14 @@ pub struct CreateDatabaseRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub memory_size: Option<u64>,
+    /// Redis database engine version to provision (for example, `"7.4"`).
+    ///
+    /// Supported values are advertised by each node's
+    /// `supported_database_versions` field. When omitted, Redis Software
+    /// chooses its configured default.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(into, strip_option))]
+    pub redis_version: Option<String>,
     /// TCP port on which the database is available (read-only).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -646,7 +655,15 @@ pub struct CreateDatabaseRequest {
     #[builder(default, setter(strip_option))]
     pub replication: Option<bool>,
     /// Persistence policy (e.g. `"disabled"`, `"aof"`, `"snapshot"`).
-    #[serde(skip_serializing_if = "Option::is_none")]
+    ///
+    /// Redis Software names this field `data_persistence` on the wire. The
+    /// shorter Rust field and builder name are retained for source
+    /// compatibility.
+    #[serde(
+        rename = "data_persistence",
+        alias = "persistence",
+        skip_serializing_if = "Option::is_none"
+    )]
     #[builder(default, setter(into, strip_option))]
     pub persistence: Option<String>,
     /// Eviction policy when the database reaches its memory limit (e.g. `"allkeys-lru"`).
