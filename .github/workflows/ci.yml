@@ -51,6 +51,19 @@ jobs:
           python3 scripts/audit_api_coverage.py
           git diff --exit-code -- docs/api-coverage-audit.csv docs/api-coverage-audit.md
 
+  audit:
+    name: Dependency policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check advisories, bans, licenses, and sources
+        uses: EmbarkStudios/cargo-deny-action@v2.1.1
+        with:
+          rust-version: "1.89"
+          command: check advisories bans licenses sources
+          arguments: --all-features
+
   test:
     name: Test
     needs: check
@@ -69,6 +82,70 @@ jobs:
 
       - name: Run integration tests
         run: cargo test --test '*' --all-features
+
+  coverage:
+    name: Rust coverage
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust coverage tools
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@v2.85.7
+        with:
+          tool: cargo-llvm-cov@0.8.7
+          fallback: none
+
+      - name: Prepare coverage artifact directory
+        run: mkdir -p target/coverage-artifacts
+
+      - name: Measure all-feature coverage
+        run: >-
+          cargo llvm-cov --all-features --json --summary-only
+          --output-path target/coverage-artifacts/coverage.json
+
+      - name: Enforce reviewed coverage floors
+        run: >-
+          python3 scripts/check_coverage.py
+          --config quality-gates.toml
+          --report target/coverage-artifacts/coverage.json
+          --summary target/coverage-artifacts/coverage-summary.md
+
+      - name: Generate LCOV report
+        run: >-
+          cargo llvm-cov report --lcov
+          --output-path target/coverage-artifacts/lcov.info
+
+      - name: Publish coverage job summary
+        run: cat target/coverage-artifacts/coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-coverage-${{ github.run_id }}
+          path: |
+            target/coverage-artifacts/coverage.json
+            target/coverage-artifacts/coverage-summary.md
+            target/coverage-artifacts/lcov.info
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload coverage to Codecov (optional reporting)
+        continue-on-error: true
+        uses: codecov/codecov-action@v5.5.5
+        with:
+          files: target/coverage-artifacts/lcov.info
+          disable_search: true
+          fail_ci_if_error: false
 
   build:
     name: Build - ${{ matrix.os }}
@@ -93,7 +170,7 @@ jobs:
   ci-status:
     name: CI Status
     runs-on: ubuntu-latest
-    needs: [check, test, build]
+    needs: [check, audit, test, coverage, build]
     if: always()
     steps:
       - name: Check CI status
@@ -104,6 +181,18 @@ jobs:
           fi
           if [[ "${{ needs.test.result }}" != "success" ]]; then
             echo "Tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.audit.result }}" != "success" ]]; then
+            echo "Dependency policy failed"
+            exit 1
+          fi
+          if [[ "${{ needs.coverage.result }}" != "success" ]]; then
+            echo "Coverage gate failed"
+            exit 1
+          fi
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "Platform build failed"
             exit 1
           fi
           echo "CI passed!"
