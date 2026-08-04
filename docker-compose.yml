@@ -6,7 +6,7 @@
 #   docker compose down -v            # Stop and remove
 #
 # Environment variables (optional):
-#   REDIS_ENTERPRISE_IMAGE - Docker image (default: redislabs/redis:8.0.10-81)
+#   REDIS_ENTERPRISE_IMAGE - Docker image (default: redislabs/redis:8.2.0-25.12)
 #   REDIS_ENTERPRISE_DB_PORT - Host port mapped to the default database port (default: 12000)
 #   REDIS_ENTERPRISE_API_PORT - Host port mapped to the REST API (default: 9443)
 #   REDIS_ENTERPRISE_UI_PORT - Host port mapped to the admin UI (default: 8443)
@@ -18,7 +18,7 @@
 
 services:
   redis-enterprise:
-    image: ${REDIS_ENTERPRISE_IMAGE:-redislabs/redis:8.0.10-81}
+    image: ${REDIS_ENTERPRISE_IMAGE:-redislabs/redis:8.2.0-25.12}
     tty: true
     cap_add:
       - ALL
