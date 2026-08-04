@@ -476,7 +476,12 @@ fn collect_dropped_paths(raw: &Value, typed: &Value, path: &str, output: &mut Ve
                     Some(typed_value) => {
                         collect_dropped_paths(raw_value, typed_value, &child_path, output)
                     }
-                    None => output.push(child_path),
+                    // `Option::None` response fields may intentionally omit a
+                    // raw `null` when reserialized. No information was lost in
+                    // that case, so only non-null missing values count as a
+                    // dropped field.
+                    None if !raw_value.is_null() => output.push(child_path),
+                    None => {}
                 }
                 if output.len() >= 200 {
                     break;
@@ -1034,6 +1039,20 @@ fn dropped_path_comparison_records_names_not_values() {
     assert_eq!(comparison.dropped_paths, ["/*/nested/dropped"]);
     assert!(!comparison.reason.contains("secret-one"));
     assert!(!comparison.reason.contains("secret-two"));
+}
+
+#[test]
+fn dropped_path_comparison_ignores_omitted_nulls_but_not_values() {
+    let raw = json!({
+        "modeled_optional": null,
+        "unknown_null": null,
+        "unknown_value": false
+    });
+    let typed = json!({});
+
+    let comparison = compare_model("Example", Ok(raw), Ok(typed));
+    assert_eq!(comparison.status, ModelStatus::DroppedFields);
+    assert_eq!(comparison.dropped_paths, ["/unknown_value"]);
 }
 
 #[test]

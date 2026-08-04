@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "provenance": {
+    "captured_on": "2026-08-04",
+    "redis_software_families": ["7.4", "7.8", "7.22", "8.0", "8.2"],
+    "policy": "Sanitized synthetic values reproduce documented and observed field shapes; no live payload values are stored.",
+    "sources": [
+      "https://redis.io/docs/latest/operate/rs/references/rest-api/objects/bdb/",
+      "https://redis.io/docs/latest/operate/rs/references/rest-api/objects/shard/",
+      "https://redis.io/docs/latest/operate/rs/references/rest-api/objects/user/",
+      "tests/fixtures/live_compliance_baseline.json"
+    ]
+  },
+  "responses": {
+    "cluster": {
+      "name": "cluster.example.invalid",
+      "uid": 1,
+      "status": "active",
+      "availability_api": true,
+      "crdt_supported_featureset_version_map": {"default": 1},
+      "usage_report_fields": ["bdb_uid", "used_memory"]
+    },
+    "database": {
+      "uid": 1,
+      "name": "model-fidelity-database",
+      "status": "active",
+      "endpoints": [
+        {
+          "uid": "1:1",
+          "port": 12000,
+          "oss_cluster_api_preferred_ip_type": "internal",
+          "oss_cluster_api_preferred_endpoint_type": "hostname",
+          "future_endpoint_control": {"enabled": true}
+        }
+      ],
+      "availability_api": true,
+      "auto_shards_balancing": true,
+      "gradual_sync_policy": "default",
+      "future_database_control": {"mode": "synthetic"}
+    },
+    "license": {
+      "expired": false,
+      "type": "trial",
+      "cluster_name": null,
+      "owner": null,
+      "ram_shards_limit": null,
+      "flash_shards_limit": null,
+      "future_license_metadata": "preserved"
+    },
+    "node": {
+      "uid": 1,
+      "status": "active",
+      "software_version": "8.2.0-25",
+      "node_guardrails_ingress_throttling_worker_limit_ops_per_sec": -1,
+      "future_node_capability": {"enabled": true}
+    },
+    "shard": {
+      "uid": "1",
+      "bdb_uid": 1,
+      "node_uid": "1",
+      "role": "master",
+      "status": "active",
+      "detailed_status": "ok",
+      "loading": {"progress": 100.0, "status": "idle"},
+      "report_timestamp": "2026-08-04T17:00:00Z",
+      "actual_role": "master",
+      "marked_for_removal": false,
+      "future_shard_state": {"epoch": 1}
+    },
+    "user": {
+      "uid": 1,
+      "email": "model-fidelity@example.invalid",
+      "role": "admin",
+      "status": "active",
+      "last_login": 1785862800,
+      "future_user_metadata": {"source": "synthetic"}
+    }
+  },
+  "requests": {
+    "create_database": {
+      "name": "model-fidelity-database",
+      "memory_size": 1073741824,
+      "redis_version": "8.2",
+      "replication": true,
+      "data_persistence": "aof",
+      "shards_count": 2
+    },
+    "create_user": {
+      "email": "model-fidelity@example.invalid",
+      "password": "synthetic-password",
+      "name": "Model Fidelity",
+      "email_alerts": false,
+      "role_uids": [1],
+      "auth_method": "regular"
+    }
+  }
+}

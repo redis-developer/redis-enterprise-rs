@@ -221,7 +221,13 @@ server. The ignored live test:
 - classifies every operation as `pass`, `known_difference`,
   `version_specific`, `skipped`, `unsupported`, or `fail`; and
 - writes only status metadata, JSON field paths, and sanitized error classes.
-  It never writes response bodies, credentials, resource IDs, or field values.
+
+It never writes response bodies, credentials, resource IDs, or field values.
+
+The comparison policy and sanitized fixture provenance are documented in the
+[model-fidelity guide](./model-fidelity.md). In particular, a raw JSON `null`
+omitted by `Option::None` does not count as lost information; every missing
+non-null field does.
 
 To create a candidate for review against the pinned 8.2 image, first export the
 client variables from the smoke-check section, then run:
@@ -325,6 +331,16 @@ docker compose up -d
 ```
 
 ## Current Validation Snapshot
+
+On August 4, 2026, the safe compliance profile passed against Redis Software
+`8.2.0-25` in `redislabs/redis:8.2.0-25.12` with 203 inventoried operations,
+no failed operations, and all 11 raw-to-typed model comparisons passing with
+zero dropped non-null fields. Type-only live inspection also confirmed that
+the node ingress-throttling limit is a signed integer with a negative default
+sentinel; endpoint, shard, and user fields matched their documented types. The
+versioned model baseline now expects lossless round trips across all five
+supported families. Older families retain their prior live field-path evidence
+and should be rerun automatically as part of the multi-version CI work.
 
 On August 4, 2026, Redis Software `8.2.0-25` in
 `redislabs/redis:8.2.0-25.12` returned empty HTTP 200 bodies from both

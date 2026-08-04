@@ -9,6 +9,7 @@ use crate::client::RestClient;
 use crate::error::{RestError, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::BTreeMap;
 
 /// Response for a single metric query
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,8 +22,22 @@ pub struct MetricResponse {
     pub values: Vec<Value>,
 }
 
+/// Current shard dump-file loading state.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ShardLoading {
+    /// Percentage of bytes already loaded (0-100).
+    pub progress: Option<f64>,
+    /// Load status (`in_progress` or `idle`).
+    pub status: Option<String>,
+    /// Additive or version-specific loading fields.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
+}
+
 /// Shard information
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Shard {
     /// Unique identifier (read-only).
     pub uid: String,
@@ -34,6 +49,16 @@ pub struct Shard {
     pub role: String,
     /// Current status.
     pub status: String,
+    /// More detailed shard status.
+    pub detailed_status: Option<String>,
+    /// Current dump-file loading state.
+    pub loading: Option<ShardLoading>,
+    /// Time at which the shard information was collected.
+    pub report_timestamp: Option<String>,
+    /// Effective role reported by Redis Software 8.x.
+    pub actual_role: Option<String>,
+    /// Whether Redis Software has marked the shard for removal.
+    pub marked_for_removal: Option<bool>,
     /// Hash slot range owned by this shard.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub slots: Option<String>,
@@ -56,6 +81,9 @@ pub struct Shard {
     pub redis_info: Option<Value>,
     /// Roles assigned to this shard
     pub roles: Option<Vec<String>>,
+    /// Additive or version-specific shard fields.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
 }
 
 /// Shard stats information
