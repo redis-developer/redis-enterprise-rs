@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
+import ssl
 import sys
 import urllib.error
 import urllib.parse
@@ -17,6 +19,23 @@ DOCS_ROOT = "https://redis.io"
 REQUESTS_PREFIX = "/docs/latest/operate/rs/references/rest-api/requests/"
 REQUESTS_ROOT = urllib.parse.urljoin(DOCS_ROOT, REQUESTS_PREFIX)
 USER_AGENT = "redis-enterprise-rs-api-inventory/0.1"
+
+EXIT_FETCH_FAILURE = 2
+EXIT_PARSE_FAILURE = 3
+EXIT_LOCAL_FAILURE = 4
+
+
+class DocsFetchError(RuntimeError):
+    """The official documentation could not be fetched."""
+
+    def __init__(self, url: str, category: str):
+        super().__init__(f"{category}: {url}")
+        self.url = url
+        self.category = category
+
+
+class DocsParseError(RuntimeError):
+    """Fetched documentation did not contain a usable inventory."""
 
 MODULE_GUESSES = {
     "actions": "actions",
@@ -69,8 +88,21 @@ MODULE_GUESSES = {
 
 def fetch_text(url: str) -> str:
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=20) as response:
-        return response.read().decode("utf-8")
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            payload = response.read()
+    except urllib.error.HTTPError as exc:
+        raise DocsFetchError(url, f"http_{exc.code}") from exc
+    except urllib.error.URLError as exc:
+        category = "tls" if isinstance(exc.reason, ssl.SSLError) else "network"
+        raise DocsFetchError(url, category) from exc
+    except (TimeoutError, OSError) as exc:
+        raise DocsFetchError(url, "network") from exc
+
+    try:
+        return payload.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise DocsParseError(f"official docs response was not UTF-8: {url}") from exc
 
 
 def normalize_page_url(url: str) -> str:
@@ -162,11 +194,12 @@ def parse_method_rows(markdown: str) -> list[tuple[str, str, str]]:
     return rows
 
 
-def export_inventory(output_path: Path) -> tuple[int, int]:
+def export_inventory(output_path: Path) -> tuple[int, int, list[str]]:
     repo_root = Path(__file__).resolve().parent.parent
     src_root = repo_root / "src"
     pages = discover_request_pages()
     records: list[dict[str, str]] = []
+    pages_without_method_rows: list[str] = []
 
     for page_url in pages:
         page_rel = relative_page(page_url)
@@ -174,8 +207,11 @@ def export_inventory(output_path: Path) -> tuple[int, int]:
         title = parse_title(markdown)
         module_guess = MODULE_GUESSES.get(page_rel, "")
         module_exists = str((src_root / f"{module_guess}.rs").exists()).lower() if module_guess else ""
+        method_rows = parse_method_rows(markdown)
+        if not method_rows:
+            pages_without_method_rows.append(page_rel or "_index")
 
-        for method, path, description in parse_method_rows(markdown):
+        for method, path, description in method_rows:
             records.append(
                 {
                     "page": page_rel or "_index",
@@ -191,6 +227,13 @@ def export_inventory(output_path: Path) -> tuple[int, int]:
                     "notes": "",
                 }
             )
+
+    if not pages:
+        raise DocsParseError("official docs crawl discovered no request pages")
+    if not records:
+        raise DocsParseError(
+            "official docs crawl found no method/path rows; the page layout may have changed"
+        )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="", encoding="utf-8") as handle:
@@ -214,7 +257,14 @@ def export_inventory(output_path: Path) -> tuple[int, int]:
         writer.writeheader()
         writer.writerows(records)
 
-    return len(pages), len(records)
+    return len(pages), len(records), sorted(pages_without_method_rows)
+
+
+def write_status(path: Path | None, payload: dict[str, object]) -> None:
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -224,13 +274,55 @@ def main() -> int:
         default="docs/api-inventory.csv",
         help="Path to the generated CSV file (default: docs/api-inventory.csv)",
     )
+    parser.add_argument(
+        "--status-output",
+        help="Optional JSON status artifact distinguishing fetch, parse, and local failures",
+    )
     args = parser.parse_args()
+    output_path = Path(args.output)
+    status_path = Path(args.status_output) if args.status_output else None
 
     try:
-        page_count, endpoint_count = export_inventory(Path(args.output))
-    except urllib.error.URLError as exc:
-        print(f"error: failed to fetch Redis docs: {exc}", file=sys.stderr)
-        return 1
+        page_count, endpoint_count, pages_without_method_rows = export_inventory(output_path)
+    except DocsFetchError as exc:
+        write_status(
+            status_path,
+            {
+                "classification": "fetch_failure",
+                "category": exc.category,
+                "source": exc.url,
+            },
+        )
+        print(
+            f"error: official docs fetch failed ({exc.category}) for {exc.url}",
+            file=sys.stderr,
+        )
+        return EXIT_FETCH_FAILURE
+    except DocsParseError as exc:
+        write_status(
+            status_path,
+            {"classification": "parse_failure", "message": str(exc)},
+        )
+        print(f"error: official docs parse failed: {exc}", file=sys.stderr)
+        return EXIT_PARSE_FAILURE
+    except OSError as exc:
+        write_status(
+            status_path,
+            {"classification": "local_failure", "category": type(exc).__name__},
+        )
+        print(f"error: could not write inventory artifacts: {type(exc).__name__}", file=sys.stderr)
+        return EXIT_LOCAL_FAILURE
+
+    write_status(
+        status_path,
+        {
+            "classification": "success",
+            "docs_pages": page_count,
+            "inventory_rows": endpoint_count,
+            "output": str(output_path),
+            "pages_without_method_rows": pages_without_method_rows,
+        },
+    )
 
     print(f"Exported {endpoint_count} endpoints from {page_count} docs pages to {args.output}")
     return 0

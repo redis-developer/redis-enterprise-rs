@@ -1,0 +1,177 @@
+name: Enterprise API contract
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      run_docs:
+        description: Crawl official Redis request docs and compare the checked inventory
+        required: true
+        default: true
+        type: boolean
+      run_live:
+        description: Run safe live compliance against every supported Redis Software family
+        required: true
+        default: true
+        type: boolean
+      run_disposable_writes:
+        description: Also run self-cleaning write lifecycles (manual dispatch only)
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: enterprise-api-contract
+  cancel-in-progress: false
+
+jobs:
+  docs-inventory:
+    name: Official docs inventory drift
+    if: github.event_name == 'schedule' || inputs.run_docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare artifact directory
+        run: mkdir -p target/contract-artifacts
+
+      - name: Crawl official request documentation
+        id: crawl
+        continue-on-error: true
+        run: >-
+          python3 scripts/export_api_inventory.py
+          --output target/contract-artifacts/fresh-api-inventory.csv
+          --status-output target/contract-artifacts/docs-crawl-status.json
+
+      - name: Compare normalized method and path sets
+        id: compare
+        if: steps.crawl.outcome == 'success'
+        continue-on-error: true
+        run: >-
+          python3 scripts/check_api_inventory_drift.py
+          --expected docs/api-inventory.csv
+          --actual target/contract-artifacts/fresh-api-inventory.csv
+          --crawl-status target/contract-artifacts/docs-crawl-status.json
+          --report target/contract-artifacts/api-inventory-drift.md
+          --status-output target/contract-artifacts/api-inventory-drift.json
+
+      - name: Publish drift job summary
+        if: always() && steps.compare.outcome != 'skipped'
+        run: cat target/contract-artifacts/api-inventory-drift.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish crawl failure summary
+        if: always() && steps.crawl.outcome == 'failure'
+        run: |
+          {
+            echo "## Official Redis API inventory crawl"
+            echo
+            echo "The crawl failed before semantic comparison. The status artifact classifies this as a fetch, parse, or local-output failure; it is not reported as an API removal."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload docs contract artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-docs-contract-${{ github.run_id }}
+          path: target/contract-artifacts/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce docs contract result
+        if: always()
+        run: |
+          test "${{ steps.crawl.outcome }}" = "success"
+          test "${{ steps.compare.outcome }}" = "success"
+
+  live-compliance:
+    name: Redis Software ${{ matrix.family }} (${{ inputs.run_disposable_writes && 'writes' || 'safe' }})
+    if: github.event_name == 'schedule' || inputs.run_live
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: "8.2"
+            image: redislabs/redis:8.2.0-25.12
+            expected_version: 8.2.0-25
+          - family: "8.0"
+            image: redislabs/redis:8.0.20-68.25
+            expected_version: 8.0.20-68
+          - family: "7.22"
+            image: redislabs/redis:7.22.2-170
+            expected_version: 7.22.2-170
+          - family: "7.8"
+            image: redislabs/redis:7.8.6-286
+            expected_version: 7.8.6-286
+          - family: "7.4"
+            image: redislabs/redis:7.4.6-272
+            expected_version: 7.4.6-272
+    env:
+      REDIS_ENTERPRISE_IMAGE: ${{ matrix.image }}
+      REDIS_ENTERPRISE_URL: https://localhost:9443
+      REDIS_ENTERPRISE_USER: admin@redis.local
+      REDIS_ENTERPRISE_PASSWORD: Redis123!
+      REDIS_ENTERPRISE_INSECURE: "true"
+      REDIS_ENTERPRISE_EXPECTED_VERSION: ${{ matrix.expected_version }}
+      COMPLIANCE_PROFILE: ${{ github.event_name == 'workflow_dispatch' && inputs.run_disposable_writes && 'writes' || 'safe' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Pull pinned Enterprise and initializer images
+        run: docker compose --profile init pull redis-enterprise init
+
+      - name: Start pinned Redis Software
+        run: docker compose up -d redis-enterprise
+
+      - name: Initialize disposable cluster and database
+        run: docker compose --profile init up --exit-code-from init init
+
+      - name: Run versioned compliance profile
+        id: compliance
+        run: |
+          mkdir -p target/contract-artifacts
+          if [[ "$COMPLIANCE_PROFILE" == "writes" ]]; then
+            export REDIS_ENTERPRISE_LIVE_WRITES=true
+          fi
+          export REDIS_ENTERPRISE_COMPLIANCE_OUTPUT="target/contract-artifacts/enterprise-compliance-${{ matrix.family }}-${COMPLIANCE_PROFILE}.json"
+          cargo test --test live_compliance live_inventory_compliance -- --ignored --nocapture --test-threads=1
+
+      - name: Render sanitized compliance summary
+        id: summarize
+        if: always() && steps.compliance.outcome == 'success'
+        run: >-
+          python3 scripts/summarize_live_compliance.py
+          --input "target/contract-artifacts/enterprise-compliance-${{ matrix.family }}-${COMPLIANCE_PROFILE}.json"
+          --output "target/contract-artifacts/enterprise-compliance-${{ matrix.family }}-${COMPLIANCE_PROFILE}.md"
+          --expected-version "${{ matrix.expected_version }}"
+          --expected-image "${{ matrix.image }}"
+          --profile "$COMPLIANCE_PROFILE"
+
+      - name: Publish compliance job summary
+        if: always() && steps.summarize.outcome == 'success'
+        run: cat "target/contract-artifacts/enterprise-compliance-${{ matrix.family }}-${COMPLIANCE_PROFILE}.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload sanitized compliance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enterprise-compliance-${{ matrix.family }}-${{ env.COMPLIANCE_PROFILE }}-${{ github.run_id }}
+          path: target/contract-artifacts/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Remove disposable cluster and volumes
+        if: always()
+        run: docker compose --profile init down -v

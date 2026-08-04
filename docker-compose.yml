@@ -10,6 +10,7 @@
 #   REDIS_ENTERPRISE_DB_PORT - Host port mapped to the default database port (default: 12000)
 #   REDIS_ENTERPRISE_API_PORT - Host port mapped to the REST API (default: 9443)
 #   REDIS_ENTERPRISE_UI_PORT - Host port mapped to the admin UI (default: 8443)
+#   REDISCTL_IMAGE - Cluster initializer image (defaults to the reviewed digest below)
 #
 # After initialization:
 #   API:      https://localhost:9443 (admin@redis.local / Redis123!)
@@ -34,7 +35,7 @@ services:
       start_period: 10s
 
   init:
-    image: ghcr.io/redis-developer/redisctl:latest
+    image: ${REDISCTL_IMAGE:-ghcr.io/redis-developer/redisctl@sha256:2d8b5148226705ae4c057611c4adcd2c9ba08cac0c02cec1c449fc31b92a2026}
     depends_on:
       redis-enterprise:
         condition: service_healthy
