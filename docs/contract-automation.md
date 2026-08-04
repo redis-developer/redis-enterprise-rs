@@ -64,8 +64,11 @@ in the [version support policy](./version-support.md): 8.2, 8.0, 7.22, 7.8,
 and 7.4. Each matrix runner:
 
 - pulls the exact Redis Software image;
-- initializes a local cluster and default database with the immutable redisctl
-  image digest checked into `docker-compose.yml`;
+- initializes a local cluster with the immutable redisctl image digest checked
+  into `docker-compose.yml`, then strictly creates and waits for the required
+  default database and shard;
+- supplies Redis database version `7.2` for the 7.4 family, whose early
+  post-bootstrap API rejects a versionless create until policy state settles;
 - runs the versioned compliance baseline;
 - verifies that the report's product version and image match the matrix;
 - uploads sanitized JSON and Markdown summaries; and
@@ -81,6 +84,9 @@ guard and safety review.
 The report contains operation status, model field paths, exact image/version
 provenance, and sanitized error classes. It never stores response bodies,
 credentials, license values, resource identifiers, or customer data.
+Typed model fidelity is measured by deserializing and reserializing the exact
+raw payload being evaluated, so differences between two successive API reads
+cannot produce false dropped-field drift.
 
 ### Responding to live failures
 

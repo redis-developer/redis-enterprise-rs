@@ -306,6 +306,7 @@ class ComplianceSummaryTests(unittest.TestCase):
         rendered = summary.render_report(self.report(), normalized, "safe")
 
         self.assertIn("**Outcome:** pass", rendered)
+        self.assertIn("Compliance test: `success`", rendered)
         self.assertIn("`redislabs/redis:8.2.0-25.12`", rendered)
         self.assertIn("Model failures: `0`", rendered)
         self.assertTrue(summary.compliance_passed(normalized))
@@ -347,6 +348,20 @@ class ComplianceSummaryTests(unittest.TestCase):
         normalized["model_dropped_fields"] = 1
         self.assertFalse(summary.compliance_passed(normalized))
 
+    def test_summary_fails_when_test_assertion_failed(self) -> None:
+        normalized = summary.validate_report(
+            self.report(),
+            "8.2.0-25",
+            "redislabs/redis:8.2.0-25.12",
+        )
+        rendered = summary.render_report(
+            self.report(), normalized, "safe", test_outcome="failure"
+        )
+
+        self.assertIn("**Outcome:** fail", rendered)
+        self.assertIn("Compliance test: `failure`", rendered)
+        self.assertFalse(summary.compliance_passed(normalized, "failure"))
+
 
 class WorkflowContractTests(unittest.TestCase):
     def test_workflow_is_external_only_and_pins_the_support_matrix(self) -> None:
@@ -378,7 +393,32 @@ class WorkflowContractTests(unittest.TestCase):
             "2d8b5148226705ae4c057611c4adcd2c9ba08cac0c02cec1c449fc31b92a2026",
             compose,
         )
+        self.assertIn('database_version: "7.2"', workflow)
+        self.assertIn("--skip-database", compose)
+        self.assertIn("Required disposable database could not be created", compose)
+        self.assertIn("Required disposable database and shard did not become ready", compose)
         self.assertNotIn("redisctl:latest", compose)
+
+    def test_workflows_use_node_24_backed_official_actions(self) -> None:
+        workflow_root = Path(__file__).resolve().parents[2] / ".github" / "workflows"
+        workflow_text = "\n".join(
+            path.read_text(encoding="utf-8") for path in workflow_root.glob("*.yml")
+        )
+
+        for current_action in [
+            "actions/checkout@v7",
+            "actions/setup-python@v7",
+            "actions/upload-artifact@v7",
+            "actions/download-artifact@v8",
+        ]:
+            self.assertIn(current_action, workflow_text)
+        for retired_action in [
+            "actions/checkout@v4",
+            "actions/setup-python@v5",
+            "actions/upload-artifact@v4",
+            "actions/download-artifact@v4",
+        ]:
+            self.assertNotIn(retired_action, workflow_text)
 
     def test_scheduled_profile_is_safe_and_writes_require_manual_dispatch(self) -> None:
         workflow = (

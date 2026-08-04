@@ -35,10 +35,15 @@ The compose file defaults to:
 - `REDIS_ENTERPRISE_API_PORT=9443`
 - `REDIS_ENTERPRISE_UI_PORT=8443`
 - `REDIS_ENTERPRISE_DB_PORT=12000`
+- `REDIS_ENTERPRISE_DATABASE_VERSION` unset (use the server default)
 
 The initializer also defaults to an immutable reviewed redisctl image digest.
 Set `REDISCTL_IMAGE` only when intentionally validating a newer initializer;
-scheduled contract runs use the checked-in digest.
+scheduled contract runs use the checked-in digest. The Compose fixture treats
+the database and its first shard as required state: it initializes the cluster,
+creates the database with retries while the cluster policy settles, waits for
+both resources to become active and discoverable, and exits nonzero if any of
+those steps fail.
 
 You can override the host ports to avoid collisions with an existing local
 cluster:
@@ -85,9 +90,15 @@ pin before every Compose command for that cluster lifecycle:
 
 ```bash
 export REDIS_ENTERPRISE_IMAGE="redislabs/redis:7.4.6-272"
+export REDIS_ENTERPRISE_DATABASE_VERSION="7.2"
 docker compose up -d redis-enterprise
 docker compose --profile init up init
 ```
+
+Redis Software 7.4 advertises a 7.2.x database engine but requires the
+major/minor request value `7.2` during this early post-bootstrap window. The
+hosted matrix pins that value explicitly; later families leave the variable
+unset and use their reviewed server default.
 
 Each matrix entry must use a fresh named volume or run after `docker compose
 down -v`; cluster state is not portable between server versions. Docker images

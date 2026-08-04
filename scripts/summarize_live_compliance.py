@@ -81,14 +81,18 @@ def validate_report(
 
 
 def render_report(
-    report: dict[str, object], summary: dict[str, int], profile: str
+    report: dict[str, object],
+    summary: dict[str, int],
+    profile: str,
+    test_outcome: str = "success",
 ) -> str:
-    result = "pass" if compliance_passed(summary) else "fail"
+    result = "pass" if compliance_passed(summary, test_outcome) else "fail"
     lines = [
         f"# Redis Software {report['version_family']} compliance",
         "",
         f"**Outcome:** {result}",
         "",
+        f"- Compliance test: `{test_outcome}`",
         f"- Product version: `{report['server_version']}`",
         f"- Container image: `{report['image']}`",
         f"- Profile: `{profile}`",
@@ -109,9 +113,12 @@ def render_report(
     return "\n".join(lines)
 
 
-def compliance_passed(summary: dict[str, int]) -> bool:
+def compliance_passed(
+    summary: dict[str, int], test_outcome: str = "success"
+) -> bool:
     return (
-        summary["fail"] == 0
+        test_outcome == "success"
+        and summary["fail"] == 0
         and summary["model_failed"] == 0
         and summary["model_dropped_fields"] == 0
     )
@@ -124,6 +131,12 @@ def main() -> int:
     parser.add_argument("--expected-version", required=True)
     parser.add_argument("--expected-image", required=True)
     parser.add_argument("--profile", choices=["safe", "writes"], required=True)
+    parser.add_argument(
+        "--test-outcome",
+        choices=["success", "failure", "cancelled", "skipped"],
+        default="success",
+        help="GitHub Actions outcome of the compliance test step",
+    )
     args = parser.parse_args()
 
     try:
@@ -135,9 +148,12 @@ def main() -> int:
 
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(render_report(report, summary, args.profile), encoding="utf-8")
+    output.write_text(
+        render_report(report, summary, args.profile, args.test_outcome),
+        encoding="utf-8",
+    )
     print(f"Wrote sanitized compliance summary to {output}")
-    if not compliance_passed(summary):
+    if not compliance_passed(summary, args.test_outcome):
         print("error: compliance summary contains operation or model failures", file=sys.stderr)
         return 1
     return 0

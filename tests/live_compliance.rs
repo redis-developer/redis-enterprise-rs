@@ -17,9 +17,12 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use chrono::{SecondsFormat, Utc};
-use redis_enterprise::{CreateUserRequest, EnterpriseClient, RestError, UpdateUserRequest};
+use redis_enterprise::{
+    ClusterInfo, Crdb, CreateUserRequest, Database, EnterpriseClient, License, MetricsConfig,
+    Module, Node, Proxy, RestError, Role, Shard, UpdateUserRequest, User,
+};
 use regex::Regex;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use tokio::time::{Duration, sleep};
 
@@ -500,54 +503,111 @@ fn collect_dropped_paths(raw: &Value, typed: &Value, path: &str, output: &mut Ve
     }
 }
 
-fn compare_model(
-    model: &str,
-    raw: Result<Value, RestError>,
-    typed: Result<Value, RestError>,
-) -> ModelComparison {
-    match (raw, typed) {
-        (Ok(raw), Ok(typed)) => {
-            let mut dropped_paths = Vec::new();
-            collect_dropped_paths(&raw, &typed, "", &mut dropped_paths);
-            dropped_paths.sort();
-            dropped_paths.dedup();
-            let status = if dropped_paths.is_empty() {
-                ModelStatus::Pass
-            } else {
-                ModelStatus::DroppedFields
-            };
-            let reason = if dropped_paths.is_empty() {
-                "raw JSON round-tripped through the typed model without dropped fields".to_string()
-            } else {
-                format!(
-                    "typed round-trip dropped {} JSON paths (capped at 200)",
-                    dropped_paths.len()
-                )
-            };
-            ModelComparison {
-                model: model.to_string(),
-                status,
-                dropped_paths,
-                reason,
-            }
-        }
-        (Err(error), _) => ModelComparison {
-            model: model.to_string(),
-            status: ModelStatus::Skipped,
-            dropped_paths: Vec::new(),
-            reason: format!("raw probe unavailable: {}", sanitized_error(&error)),
-        },
-        (_, Err(error)) => ModelComparison {
-            model: model.to_string(),
-            status: ModelStatus::Failed,
-            dropped_paths: Vec::new(),
-            reason: format!("typed deserialization failed: {}", sanitized_error(&error)),
-        },
+fn compare_model_values(model: &str, raw: Value, typed: Value) -> ModelComparison {
+    let mut dropped_paths = Vec::new();
+    collect_dropped_paths(&raw, &typed, "", &mut dropped_paths);
+    dropped_paths.sort();
+    dropped_paths.dedup();
+    let status = if dropped_paths.is_empty() {
+        ModelStatus::Pass
+    } else {
+        ModelStatus::DroppedFields
+    };
+    let reason = if dropped_paths.is_empty() {
+        "raw JSON round-tripped through the typed model without dropped fields".to_string()
+    } else {
+        format!(
+            "typed round-trip dropped {} JSON paths (capped at 200)",
+            dropped_paths.len()
+        )
+    };
+    ModelComparison {
+        model: model.to_string(),
+        status,
+        dropped_paths,
+        reason,
     }
 }
 
-fn to_json<T: Serialize>(result: Result<T, RestError>) -> Result<Value, RestError> {
-    result.and_then(|value| serde_json::to_value(value).map_err(Into::into))
+fn model_failure(model: &str, reason: &str) -> ModelComparison {
+    ModelComparison {
+        model: model.to_string(),
+        status: ModelStatus::Failed,
+        dropped_paths: Vec::new(),
+        reason: reason.to_string(),
+    }
+}
+
+fn compare_raw_model<T>(model: &str, raw: Result<Value, RestError>) -> ModelComparison
+where
+    T: DeserializeOwned + Serialize,
+{
+    let raw = match raw {
+        Ok(raw) => raw,
+        Err(error) => {
+            return ModelComparison {
+                model: model.to_string(),
+                status: ModelStatus::Skipped,
+                dropped_paths: Vec::new(),
+                reason: format!("raw probe unavailable: {}", sanitized_error(&error)),
+            };
+        }
+    };
+    let typed = match serde_json::from_value::<T>(raw.clone()) {
+        Ok(typed) => typed,
+        Err(_) => {
+            return model_failure(
+                model,
+                "typed deserialization failed for the observed JSON shape",
+            );
+        }
+    };
+    let typed = match serde_json::to_value(typed) {
+        Ok(typed) => typed,
+        Err(_) => return model_failure(model, "typed serialization failed for the observed model"),
+    };
+    compare_model_values(model, raw, typed)
+}
+
+fn compare_raw_wrapped_vec_model<T>(
+    model: &str,
+    raw: Result<Value, RestError>,
+    field: &str,
+) -> ModelComparison
+where
+    T: DeserializeOwned + Serialize,
+{
+    let raw = match raw {
+        Ok(raw) => raw,
+        Err(error) => {
+            return ModelComparison {
+                model: model.to_string(),
+                status: ModelStatus::Skipped,
+                dropped_paths: Vec::new(),
+                reason: format!("raw probe unavailable: {}", sanitized_error(&error)),
+            };
+        }
+    };
+    let Some(items) = raw.get(field).cloned() else {
+        return model_failure(
+            model,
+            "typed deserialization failed: response wrapper is missing",
+        );
+    };
+    let typed = match serde_json::from_value::<Vec<T>>(items) {
+        Ok(typed) => typed,
+        Err(_) => {
+            return model_failure(
+                model,
+                "typed deserialization failed for the observed wrapped JSON shape",
+            );
+        }
+    };
+    let typed = match serde_json::to_value(typed) {
+        Ok(typed) => json!({ field: typed }),
+        Err(_) => return model_failure(model, "typed serialization failed for the observed model"),
+    };
+    compare_model_values(model, raw, typed)
 }
 
 async fn attach_model_comparisons(
@@ -555,38 +615,32 @@ async fn attach_model_comparisons(
     reports: &mut BTreeMap<String, OperationReport>,
 ) {
     macro_rules! attach {
-        ($path:literal, $model:literal, $typed:expr) => {{
+        ($path:literal, $model:literal, $type:ty) => {{
             let raw = client.get_raw($path).await;
-            let typed = to_json($typed.await);
             if let Some(report) = reports.get_mut(concat!("GET ", $path)) {
-                report.model = Some(compare_model($model, raw, typed));
+                report.model = Some(compare_raw_model::<$type>($model, raw));
             }
         }};
     }
 
-    attach!("/v1/cluster", "ClusterInfo", client.cluster().info());
-    attach!("/v1/nodes", "Vec<Node>", client.nodes().list());
-    attach!("/v1/bdbs", "Vec<DatabaseInfo>", client.databases().list());
-    attach!("/v1/users", "Vec<User>", client.users().list());
-    attach!("/v1/roles", "Vec<Role>", client.roles().list());
-    attach!("/v1/modules", "Vec<Module>", client.modules().list());
-    attach!("/v1/shards", "Vec<Shard>", client.shards().list());
-    attach!("/v1/proxies", "Vec<Proxy>", client.proxies().list());
-    attach!("/v1/license", "License", client.license().get());
-    attach!(
-        "/v1/metrics_config",
-        "MetricsConfig",
-        client.metrics_config().get()
-    );
+    attach!("/v1/cluster", "ClusterInfo", ClusterInfo);
+    attach!("/v1/nodes", "Vec<Node>", Vec<Node>);
+    attach!("/v1/bdbs", "Vec<DatabaseInfo>", Vec<Database>);
+    attach!("/v1/users", "Vec<User>", Vec<User>);
+    attach!("/v1/roles", "Vec<Role>", Vec<Role>);
+    attach!("/v1/modules", "Vec<Module>", Vec<Module>);
+    attach!("/v1/shards", "Vec<Shard>", Vec<Shard>);
+    attach!("/v1/proxies", "Vec<Proxy>", Vec<Proxy>);
+    attach!("/v1/license", "License", License);
+    attach!("/v1/metrics_config", "MetricsConfig", MetricsConfig);
 
     let raw = client.get_raw("/v1/crdbs").await;
-    let typed = client
-        .crdb()
-        .list()
-        .await
-        .and_then(|crdbs| serde_json::to_value(json!({ "crdbs": crdbs })).map_err(Into::into));
     if let Some(report) = reports.get_mut("GET /v1/crdbs") {
-        report.model = Some(compare_model("Vec<Crdb>", raw, typed));
+        report.model = Some(compare_raw_wrapped_vec_model::<Crdb>(
+            "Vec<Crdb>",
+            raw,
+            "crdbs",
+        ));
     }
 }
 
@@ -1034,7 +1088,7 @@ fn dropped_path_comparison_records_names_not_values() {
         {"uid": 1, "nested": {"kept": true}},
         {"uid": 2, "nested": {"kept": true}}
     ]);
-    let comparison = compare_model("Example", Ok(raw), Ok(typed));
+    let comparison = compare_model_values("Example", raw, typed);
     assert_eq!(comparison.status, ModelStatus::DroppedFields);
     assert_eq!(comparison.dropped_paths, ["/*/nested/dropped"]);
     assert!(!comparison.reason.contains("secret-one"));
@@ -1050,9 +1104,50 @@ fn dropped_path_comparison_ignores_omitted_nulls_but_not_values() {
     });
     let typed = json!({});
 
-    let comparison = compare_model("Example", Ok(raw), Ok(typed));
+    let comparison = compare_model_values("Example", raw, typed);
     assert_eq!(comparison.status, ModelStatus::DroppedFields);
     assert_eq!(comparison.dropped_paths, ["/unknown_value"]);
+}
+
+#[test]
+fn model_fidelity_uses_one_observed_payload() {
+    #[derive(Debug, Serialize, Deserialize)]
+    struct PreservingModel {
+        stable: bool,
+        #[serde(flatten)]
+        additional_fields: BTreeMap<String, Value>,
+    }
+
+    let observed = json!({
+        "stable": true,
+        "grpc_gossip": true,
+        "grpc_gossip_only": true,
+        "grpc_info_provider": false
+    });
+    let later_response = json!({"stable": true});
+
+    let cross_request = compare_model_values("PreservingModel", observed.clone(), later_response);
+    assert_eq!(cross_request.status, ModelStatus::DroppedFields);
+
+    let same_payload = compare_raw_model::<PreservingModel>("PreservingModel", Ok(observed));
+    assert_eq!(same_payload.status, ModelStatus::Pass);
+    assert!(same_payload.dropped_paths.is_empty());
+}
+
+#[test]
+fn model_fidelity_classifies_deserialization_failures_without_values() {
+    #[derive(Debug, Serialize, Deserialize)]
+    struct NumericModel {
+        count: u32,
+    }
+
+    let comparison = compare_raw_model::<NumericModel>(
+        "NumericModel",
+        Ok(json!({"count": "sensitive-server-value"})),
+    );
+    assert_eq!(comparison.status, ModelStatus::Failed);
+    assert!(comparison.reason.contains("deserialization failed"));
+    assert!(!comparison.reason.contains("sensitive-server-value"));
 }
 
 #[test]
