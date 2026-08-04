@@ -1,8 +1,8 @@
 //! Alerts endpoint tests for Redis Enterprise
 
-use redis_enterprise::{AlertHandler, AlertSettings, EnterpriseClient};
+use redis_enterprise::{AlertHandler, EnterpriseClient};
 use serde_json::json;
-use wiremock::matchers::{basic_auth, body_json, method, path};
+use wiremock::matchers::{basic_auth, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 // Test helper functions
@@ -47,40 +47,11 @@ fn test_database_alert() -> serde_json::Value {
 }
 
 #[tokio::test]
-async fn test_alerts_get_settings() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("GET"))
-        .and(path("/v1/cluster/alert_settings/node_memory_high"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!({
-            "enabled": true,
-            "threshold": {"value": 80, "unit": "percent"}
-        })))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = AlertHandler::new(client);
-    let result = handler.get_settings("node_memory_high").await;
-
-    assert!(result.is_ok());
-    let settings = result.unwrap();
-    assert!(settings.enabled);
-}
-
-#[tokio::test]
 async fn test_alerts_list_by_database() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/1/alerts"))
+        .and(path("/v1/bdbs/alerts/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([test_database_alert()])))
         .mount(&mock_server)
@@ -108,7 +79,7 @@ async fn test_alerts_list_by_database_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/1/alerts"))
+        .and(path("/v1/bdbs/alerts/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([])))
         .mount(&mock_server)
@@ -134,7 +105,7 @@ async fn test_alerts_list_by_node() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/alerts"))
+        .and(path("/v1/nodes/alerts/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([test_alert()])))
         .mount(&mock_server)
@@ -162,7 +133,7 @@ async fn test_alerts_list_by_node_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/999/alerts"))
+        .and(path("/v1/nodes/alerts/999"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Node not found"))
         .mount(&mock_server)
@@ -226,104 +197,6 @@ async fn test_alerts_list_cluster_alerts() {
     let overcommit = alerts.get("cluster_ram_overcommit").unwrap();
     assert!(!overcommit.enabled);
     assert!(overcommit.change_time.is_none());
-}
-
-#[tokio::test]
-async fn test_alerts_update_settings() {
-    let mock_server = MockServer::start().await;
-
-    let settings = AlertSettings {
-        enabled: true,
-        threshold: Some(json!({"value": 85, "unit": "percent"})),
-        email_recipients: Some(vec!["admin@example.com".to_string()]),
-        webhook_url: Some("https://webhook.example.com/alerts".to_string()),
-    };
-
-    Mock::given(method("PUT"))
-        .and(path("/v1/cluster/alert_settings/node_memory_high"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&settings))
-        .respond_with(success_response(json!({
-            "enabled": true,
-            "threshold": {"value": 85, "unit": "percent"},
-            "email_recipients": ["admin@example.com"],
-            "webhook_url": "https://webhook.example.com/alerts"
-        })))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = AlertHandler::new(client);
-    let result = handler.update_settings("node_memory_high", settings).await;
-
-    assert!(result.is_ok());
-    let updated_settings = result.unwrap();
-    assert!(updated_settings.enabled);
-    assert!(updated_settings.threshold.is_some());
-    assert!(updated_settings.email_recipients.is_some());
-    assert!(updated_settings.webhook_url.is_some());
-}
-
-#[tokio::test]
-async fn test_alerts_update_settings_invalid() {
-    let mock_server = MockServer::start().await;
-
-    let settings = AlertSettings {
-        enabled: true,
-        threshold: Some(json!({"value": "invalid", "unit": "percent"})),
-        email_recipients: None,
-        webhook_url: None,
-    };
-
-    Mock::given(method("PUT"))
-        .and(path("/v1/cluster/alert_settings/invalid_alert"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&settings))
-        .respond_with(error_response(400, "Invalid alert settings"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = AlertHandler::new(client);
-    let result = handler.update_settings("invalid_alert", settings).await;
-
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_alerts_get_settings_nonexistent() {
-    let mock_server = MockServer::start().await;
-
-    Mock::given(method("GET"))
-        .and(path("/v1/cluster/alert_settings/nonexistent_alert"))
-        .and(basic_auth("admin", "password"))
-        .respond_with(error_response(404, "Alert settings not found"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = AlertHandler::new(client);
-    let result = handler.get_settings("nonexistent_alert").await;
-
-    assert!(result.is_err());
 }
 
 #[tokio::test]

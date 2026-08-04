@@ -127,11 +127,10 @@ impl ActionHandler {
             .await
     }
 
-    /// Cancel an action
-    pub async fn cancel(&self, action_uid: &str) -> Result<()> {
-        self.client
-            .delete(&format!("/v1/actions/{}", action_uid))
-            .await
+    /// Retired generic action cancellation helper.
+    #[deprecated(note = "Redis Software does not register generic action deletion")]
+    pub async fn cancel(&self, _action_uid: &str) -> Result<()> {
+        crate::error::unsupported_operation("generic action cancellation")
     }
 
     /// List actions via v2 API - GET /v2/actions
@@ -203,11 +202,10 @@ pub mod v1 {
                 .await
         }
 
-        /// Cancel an in-flight action.
-        pub async fn cancel(&self, action_uid: &str) -> Result<()> {
-            self.client
-                .delete(&format!("/v1/actions/{}", action_uid))
-                .await
+        /// Retired generic action cancellation helper.
+        #[deprecated(note = "Redis Software does not register generic action deletion")]
+        pub async fn cancel(&self, _action_uid: &str) -> Result<()> {
+            crate::error::unsupported_operation("generic action cancellation")
         }
 
         /// List actions + state machines scoped to a single database, flattened.

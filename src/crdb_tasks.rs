@@ -74,9 +74,10 @@ impl CrdbTasksHandler {
             .await
     }
 
-    /// Create a new CRDB task
-    pub async fn create(&self, request: CreateCrdbTaskRequest) -> Result<CrdbTask> {
-        self.client.post("/v1/crdb_tasks", &request).await
+    /// Retired direct CRDB task creation helper.
+    #[deprecated(note = "CRDB tasks are created by CRDB operations, not POST /v1/crdb_tasks")]
+    pub async fn create(&self, _request: CreateCrdbTaskRequest) -> Result<CrdbTask> {
+        crate::error::unsupported_operation("create CRDB task directly")
     }
 
     /// Cancel a CRDB task
@@ -100,10 +101,16 @@ impl CrdbTasksHandler {
         self.client.post_action(&path, &serde_json::json!({})).await
     }
 
-    /// Get tasks for a specific CRDB
+    /// Get tasks for a specific CRDB.
+    ///
+    /// Redis Software does not expose a CRDB-scoped task route. Fetch the
+    /// documented global collection and filter it client-side instead.
     pub async fn list_by_crdb(&self, crdb_guid: &str) -> Result<Vec<CrdbTask>> {
-        self.client
-            .get(&format!("/v1/crdbs/{}/tasks", crdb_guid))
-            .await
+        Ok(self
+            .list()
+            .await?
+            .into_iter()
+            .filter(|task| task.crdb_guid == crdb_guid)
+            .collect())
     }
 }

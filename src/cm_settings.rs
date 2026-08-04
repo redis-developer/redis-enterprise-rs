@@ -56,8 +56,9 @@ impl CmSettingsHandler {
         self.client.put("/v1/cm_settings", &settings).await
     }
 
-    /// Reset Cluster Manager settings to defaults
+    /// Retired Cluster Manager reset helper.
+    #[deprecated(note = "Redis Software does not register DELETE /v1/cm_settings")]
     pub async fn reset(&self) -> Result<()> {
-        self.client.delete("/v1/cm_settings").await
+        crate::error::unsupported_operation("reset Cluster Manager settings")
     }
 }

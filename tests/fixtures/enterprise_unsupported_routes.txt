@@ -9,10 +9,10 @@
 # excluded (which issue tracks it, or "out of scope") so a reviewer
 # can validate whether it's still relevant.
 #
-# This file plus enterprise_non_spec_routes.txt form the explicit
+# This file plus live_non_inventory_routes.json form the explicit
 # acknowledgement of the current state. The route-coverage test fails
-# if either list drifts (a route is implemented or stops being
-# implemented without updating the allowlist).
+# if either registry drifts (a route is implemented, corrected, or stops
+# being implemented without updating its reviewed disposition).
 
 # ============================================================================
 # Per-DB module ops + password rotation — referenced in #65 triage

@@ -81,35 +81,67 @@ define_handler!(
     pub struct JobSchedulerHandler;
 );
 
-impl_crud!(JobSchedulerHandler {
-    list => ScheduledJob, "/v1/job_scheduler";
-    get(&str) => ScheduledJob, "/v1/job_scheduler/{}";
-    delete(&str), "/v1/job_scheduler/{}";
-    create(CreateScheduledJobRequest) => ScheduledJob, "/v1/job_scheduler";
-    update(&str, CreateScheduledJobRequest) => ScheduledJob, "/v1/job_scheduler/{}";
-});
-
-// Custom methods
 impl JobSchedulerHandler {
-    /// Trigger job execution
-    pub async fn trigger(&self, job_id: &str) -> Result<JobExecution> {
-        self.client
-            .post(
-                &format!("/v1/job_scheduler/{}/trigger", job_id),
-                &Value::Null,
-            )
-            .await
+    /// Get the documented global job scheduler configuration.
+    pub async fn get_config(&self) -> Result<Value> {
+        self.client.get("/v1/job_scheduler").await
     }
 
-    /// Get job execution history
-    pub async fn history(&self, job_id: &str) -> Result<Vec<JobExecution>> {
-        self.client
-            .get(&format!("/v1/job_scheduler/{}/history", job_id))
-            .await
-    }
-
-    /// Update job scheduler globally - PUT /v1/job_scheduler
-    pub async fn update_all(&self, body: Value) -> Result<Vec<ScheduledJob>> {
+    /// Update the documented global job scheduler configuration.
+    pub async fn update_config(&self, body: Value) -> Result<Value> {
         self.client.put("/v1/job_scheduler", &body).await
+    }
+
+    /// Retired list helper whose response model did not match the global
+    /// configuration resource.
+    #[deprecated(note = "use get_config")]
+    pub async fn list(&self) -> Result<Vec<ScheduledJob>> {
+        crate::error::unsupported_operation("list scheduled jobs")
+    }
+
+    /// Retired scheduled-job lookup helper.
+    #[deprecated(note = "Redis Software does not register per-job scheduler routes")]
+    pub async fn get(&self, _job_id: &str) -> Result<ScheduledJob> {
+        crate::error::unsupported_operation("get scheduled job")
+    }
+
+    /// Retired scheduled-job deletion helper.
+    #[deprecated(note = "Redis Software does not register per-job scheduler routes")]
+    pub async fn delete(&self, _job_id: &str) -> Result<()> {
+        crate::error::unsupported_operation("delete scheduled job")
+    }
+
+    /// Retired scheduled-job creation helper.
+    #[deprecated(note = "Redis Software does not register POST /v1/job_scheduler")]
+    pub async fn create(&self, _request: CreateScheduledJobRequest) -> Result<ScheduledJob> {
+        crate::error::unsupported_operation("create scheduled job")
+    }
+
+    /// Retired per-job update helper.
+    #[deprecated(note = "Redis Software does not register per-job scheduler routes")]
+    pub async fn update(
+        &self,
+        _job_id: &str,
+        _request: CreateScheduledJobRequest,
+    ) -> Result<ScheduledJob> {
+        crate::error::unsupported_operation("update scheduled job")
+    }
+
+    /// Retired scheduled-job trigger helper.
+    #[deprecated(note = "Redis Software does not register per-job scheduler routes")]
+    pub async fn trigger(&self, _job_id: &str) -> Result<JobExecution> {
+        crate::error::unsupported_operation("trigger scheduled job")
+    }
+
+    /// Retired scheduled-job history helper.
+    #[deprecated(note = "Redis Software does not register per-job scheduler routes")]
+    pub async fn history(&self, _job_id: &str) -> Result<Vec<JobExecution>> {
+        crate::error::unsupported_operation("get scheduled-job history")
+    }
+
+    /// Retired global update alias whose response type was inaccurate.
+    #[deprecated(note = "use update_config")]
+    pub async fn update_all(&self, _body: Value) -> Result<Vec<ScheduledJob>> {
+        crate::error::unsupported_operation("update scheduler with legacy response model")
     }
 }

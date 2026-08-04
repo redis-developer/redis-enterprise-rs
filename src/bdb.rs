@@ -735,9 +735,12 @@ impl DatabaseHandler {
         self.client.get(&format!("/v1/bdbs/stats/{}", uid)).await
     }
 
-    /// Get database metrics (BDB.METRICS)
+    /// Get database metrics through the canonical database statistics route.
+    ///
+    /// Redis Software does not register `/v1/bdbs/metrics/{uid}`. Keep this
+    /// convenience alias for callers that use metrics terminology.
     pub async fn metrics(&self, uid: u32) -> Result<Value> {
-        self.client.get(&format!("/v1/bdbs/metrics/{}", uid)).await
+        self.stats(uid).await
     }
 
     /// Export database (BDB.EXPORT)
@@ -784,11 +787,10 @@ impl DatabaseHandler {
         self.client.get(&format!("/v1/bdbs/{}/shards", uid)).await
     }
 
-    /// Get database endpoints (BDB.ENDPOINTS)
-    pub async fn endpoints(&self, uid: u32) -> Result<Vec<EndpointInfo>> {
-        self.client
-            .get(&format!("/v1/bdbs/{}/endpoints", uid))
-            .await
+    /// Retired database endpoints helper.
+    #[deprecated(note = "Redis Software does not register database-scoped endpoint routes")]
+    pub async fn endpoints(&self, _uid: u32) -> Result<Vec<EndpointInfo>> {
+        crate::error::unsupported_operation("list database endpoints")
     }
 
     /// Optimize shards placement (status) - GET

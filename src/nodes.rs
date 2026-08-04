@@ -187,9 +187,11 @@ impl NodeHandler {
             .await
     }
 
-    /// Remove node from cluster
+    /// Remove a node from the cluster through the documented node action.
     pub async fn remove(&self, uid: u32) -> Result<()> {
-        self.client.delete(&format!("/v1/nodes/{}", uid)).await
+        self.client
+            .post_action(&format!("/v1/nodes/{}/actions/remove", uid), &Value::Null)
+            .await
     }
 
     /// Run node health checks - GET /v1/nodes/check/{uid}
@@ -199,7 +201,7 @@ impl NodeHandler {
 
     /// Get node stats
     pub async fn stats(&self, uid: u32) -> Result<NodeStats> {
-        self.client.get(&format!("/v1/nodes/{}/stats", uid)).await
+        self.client.get(&format!("/v1/nodes/stats/{}", uid)).await
     }
 
     /// Get node actions

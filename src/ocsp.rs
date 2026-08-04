@@ -8,7 +8,6 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 /// OCSP configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -114,15 +113,15 @@ impl OcspHandler {
         self.test().await
     }
 
-    /// Trigger OCSP query
+    /// Retired manual OCSP query helper.
+    #[deprecated(note = "Redis Software does not register /v1/ocsp/query")]
     pub async fn query(&self) -> Result<()> {
-        self.client
-            .post_action("/v1/ocsp/query", &Value::Null)
-            .await
+        crate::error::unsupported_operation("trigger OCSP query")
     }
 
-    /// Clear OCSP cache
+    /// Retired OCSP cache-clearing helper.
+    #[deprecated(note = "Redis Software does not register /v1/ocsp/cache")]
     pub async fn clear_cache(&self) -> Result<()> {
-        self.client.delete("/v1/ocsp/cache").await
+        crate::error::unsupported_operation("clear OCSP cache")
     }
 }

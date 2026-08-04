@@ -15,6 +15,8 @@ A comprehensive Rust client library for the Redis Enterprise REST API, with Pyth
 - Async/await support with tokio
 - Strong typing for API requests and responses
 - Comprehensive error handling
+- Version-audited route coverage: fictional legacy methods are deprecated and
+  fail locally instead of sending unsupported requests
 - Optional Tower service integration for middleware composition
 - Coverage across Redis Enterprise feature areas including:
   - Cluster management and bootstrap
@@ -164,9 +166,11 @@ REST API surface. Handler organization:
 For an authoritative per-endpoint inventory see
 [`docs/api-inventory.csv`](docs/api-inventory.csv). The generated
 [method-aware coverage audit](docs/api-coverage-audit.md) keeps handler, mock,
-request, response, fixture, and live evidence separate. For the historical
-audit of routes the SDK once exposed but the docs do not, see
-[`docs/api-gap-triage.md`](docs/api-gap-triage.md).
+request, response, fixture, and live evidence separate. The
+[non-inventory route evidence matrix](docs/non-inventory-route-evidence.md)
+records exact version results and dispositions for SDK routes absent from the
+public-doc inventory. The earlier docs-only triage remains available as
+[historical context](docs/api-gap-triage.md).
 
 ## Documentation
 
@@ -174,6 +178,7 @@ audit of routes the SDK once exposed but the docs do not, see
 - [Redis Software REST API Reference](https://redis.io/docs/latest/operate/rs/references/rest-api/)
 - [Version support and compatibility policy](docs/version-support.md)
 - [Local live-validation runbook](docs/live-validation.md) — bring up a disposable Redis Enterprise cluster via Docker Compose for SDK validation against the real API.
+- [Non-inventory route evidence](docs/non-inventory-route-evidence.md) — versioned live dispositions for SDK method/path pairs absent from the public-doc inventory.
 
 ## License
 

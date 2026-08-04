@@ -82,6 +82,11 @@ pub enum RestError {
     #[error("Conflict: {0}")]
     Conflict(String),
 
+    /// The SDK method represents an operation that supported Redis Software
+    /// versions do not register.
+    #[error("Unsupported operation: {0}")]
+    UnsupportedOperation(String),
+
     /// The cluster is busy or temporarily unavailable (HTTP 503).
     #[error("Cluster is busy or unavailable")]
     ClusterBusy,
@@ -160,3 +165,8 @@ impl RestError {
 
 /// Result alias used throughout the crate for Redis Enterprise REST API operations.
 pub type Result<T> = std::result::Result<T, RestError>;
+
+/// Return a consistent local error for a retired SDK operation.
+pub(crate) fn unsupported_operation<T>(operation: &str) -> Result<T> {
+    Err(RestError::UnsupportedOperation(operation.to_string()))
+}

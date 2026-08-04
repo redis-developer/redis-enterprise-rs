@@ -6,7 +6,7 @@
 //! - Monitor status and metrics
 
 use crate::client::RestClient;
-use crate::error::Result;
+use crate::error::{RestError, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -101,14 +101,32 @@ impl ShardHandler {
 
     /// Get shard statistics
     pub async fn stats(&self, uid: &str) -> Result<ShardStats> {
-        self.client.get(&format!("/v1/shards/{}/stats", uid)).await
+        self.client.get(&format!("/v1/shards/stats/{}", uid)).await
     }
 
-    /// Get shard statistics for a specific metric
+    /// Get the first interval of one metric from canonical shard statistics.
     pub async fn stats_metric(&self, uid: &str, metric: &str) -> Result<MetricResponse> {
-        self.client
-            .get(&format!("/v1/shards/{}/stats/{}", uid, metric))
-            .await
+        let stats = self.stats(uid).await?;
+        let interval = stats.intervals.into_iter().next().ok_or_else(|| {
+            RestError::ParseError(format!("shard {uid} returned no statistics intervals"))
+        })?;
+        let values = interval
+            .values
+            .into_iter()
+            .map(|sample| {
+                sample.get(metric).cloned().ok_or_else(|| {
+                    RestError::ParseError(format!(
+                        "metric {metric:?} is absent from shard {uid} statistics"
+                    ))
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(MetricResponse {
+            interval: interval.interval,
+            timestamps: interval.timestamps,
+            values,
+        })
     }
 
     // raw variant removed: use stats_metric()
@@ -120,11 +138,18 @@ impl ShardHandler {
             .await
     }
 
-    /// Get shards for a specific node
+    /// Get shards for a specific node.
+    ///
+    /// Redis Software does not expose a node-scoped shard route. Fetch the
+    /// documented global collection and filter it client-side instead.
     pub async fn list_by_node(&self, node_uid: u32) -> Result<Vec<Shard>> {
-        self.client
-            .get(&format!("/v1/nodes/{}/shards", node_uid))
-            .await
+        let node_uid = node_uid.to_string();
+        Ok(self
+            .list()
+            .await?
+            .into_iter()
+            .filter(|shard| shard.node_uid == node_uid)
+            .collect())
     }
 
     // Aggregate raw helpers removed; use StatsHandler for aggregates
