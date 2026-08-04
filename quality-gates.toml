@@ -1,0 +1,15 @@
+schema = 1
+
+[coverage.baseline]
+measured_on = "2026-08-04"
+tool = "cargo-llvm-cov 0.8.7"
+line_covered = 2279
+line_count = 3656
+line_percent = 62.33588621444201
+function_covered = 576
+function_count = 953
+function_percent = 60.44071353620147
+
+[coverage.minimum]
+line_percent = 60.0
+function_percent = 58.0
