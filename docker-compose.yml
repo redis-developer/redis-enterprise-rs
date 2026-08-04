@@ -41,18 +41,50 @@ services:
         condition: service_healthy
     environment:
       REDIS_ENTERPRISE_URL: "https://redis-enterprise:9443"
+      REDIS_ENTERPRISE_USER: "admin@redis.local"
+      REDIS_ENTERPRISE_PASSWORD: "Redis123!"
       REDIS_ENTERPRISE_INSECURE: "true"
+      REDIS_ENTERPRISE_DATABASE_VERSION: "${REDIS_ENTERPRISE_DATABASE_VERSION:-}"
+    entrypoint: ["/bin/sh", "-ec"]
     command:
-      [
-        "enterprise",
-        "workflow",
-        "init-cluster",
-        "--name",
-        "test-cluster",
-        "--username",
-        "admin@redis.local",
-        "--password",
-        "Redis123!",
-      ]
+      - |
+        redisctl enterprise workflow init-cluster \
+          --name test-cluster \
+          --username admin@redis.local \
+          --password 'Redis123!' \
+          --skip-database
+
+        database_data='{"name":"default-db","memory_size":1073741824,"type":"redis","replication":false}'
+        if [ -n "$$REDIS_ENTERPRISE_DATABASE_VERSION" ]; then
+          database_data=$$(printf \
+            '{"name":"default-db","memory_size":1073741824,"type":"redis","replication":false,"redis_version":"%s"}' \
+            "$$REDIS_ENTERPRISE_DATABASE_VERSION")
+        fi
+        create_attempt=0
+        until redisctl enterprise database create --data "$$database_data" --output json > /dev/null; do
+          create_attempt=$$((create_attempt + 1))
+          if [ "$$create_attempt" -ge 60 ]; then
+            echo "Required disposable database could not be created" >&2
+            exit 1
+          fi
+          echo "Database create is not ready; retrying in 5 seconds"
+          sleep 5
+        done
+
+        attempt=0
+        while [ "$$attempt" -lt 120 ]; do
+          databases=$$(redisctl enterprise database list --output json)
+          shards=$$(redisctl enterprise shard list --output json)
+          if echo "$$databases" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"active"' \
+            && echo "$$shards" | grep -Eq '"uid"[[:space:]]*:'; then
+            echo "Disposable database and shard are ready"
+            exit 0
+          fi
+          attempt=$$((attempt + 1))
+          sleep 5
+        done
+
+        echo "Required disposable database and shard did not become ready" >&2
+        exit 1
     profiles:
       - init
