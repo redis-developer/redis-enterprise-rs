@@ -39,6 +39,7 @@ tower-integration = ["tower"]
 test-support = ["wiremock"]
 
 [dev-dependencies]
+csv = "1"
 wiremock = "0.6"
 tokio = { version = "1.40", features = ["rt", "macros", "test-util"] }
 pretty_assertions = "1.4"

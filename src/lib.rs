@@ -1,20 +1,28 @@
 //! Redis Enterprise REST API client
 //!
 //! A comprehensive Rust client library for the Redis Enterprise REST API, providing
-//! full cluster management, database operations, security configuration, and monitoring
-//! capabilities. This crate offers both typed and untyped API access with comprehensive
-//! coverage of all Enterprise REST endpoints.
+//! cluster management, database operations, security configuration, and monitoring
+//! capabilities. This crate offers both typed and untyped API access across a broad
+//! portion of the documented Redis Software REST surface.
 //!
 //! # Features
 //!
-//! - **Complete API Coverage**: Full coverage of v1 endpoints plus select v2
-//!   endpoints where they exist (e.g., actions, modules)
+//! - **Broad API Coverage**: Typed v1 coverage plus select v2 endpoints where
+//!   they exist (for example, actions and modules)
 //! - **Type-Safe Operations**: Strongly typed request/response models
 //! - **Flexible Authentication**: Basic auth with optional SSL verification
 //! - **Async/Await Support**: Built on Tokio for high-performance async operations
 //! - **Error Handling**: Comprehensive error types with context
 //! - **Builder Patterns**: Ergonomic API for complex request construction
 //! - **Versioned APIs**: Clear accessors for v1 and v2 where both exist
+//!
+//! # Redis Software Version Support
+//!
+//! Releases target the active Redis Software families listed in the
+//! [version support policy](https://github.com/redis-developer/redis-enterprise-rs/blob/main/docs/version-support.md).
+//! Operations and fields that exist only on particular server families are
+//! documented as version-specific; the client does not silently translate
+//! between v1 and v2 wire contracts.
 //!
 //! # Quick Start
 //!
@@ -309,7 +317,7 @@
 //!
 //! # API Coverage
 //!
-//! This crate provides complete coverage of the Redis Enterprise REST API:
+//! This crate provides broad coverage of the Redis Software REST API:
 //!
 //! - **Cluster Management**: Bootstrap, configuration, licenses
 //! - **Database Operations**: CRUD, backup/restore, configuration

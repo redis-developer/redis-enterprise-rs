@@ -10,12 +10,13 @@ A comprehensive Rust client library for the Redis Enterprise REST API, with Pyth
 
 ## Features
 
-- Complete coverage of Redis Enterprise REST API endpoints
+- Broad typed coverage of the documented Redis Software REST API, backed by a
+  generated route inventory
 - Async/await support with tokio
 - Strong typing for API requests and responses
 - Comprehensive error handling
 - Optional Tower service integration for middleware composition
-- Support for all Redis Enterprise features including:
+- Coverage across Redis Enterprise feature areas including:
   - Cluster management and bootstrap
   - Database (BDB) operations
   - Node management and statistics
@@ -33,6 +34,17 @@ redis-enterprise = "0.9"
 # Optional: Enable Tower service integration
 redis-enterprise = { version = "0.9", features = ["tower-integration"] }
 ```
+
+## Redis Software Version Support
+
+The crate targets all Redis Software release families that are still active in
+Redis's product lifecycle when the crate is released. The current matrix spans
+7.4, 7.8, 7.22, 8.0, and 8.2, using exact Docker image pins for reproducible
+validation. Operations introduced or removed in a particular server family are
+documented as version-specific rather than silently rewritten.
+
+See the [version support and compatibility policy](docs/version-support.md) for
+the current pins, release gates, API classifications, and semver rules.
 
 ## Quick Start
 
@@ -159,7 +171,8 @@ audit of routes the SDK once exposed but the docs do not, see
 ## Documentation
 
 - [API Documentation](https://docs.rs/redis-enterprise)
-- [Redis Enterprise REST API Reference](https://docs.redis.com/latest/rs/references/rest-api/)
+- [Redis Software REST API Reference](https://redis.io/docs/latest/operate/rs/references/rest-api/)
+- [Version support and compatibility policy](docs/version-support.md)
 - [Local live-validation runbook](docs/live-validation.md) — bring up a disposable Redis Enterprise cluster via Docker Compose for SDK validation against the real API.
 
 ## License
