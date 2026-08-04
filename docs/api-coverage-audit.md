@@ -11,19 +11,19 @@ validation annotations.
 - Unique documented operations: `203`
 - Collapsed duplicate aliases: `6`
 - Handler declarations: `195`
-- Wiremock method/path matchers: `140`
-- Explicit Wiremock call-count expectations: `3`
+- Wiremock method/path matchers: `141`
+- Explicit Wiremock call-count expectations: `5`
 - Request body matchers: `28`
 - Query matchers: `6`
-- Response fixtures: `128`
+- Response fixtures: `129`
 - Explicit fixture-deserialization evidence: `7`
-- Explicit live evidence: `16`
+- Explicit live evidence: `19`
 
 ### Dispositions
 
-- `handler_with_asserted_mock`: `3`
-- `handler_with_mock_evidence`: `137`
-- `handler_without_mock_evidence`: `55`
+- `handler_with_asserted_mock`: `5`
+- `handler_with_mock_evidence`: `136`
+- `handler_without_mock_evidence`: `54`
 - `mock_without_handler`: `0`
 - `docs_only`: `8`
 
@@ -67,12 +67,12 @@ validation annotations.
 - `GET /v1/bdbs/replica_sources/alerts/{uid}/{replica_src_id}/{alert}`: handler has no matching mock evidence
 - `GET /v1/bdbs/stats/last`: handler has no matching mock evidence
 - `GET /v1/bdbs/{uid}/actions/recover`: handler has no matching mock evidence
-- `GET /v1/bdbs/{uid}/availability`: handler has no matching mock evidence
 - `GET /v1/bdbs/{bdb_uid}/peer_stats/{uid}`: handler has no matching mock evidence
 - `GET /v1/bdbs/{bdb_uid}/sync_source_stats`: handler has no matching mock evidence
 - `GET /v1/bdbs/{bdb_uid}/sync_source_stats/{uid}`: handler has no matching mock evidence
 - `GET /v1/bdbs/{uid}/syncer_state/crdt`: handler has no matching mock evidence
 - `GET /v1/bdbs/{uid}/syncer_state/replica`: handler has no matching mock evidence
+- `GET /v1/cluster/actions/{action}`: handler has no matching mock evidence
 
 ## Reproduce
 

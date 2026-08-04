@@ -360,6 +360,53 @@ impl EnterpriseClient {
         }
     }
 
+    /// Make a GET request where the successful response body is not part of
+    /// the endpoint contract.
+    ///
+    /// Any 2xx status is returned as `()`. Error responses retain their HTTP
+    /// classification without copying the response body into the error.
+    pub async fn get_empty(&self, path: &str) -> Result<()> {
+        let url = self.normalize_url(path);
+        debug!("GET {} (status only)", url);
+
+        let response = self
+            .client
+            .get(&url)
+            .basic_auth(&self.username, Some(&self.password))
+            .send()
+            .await
+            .map_err(|e| self.map_reqwest_error(e, &url))?;
+
+        trace!("Response status: {}", response.status());
+        if response.status().is_success() {
+            Ok(())
+        } else {
+            Err(Self::status_only_error(response.status().as_u16()))
+        }
+    }
+
+    /// Start a GET request whose successful body will be consumed as a
+    /// stream by a crate handler.
+    pub(crate) async fn get_streaming_response(&self, path: &str) -> Result<Response> {
+        let url = self.normalize_url(path);
+        debug!("GET {} (streaming)", url);
+
+        let response = self
+            .client
+            .get(&url)
+            .basic_auth(&self.username, Some(&self.password))
+            .send()
+            .await
+            .map_err(|e| self.map_reqwest_error(e, &url))?;
+
+        trace!("Response status: {}", response.status());
+        if response.status().is_success() {
+            Ok(response)
+        } else {
+            Err(Self::status_only_error(response.status().as_u16()))
+        }
+    }
+
     /// Make a GET request for binary content (e.g., tar.gz files)
     pub async fn get_binary(&self, path: &str) -> Result<Vec<u8>> {
         let url = self.normalize_url(path);
@@ -720,6 +767,21 @@ impl EnterpriseClient {
             ))
         } else {
             RestError::RequestFailed(error.to_string())
+        }
+    }
+
+    fn status_only_error(status: u16) -> RestError {
+        match status {
+            401 => RestError::Unauthorized,
+            404 => RestError::NotFound,
+            409 => RestError::Conflict("server returned HTTP 409".to_string()),
+            429 => RestError::RateLimited { retry_after: None },
+            503 => RestError::ClusterBusy,
+            500..=599 => RestError::ServerError(format!("server returned HTTP {status}")),
+            _ => RestError::ApiError {
+                code: status,
+                message: format!("server returned HTTP {status}"),
+            },
         }
     }
 

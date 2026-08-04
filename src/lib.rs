@@ -497,4 +497,6 @@ pub use services::{Service, ServicesHandler};
 pub use suffixes::{CreateSuffixRequest, Suffix, SuffixesHandler};
 
 // Usage report
-pub use usage_report::{DatabaseUsage, NodeUsage, UsageReport, UsageReportHandler, UsageSummary};
+pub use usage_report::{
+    UsageReport, UsageReportHandler, UsageReportLicense, UsageReportRecord, UsageReportStream,
+};

@@ -3,9 +3,66 @@
 //! Tests for shards, alerts, peer stats, syncer state, and password management.
 
 use crate::common::{no_content_response, success_response, test_client};
+use redis_enterprise::RestError;
 use serde_json::json;
 use wiremock::matchers::{basic_auth, method, path};
-use wiremock::{Mock, MockServer};
+use wiremock::{Mock, MockServer, ResponseTemplate};
+
+#[tokio::test]
+async fn database_availability_accepts_observed_empty_success_bodies() {
+    let mock_server = MockServer::start().await;
+
+    for endpoint in [
+        "/v1/bdbs/1/availability",
+        "/v1/local/bdbs/1/endpoint/availability",
+    ] {
+        Mock::given(method("GET"))
+            .and(path(endpoint))
+            .and(basic_auth("admin", "password"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .insert_header("content-type", "text/html; charset=utf-8"),
+            )
+            .expect(1)
+            .mount(&mock_server)
+            .await;
+    }
+
+    let client = test_client(&mock_server);
+    client
+        .databases()
+        .availability(1)
+        .await
+        .expect("empty database availability response should succeed");
+    client
+        .databases()
+        .endpoint_availability(1)
+        .await
+        .expect("empty endpoint availability response should succeed");
+}
+
+#[tokio::test]
+async fn database_availability_preserves_status_without_parsing_the_body() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/bdbs/999/availability"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(ResponseTemplate::new(404).set_body_string("not-json-do-not-leak"))
+        .expect(1)
+        .mount(&mock_server)
+        .await;
+
+    let client = test_client(&mock_server);
+    let error = client
+        .databases()
+        .availability(999)
+        .await
+        .expect_err("HTTP 404 should fail");
+
+    assert!(matches!(error, RestError::NotFound));
+    assert!(!error.to_string().contains("not-json-do-not-leak"));
+}
 
 #[tokio::test]
 async fn test_database_metrics_uses_canonical_stats_route() {

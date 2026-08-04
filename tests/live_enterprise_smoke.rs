@@ -1,6 +1,9 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use redis_enterprise::{CreateDatabaseRequest, CreateUserRequest, EnterpriseClient, Node};
+use futures::StreamExt;
+use redis_enterprise::{
+    CreateDatabaseRequest, CreateUserRequest, EnterpriseClient, Node, UsageReportRecord,
+};
 use serde_json::{Value, json};
 use tokio::time::{Duration, sleep};
 
@@ -322,6 +325,64 @@ async fn live_database_create_delete_with_advertised_redis_version() {
     }
 
     panic!("deleted database {uid} was still visible after waiting for deletion to propagate");
+}
+
+#[tokio::test]
+#[ignore = "requires a disposable Redis Software 8.2 cluster configured via REDIS_ENTERPRISE_* env vars"]
+async fn live_empty_availability_and_usage_report_stream() {
+    // api-audit-live: GET /v1/bdbs
+    // api-audit-live: GET /v1/bdbs/{uid}/availability
+    // api-audit-live: GET /v1/local/bdbs/{uid}/endpoint/availability
+    // api-audit-live: GET /v1/usage_report
+    let client = require_client();
+    let database = client
+        .databases()
+        .list()
+        .await
+        .expect("database list should succeed")
+        .into_iter()
+        .next()
+        .expect("expected the initialized database");
+
+    client
+        .databases()
+        .availability(database.uid)
+        .await
+        .expect("empty database availability response should succeed");
+    client
+        .databases()
+        .endpoint_availability(database.uid)
+        .await
+        .expect("empty endpoint availability response should succeed");
+
+    let mut stream = client
+        .usage_reports()
+        .stream()
+        .await
+        .expect("usage report stream should start");
+    let mut saw_checksum = false;
+    while let Some(record) = stream.next().await {
+        match record.expect("live usage report record should decode") {
+            UsageReportRecord::Report(_) if saw_checksum => {
+                panic!("usage report returned a record after its final checksum")
+            }
+            UsageReportRecord::Report(_) => {}
+            UsageReportRecord::Checksum(checksum) => {
+                assert!(!saw_checksum, "usage report returned multiple checksums");
+                assert_eq!(checksum.len(), 32, "usage report checksum should be MD5");
+                assert!(
+                    checksum.bytes().all(|byte| byte.is_ascii_hexdigit()),
+                    "usage report checksum should be hexadecimal"
+                );
+                saw_checksum = true;
+            }
+        }
+    }
+
+    assert!(
+        saw_checksum,
+        "usage report should end with its MD5 checksum"
+    );
 }
 
 #[tokio::test]
