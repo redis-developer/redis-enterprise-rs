@@ -1134,17 +1134,23 @@ impl DatabaseHandler {
         self.reset_admin_pass(uid, new_password).await
     }
 
-    /// Check database availability
-    pub async fn availability(&self, uid: u32) -> Result<Value> {
+    /// Check database availability.
+    ///
+    /// Redis Software returns an empty successful response for this endpoint,
+    /// so availability is represented by `Ok(())` rather than a JSON value.
+    pub async fn availability(&self, uid: u32) -> Result<()> {
         self.client
-            .get(&format!("/v1/bdbs/{}/availability", uid))
+            .get_empty(&format!("/v1/bdbs/{}/availability", uid))
             .await
     }
 
-    /// Check local database endpoint availability
-    pub async fn endpoint_availability(&self, uid: u32) -> Result<Value> {
+    /// Check local database endpoint availability.
+    ///
+    /// Redis Software returns an empty successful response for this endpoint,
+    /// so availability is represented by `Ok(())` rather than a JSON value.
+    pub async fn endpoint_availability(&self, uid: u32) -> Result<()> {
         self.client
-            .get(&format!("/v1/local/bdbs/{}/endpoint/availability", uid))
+            .get_empty(&format!("/v1/local/bdbs/{}/endpoint/availability", uid))
             .await
     }
 

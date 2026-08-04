@@ -16,6 +16,8 @@ The required release families and compatibility rules are defined in the
   [redis.io/docs/latest/operate/rs/references/rest-api/](https://redis.io/docs/latest/operate/rs/references/rest-api/)
 - Official REST API requests index:
   [redis.io/docs/latest/operate/rs/references/rest-api/requests/](https://redis.io/docs/latest/operate/rs/references/rest-api/requests/)
+- Official usage report request and NDJSON contract:
+  [redis.io/docs/latest/operate/rs/references/rest-api/requests/usage_report/](https://redis.io/docs/latest/operate/rs/references/rest-api/requests/usage_report/)
 - Redis Software product lifecycle:
   [redis.io/docs/latest/operate/rs/installing-upgrading/product-lifecycle/](https://redis.io/docs/latest/operate/rs/installing-upgrading/product-lifecycle/)
 - Redis Software release notes:
@@ -180,6 +182,31 @@ Run the opt-in live smoke test:
 cargo test --test live_enterprise_smoke -- --ignored
 ```
 
+### Empty and streamed response contracts
+
+Not every successful Redis Software response is JSON. Both database
+availability endpoints return HTTP 200 with an empty `text/html` body. The
+typed `availability` and `endpoint_availability` methods therefore return
+`Result<()>`; the 2xx status is the result.
+
+`GET /v1/usage_report` returns an NDJSON stream rather than a JSON array. Each
+JSON line describes one database, and the final line is the response's MD5
+checksum. `UsageReportHandler::stream()` exposes both typed report records and
+the final checksum while buffering no more than 1 MiB for one line.
+`UsageReportHandler::list()` is a convenience collector that returns only the
+report records. A checksum-only or empty successful body produces an empty
+list. Malformed records, oversized lines, records after the checksum, and JSON
+records without a final checksum return a parse error that identifies the
+record number without including its contents.
+
+Run the focused live assertion against the pinned 8.2 image:
+
+```bash
+cargo test --test live_enterprise_smoke \
+  live_empty_availability_and_usage_report_stream \
+  -- --ignored --nocapture
+```
+
 ## Inventory Compliance Matrix
 
 `tests/live_compliance.rs` turns the checked-in API inventory into one visible
@@ -298,6 +325,12 @@ docker compose up -d
 ```
 
 ## Current Validation Snapshot
+
+On August 4, 2026, Redis Software `8.2.0-25` in
+`redislabs/redis:8.2.0-25.12` returned empty HTTP 200 bodies from both
+availability endpoints and a chunked, checksum-only usage report. The focused
+typed live assertion accepted both empty availability responses and consumed
+the final 32-character hexadecimal checksum through the bounded stream.
 
 On August 4, 2026, the self-cleaning database lifecycle passed against both:
 

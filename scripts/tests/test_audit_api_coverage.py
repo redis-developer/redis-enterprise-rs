@@ -79,6 +79,8 @@ class EvidenceExtractionTests(unittest.TestCase):
                 """
                 // self.client.delete(\"/v1/items\").await
                 self.client.get(\"/v1/items\").await;
+                self.client.get_empty(\"/v1/items\").await;
+                self.client.get_streaming_response(\"/v1/items\").await;
                 self.client.post(\"/v1/items\", &body).await;
                 """,
                 encoding="utf-8",
@@ -89,6 +91,9 @@ class EvidenceExtractionTests(unittest.TestCase):
         self.assertIn(audit.OperationKey("GET", "/v1/items"), evidence.handler)
         self.assertIn(audit.OperationKey("POST", "/v1/items"), evidence.handler)
         self.assertNotIn(audit.OperationKey("DELETE", "/v1/items"), evidence.handler)
+        self.assertEqual(
+            len(evidence.handler[audit.OperationKey("GET", "/v1/items")]), 3
+        )
 
     def test_mock_dimensions_and_explicit_markers_stay_separate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -193,6 +193,8 @@ fn extracted_handler_routes() -> BTreeSet<String> {
         ("get", "GET"),
         ("get_text", "GET"),
         ("get_binary", "GET"),
+        ("get_empty", "GET"),
+        ("get_streaming_response", "GET"),
         ("get_raw", "GET"),
         ("post", "POST"),
         ("post_raw", "POST"),
