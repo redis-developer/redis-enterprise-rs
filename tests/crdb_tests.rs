@@ -77,6 +77,7 @@ fn test_crdb_tasks_data() -> serde_json::Value {
     json!([
         {
             "task_id": "task-123",
+            "crdb_guid": "12345-abcdef-67890",
             "type": "cluster_connect",
             "status": "completed",
             "start_time": "2023-01-01T12:00:00Z",
@@ -84,9 +85,16 @@ fn test_crdb_tasks_data() -> serde_json::Value {
         },
         {
             "task_id": "task-456",
+            "crdb_guid": "12345-abcdef-67890",
             "type": "sync_status",
             "status": "running",
             "start_time": "2023-01-01T12:02:00Z"
+        },
+        {
+            "task_id": "task-other",
+            "crdb_guid": "other-guid",
+            "type": "sync_status",
+            "status": "completed"
         }
     ])
 }
@@ -507,7 +515,7 @@ async fn test_crdb_tasks() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/12345-abcdef-67890/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_crdb_tasks_data()))
         .mount(&mock_server)
@@ -539,9 +547,9 @@ async fn test_crdb_tasks_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/simple-guid-123/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
+        .respond_with(success_response(test_crdb_tasks_data()))
         .mount(&mock_server)
         .await;
 
@@ -563,13 +571,13 @@ async fn test_crdb_tasks_empty() {
 }
 
 #[tokio::test]
-async fn test_crdb_tasks_nonexistent() {
+async fn test_crdb_tasks_nonexistent_is_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/nonexistent-guid/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
-        .respond_with(error_response(404, "CRDB not found"))
+        .respond_with(success_response(test_crdb_tasks_data()))
         .mount(&mock_server)
         .await;
 
@@ -583,7 +591,8 @@ async fn test_crdb_tasks_nonexistent() {
     let handler = CrdbHandler::new(client);
     let result = handler.tasks("nonexistent-guid").await;
 
-    assert!(result.is_err());
+    assert!(result.is_ok());
+    assert!(result.unwrap().as_array().unwrap().is_empty());
 }
 
 // ===========================================================================

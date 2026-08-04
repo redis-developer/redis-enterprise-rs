@@ -10,10 +10,6 @@ fn success_response(body: serde_json::Value) -> ResponseTemplate {
     ResponseTemplate::new(200).set_body_json(body)
 }
 
-fn created_response(body: serde_json::Value) -> ResponseTemplate {
-    ResponseTemplate::new(201).set_body_json(body)
-}
-
 fn no_content_response() -> ResponseTemplate {
     ResponseTemplate::new(204)
 }
@@ -56,15 +52,6 @@ fn test_create_suffix_request() -> CreateSuffixRequest {
         dns_suffix: "new.redis.example.com".to_string(),
         use_internal_addr: Some(true),
         use_external_addr: Some(false),
-    }
-}
-
-fn test_create_suffix_request_minimal() -> CreateSuffixRequest {
-    CreateSuffixRequest {
-        name: "minimal".to_string(),
-        dns_suffix: "minimal.redis.example.com".to_string(),
-        use_internal_addr: None,
-        use_external_addr: None,
     }
 }
 
@@ -199,146 +186,11 @@ async fn test_suffixes_get_nonexistent() {
 }
 
 #[tokio::test]
-async fn test_suffixes_create() {
-    let mock_server = MockServer::start().await;
-    let request = test_create_suffix_request();
-
-    Mock::given(method("POST"))
-        .and(path("/v1/suffix"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&request))
-        .respond_with(created_response(json!({
-            "name": "new-suffix",
-            "dns_suffix": "new.redis.example.com",
-            "use_internal_addr": true,
-            "use_external_addr": false
-        })))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = SuffixesHandler::new(client);
-    let result = handler.create(request).await;
-
-    assert!(result.is_ok());
-    let suffix = result.unwrap();
-    assert_eq!(suffix.name, "new-suffix");
-    assert_eq!(suffix.dns_suffix, Some("new.redis.example.com".to_string()));
-    assert_eq!(suffix.use_internal_addr, Some(true));
-    assert_eq!(suffix.use_external_addr, Some(false));
-}
-
-#[tokio::test]
-async fn test_suffixes_create_minimal() {
-    let mock_server = MockServer::start().await;
-    let request = test_create_suffix_request_minimal();
-
-    Mock::given(method("POST"))
-        .and(path("/v1/suffix"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&request))
-        .respond_with(created_response(json!({
-            "name": "minimal",
-            "dns_suffix": "minimal.redis.example.com"
-        })))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = SuffixesHandler::new(client);
-    let result = handler.create(request).await;
-
-    assert!(result.is_ok());
-    let suffix = result.unwrap();
-    assert_eq!(suffix.name, "minimal");
-    assert_eq!(
-        suffix.dns_suffix,
-        Some("minimal.redis.example.com".to_string())
-    );
-    assert!(suffix.use_internal_addr.is_none());
-    assert!(suffix.use_external_addr.is_none());
-}
-
-#[tokio::test]
-async fn test_suffixes_create_duplicate() {
-    let mock_server = MockServer::start().await;
-    let request = CreateSuffixRequest {
-        name: "existing".to_string(),
-        dns_suffix: "existing.redis.example.com".to_string(),
-        use_internal_addr: None,
-        use_external_addr: None,
-    };
-
-    Mock::given(method("POST"))
-        .and(path("/v1/suffix"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&request))
-        .respond_with(error_response(409, "Suffix already exists"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = SuffixesHandler::new(client);
-    let result = handler.create(request).await;
-
-    assert!(result.is_err());
-}
-
-#[tokio::test]
-async fn test_suffixes_create_invalid() {
-    let mock_server = MockServer::start().await;
-    let request = CreateSuffixRequest {
-        name: "".to_string(),
-        dns_suffix: "invalid-dns".to_string(),
-        use_internal_addr: None,
-        use_external_addr: None,
-    };
-
-    Mock::given(method("POST"))
-        .and(path("/v1/suffix"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&request))
-        .respond_with(error_response(400, "Invalid suffix configuration"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = SuffixesHandler::new(client);
-    let result = handler.create(request).await;
-
-    assert!(result.is_err());
-}
-
-#[tokio::test]
 async fn test_suffixes_update() {
     let mock_server = MockServer::start().await;
     let request = test_create_suffix_request();
 
-    Mock::given(method("PUT"))
+    Mock::given(method("PATCH"))
         .and(path("/v1/suffix/new-suffix"))
         .and(basic_auth("admin", "password"))
         .and(body_json(&request))
@@ -372,7 +224,7 @@ async fn test_suffixes_update_nonexistent() {
     let mock_server = MockServer::start().await;
     let request = test_create_suffix_request();
 
-    Mock::given(method("PUT"))
+    Mock::given(method("PATCH"))
         .and(path("/v1/suffix/nonexistent"))
         .and(basic_auth("admin", "password"))
         .and(body_json(&request))
@@ -470,7 +322,7 @@ async fn test_suffixes_cluster_suffixes() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/cluster/suffixes"))
+        .and(path("/v1/suffixes"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([
             {
@@ -516,7 +368,7 @@ async fn test_suffixes_cluster_suffixes_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/cluster/suffixes"))
+        .and(path("/v1/suffixes"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([])))
         .mount(&mock_server)
@@ -542,7 +394,7 @@ async fn test_suffixes_cluster_suffixes_error() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/cluster/suffixes"))
+        .and(path("/v1/suffixes"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(500, "Internal server error"))
         .mount(&mock_server)

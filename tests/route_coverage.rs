@@ -19,7 +19,20 @@ use std::path::{Path, PathBuf};
 
 const INVENTORY_CSV: &str = include_str!("../docs/api-inventory.csv");
 const UNSUPPORTED_ROUTES: &str = include_str!("fixtures/enterprise_unsupported_routes.txt");
-const NON_SPEC_ROUTES: &str = include_str!("fixtures/enterprise_non_spec_routes.txt");
+const NON_INVENTORY_REGISTRY: &str = include_str!("fixtures/live_non_inventory_routes.json");
+
+// Literal specializations of documented `{action}` templates. Keep this list
+// narrow: a generic `{uid}` resource path must not accidentally bless reserved
+// literals such as `/permissions`, `/builtin`, or `/wd_status`.
+const DOCUMENTED_SPECIALIZATIONS: &[&str] = &[
+    "POST /v1/bootstrap/create_cluster",
+    "POST /v1/bootstrap/join",
+    "POST /v1/cluster/actions/recover",
+    "POST /v1/cluster/actions/reset",
+    "POST /v1/nodes/{}/actions/remove",
+    "PUT /v1/bdbs/{}/flush",
+    "PUT /v1/bdbs/{}/reset_admin_pass",
+];
 
 const SUPPORTED_VERBS: &[&str] = &["GET", "POST", "PUT", "PATCH", "DELETE"];
 
@@ -92,6 +105,30 @@ fn load_allowlist(contents: &str) -> BTreeSet<String> {
         .map(str::trim)
         .filter(|line| !line.is_empty() && !line.starts_with('#'))
         .map(ToOwned::to_owned)
+        .collect()
+}
+
+fn load_non_inventory_registry() -> BTreeSet<String> {
+    let registry: serde_json::Value = serde_json::from_str(NON_INVENTORY_REGISTRY)
+        .expect("non-inventory route registry should be valid JSON");
+    registry
+        .get("routes")
+        .and_then(serde_json::Value::as_object)
+        .expect("non-inventory route registry should contain a routes object")
+        .keys()
+        .cloned()
+        .collect()
+}
+
+fn load_retired_route_registry() -> BTreeSet<String> {
+    let registry: serde_json::Value = serde_json::from_str(NON_INVENTORY_REGISTRY)
+        .expect("non-inventory route registry should be valid JSON");
+    registry
+        .get("retired_routes")
+        .and_then(serde_json::Value::as_object)
+        .expect("non-inventory route registry should contain a retired_routes object")
+        .keys()
+        .cloned()
         .collect()
 }
 
@@ -252,6 +289,28 @@ fn diff(set: &BTreeSet<String>, expected: &BTreeSet<String>) -> Vec<String> {
     set.difference(expected).cloned().collect()
 }
 
+fn handler_is_documented(handler: &str, documented: &BTreeSet<String>) -> bool {
+    documented.contains(handler) || DOCUMENTED_SPECIALIZATIONS.contains(&handler)
+}
+
+#[test]
+fn documented_specializations_are_explicit_and_do_not_bless_reserved_literals() {
+    let documented = documented_routes();
+    for specialization in DOCUMENTED_SPECIALIZATIONS {
+        assert!(handler_is_documented(specialization, &documented));
+    }
+
+    assert!(!handler_is_documented(
+        "GET /v1/users/permissions",
+        &documented
+    ));
+    assert!(!handler_is_documented("GET /v1/roles/builtin", &documented));
+    assert!(!handler_is_documented(
+        "GET /v1/nodes/wd_status",
+        &documented
+    ));
+}
+
 #[test]
 fn test_documented_routes_have_handler_coverage() {
     let documented = documented_routes();
@@ -281,16 +340,21 @@ fn test_documented_routes_have_handler_coverage() {
 fn test_non_spec_handler_routes_are_explicitly_allowlisted() {
     let documented = documented_routes();
     let extracted = extracted_handler_routes();
-    let allowlist = load_allowlist(NON_SPEC_ROUTES);
+    let allowlist = load_non_inventory_registry();
+    let retired = load_retired_route_registry();
 
-    let non_spec: BTreeSet<_> = extracted.difference(&documented).cloned().collect();
+    let non_spec: BTreeSet<_> = extracted
+        .iter()
+        .filter(|handler| !handler_is_documented(handler, &documented))
+        .cloned()
+        .collect();
     let unexpected = diff(&non_spec, &allowlist);
     assert!(
         unexpected.is_empty(),
         "Found handler routes that are not in the documented inventory and not in \
-         tests/fixtures/enterprise_non_spec_routes.txt. Either remove the handler, \
-         confirm the route is internal/legacy and add it to the allowlist with a \
-         note, or update docs/api-inventory.csv (and rerun \
+         tests/fixtures/live_non_inventory_routes.json. Either remove the handler, \
+         confirm the route is intentional and add it to the evidence registry with \
+         a disposition, or update docs/api-inventory.csv (and rerun \
          `scripts/export_api_inventory.py`):\n\n{}",
         unexpected.join("\n")
     );
@@ -298,8 +362,17 @@ fn test_non_spec_handler_routes_are_explicitly_allowlisted() {
     let stale: Vec<_> = allowlist.difference(&non_spec).cloned().collect();
     assert!(
         stale.is_empty(),
-        "Found stale allowlist entries in enterprise_non_spec_routes.txt that \
-         the handler no longer calls. Remove them from the allowlist:\n\n{}",
+        "Found stale entries in live_non_inventory_routes.json that the handler \
+         no longer calls. Remove them from the evidence registry:\n\n{}",
         stale.join("\n")
+    );
+
+    let reactivated: Vec<_> = retired.intersection(&extracted).cloned().collect();
+    assert!(
+        reactivated.is_empty(),
+        "Found retired invalid routes that an HTTP handler calls again. Use a \
+         documented replacement or move the route back to the active evidence \
+         registry only after new live verification:\n\n{}",
+        reactivated.join("\n")
     );
 }

@@ -45,7 +45,7 @@ fn bootstrap_status_response(
 
 fn cluster_bootstrap_config() -> BootstrapConfig {
     BootstrapConfig {
-        action: "cluster_create".to_string(),
+        action: "create_cluster".to_string(),
         cluster: Some(ClusterBootstrap {
             name: "test-cluster".to_string(),
             dns_suffixes: Some(vec!["cluster.local".to_string()]),
@@ -86,7 +86,7 @@ async fn test_bootstrap_create_cluster() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("POST"))
-        .and(path("/v1/bootstrap"))
+        .and(path("/v1/bootstrap/create_cluster"))
         .and(basic_auth("admin", "password"))
         .respond_with(created_response(bootstrap_status_response(
             "in_progress",
@@ -263,8 +263,8 @@ async fn test_bootstrap_join_node() {
 async fn test_bootstrap_reset() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("DELETE"))
-        .and(path("/v1/bootstrap"))
+    Mock::given(method("POST"))
+        .and(path("/v1/cluster/actions/reset"))
         .and(basic_auth("admin", "password"))
         .respond_with(no_content_response())
         .mount(&mock_server)
@@ -288,7 +288,7 @@ async fn test_bootstrap_create_minimal_config() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("POST"))
-        .and(path("/v1/bootstrap"))
+        .and(path("/v1/bootstrap/create_cluster"))
         .and(basic_auth("admin", "password"))
         .respond_with(created_response(bootstrap_status_response(
             "in_progress",
@@ -309,7 +309,7 @@ async fn test_bootstrap_create_minimal_config() {
 
     // Minimal config - just action and credentials
     let config = BootstrapConfig {
-        action: "minimal_cluster".to_string(),
+        action: "create_cluster".to_string(),
         cluster: None,
         node: None,
         credentials: Some(CredentialsBootstrap {

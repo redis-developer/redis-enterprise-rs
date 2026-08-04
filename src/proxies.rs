@@ -195,37 +195,48 @@ impl ProxyHandler {
         self.client.get(&format!("/v1/proxies/{}", uid)).await
     }
 
-    /// Get proxy statistics
-    pub async fn stats(&self, uid: u32) -> Result<ProxyStats> {
-        self.client.get(&format!("/v1/proxies/{}/stats", uid)).await
+    /// Retired proxy statistics helper.
+    #[deprecated(note = "Redis Software does not register proxy statistics routes")]
+    pub async fn stats(&self, _uid: u32) -> Result<ProxyStats> {
+        crate::error::unsupported_operation("get proxy statistics")
     }
 
-    /// Get proxy statistics for a specific metric
-    pub async fn stats_metric(&self, uid: u32, metric: &str) -> Result<MetricResponse> {
-        self.client
-            .get(&format!("/v1/proxies/{}/stats/{}", uid, metric))
-            .await
+    /// Retired per-metric proxy statistics helper.
+    #[deprecated(note = "Redis Software does not register proxy statistics routes")]
+    pub async fn stats_metric(&self, _uid: u32, _metric: &str) -> Result<MetricResponse> {
+        crate::error::unsupported_operation("get proxy metric")
     }
 
-    /// Get proxies for a specific database
+    /// Get proxies for a specific database.
+    ///
+    /// Redis Software does not expose a database-scoped proxy route. Fetch the
+    /// documented global collection and filter it client-side instead.
     pub async fn list_by_database(&self, bdb_uid: u32) -> Result<Vec<Proxy>> {
-        self.client
-            .get(&format!("/v1/bdbs/{}/proxies", bdb_uid))
-            .await
+        Ok(self
+            .list()
+            .await?
+            .into_iter()
+            .filter(|proxy| proxy.bdb_uid == Some(bdb_uid))
+            .collect())
     }
 
-    /// Get proxies for a specific node
+    /// Get proxies for a specific node.
+    ///
+    /// Redis Software does not expose a node-scoped proxy route. Fetch the
+    /// documented global collection and filter it client-side instead.
     pub async fn list_by_node(&self, node_uid: u32) -> Result<Vec<Proxy>> {
-        self.client
-            .get(&format!("/v1/nodes/{}/proxies", node_uid))
-            .await
+        Ok(self
+            .list()
+            .await?
+            .into_iter()
+            .filter(|proxy| proxy.node_uid == Some(node_uid))
+            .collect())
     }
 
-    /// Reload proxy configuration
-    pub async fn reload(&self, uid: u32) -> Result<()> {
-        self.client
-            .post_action(&format!("/v1/proxies/{}/actions/reload", uid), &Value::Null)
-            .await
+    /// Retired proxy reload helper.
+    #[deprecated(note = "Redis Software does not register proxy reload actions")]
+    pub async fn reload(&self, _uid: u32) -> Result<()> {
+        crate::error::unsupported_operation("reload proxy")
     }
 
     /// Update proxies (bulk) - PUT /v1/proxies

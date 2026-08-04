@@ -253,14 +253,14 @@ impl AlertHandler {
     /// List alerts for a specific database
     pub async fn list_by_database(&self, bdb_uid: u32) -> Result<Vec<Alert>> {
         self.client
-            .get(&format!("/v1/bdbs/{}/alerts", bdb_uid))
+            .get(&format!("/v1/bdbs/alerts/{}", bdb_uid))
             .await
     }
 
     /// List alerts for a specific node
     pub async fn list_by_node(&self, node_uid: u32) -> Result<Vec<Alert>> {
         self.client
-            .get(&format!("/v1/nodes/{}/alerts", node_uid))
+            .get(&format!("/v1/nodes/alerts/{}", node_uid))
             .await
     }
 
@@ -274,57 +274,50 @@ impl AlertHandler {
         self.client.get("/v1/cluster/alerts").await
     }
 
-    /// Get alert settings for a specific alert type
-    pub async fn get_settings(&self, alert_name: &str) -> Result<AlertSettings> {
-        self.client
-            .get(&format!("/v1/cluster/alert_settings/{}", alert_name))
-            .await
+    /// Retired per-alert settings helper.
+    #[deprecated(note = "Redis Software does not register cluster alert-settings routes")]
+    pub async fn get_settings(&self, _alert_name: &str) -> Result<AlertSettings> {
+        crate::error::unsupported_operation("get per-alert cluster settings")
     }
 
-    /// Update alert settings (generic/legacy)
+    /// Retired per-alert settings update helper.
+    #[deprecated(note = "Redis Software does not register cluster alert-settings routes")]
     pub async fn update_settings(
         &self,
-        alert_name: &str,
-        settings: AlertSettings,
+        _alert_name: &str,
+        _settings: AlertSettings,
     ) -> Result<AlertSettings> {
-        self.client
-            .put(
-                &format!("/v1/cluster/alert_settings/{}", alert_name),
-                &settings,
-            )
-            .await
+        crate::error::unsupported_operation("update per-alert cluster settings")
     }
 
-    /// Get database alert settings
-    pub async fn get_database_alert_settings(&self, bdb_uid: u32) -> Result<DbAlertsSettings> {
-        self.client
-            .get(&format!("/v1/bdbs/{}/alert_settings", bdb_uid))
-            .await
+    /// Retired database alert settings helper.
+    #[deprecated(note = "Redis Software does not register database alert-settings routes")]
+    pub async fn get_database_alert_settings(&self, _bdb_uid: u32) -> Result<DbAlertsSettings> {
+        crate::error::unsupported_operation("get database alert settings")
     }
 
-    /// Update database alert settings
+    /// Retired database alert settings update helper.
+    #[deprecated(note = "Redis Software does not register database alert-settings routes")]
     pub async fn update_database_alert_settings(
         &self,
-        bdb_uid: u32,
-        settings: &DbAlertsSettings,
+        _bdb_uid: u32,
+        _settings: &DbAlertsSettings,
     ) -> Result<DbAlertsSettings> {
-        self.client
-            .put(&format!("/v1/bdbs/{}/alert_settings", bdb_uid), settings)
-            .await
+        crate::error::unsupported_operation("update database alert settings")
     }
 
-    /// Get cluster alert settings
+    /// Retired cluster alert settings helper.
+    #[deprecated(note = "Redis Software does not register cluster alert-settings routes")]
     pub async fn get_cluster_alert_settings(&self) -> Result<ClusterAlertsSettings> {
-        self.client.get("/v1/cluster/alert_settings").await
+        crate::error::unsupported_operation("get cluster alert settings")
     }
 
-    /// Update cluster alert settings
+    /// Retired cluster alert settings update helper.
+    #[deprecated(note = "Redis Software does not register cluster alert-settings routes")]
     pub async fn update_cluster_alert_settings(
         &self,
-        settings: &ClusterAlertsSettings,
+        _settings: &ClusterAlertsSettings,
     ) -> Result<ClusterAlertsSettings> {
-        self.client
-            .put("/v1/cluster/alert_settings", settings)
-            .await
+        crate::error::unsupported_operation("update cluster alert settings")
     }
 }

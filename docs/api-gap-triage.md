@@ -1,12 +1,19 @@
 # API Gap Triage — Non-Spec Routes Audit (#65)
 
+> **Historical document.** This docs-only triage was superseded on August 4,
+> 2026 by the exact five-version
+> [non-inventory route evidence matrix](./non-inventory-route-evidence.md).
+> Several claims below that a route “works live” did not survive the current
+> method-aware server probes. Use the checked-in evidence registry for current
+> dispositions.
+
 Reviewed on May 26, 2026 against the official Redis Software REST API docs at
 `https://redis.io/docs/latest/operate/rs/references/rest-api/requests/`.
 
 This document supersedes the earlier triage stub. It is the deliverable for
 [#65](https://github.com/redis-developer/redis-enterprise-rs/issues/65) — a
-per-route classification for every SDK handler route in
-[`tests/fixtures/enterprise_non_spec_routes.txt`](../tests/fixtures/enterprise_non_spec_routes.txt)
+per-route classification for every SDK handler route now tracked in the
+[live evidence registry](../tests/fixtures/live_non_inventory_routes.json)
 (122 routes) that is *not* yet listed in
 [`docs/api-inventory.csv`](./api-inventory.csv).
 

@@ -84,31 +84,34 @@ impl DiagnosticsHandler {
         DiagnosticsHandler { client }
     }
 
-    /// Run diagnostic checks
-    pub async fn run(&self, request: DiagnosticRequest) -> Result<DiagnosticReport> {
-        self.client.post("/v1/diagnostics", &request).await
+    /// Retired diagnostic-report runner.
+    #[deprecated(note = "the diagnostics API only exposes GET/PUT configuration")]
+    pub async fn run(&self, _request: DiagnosticRequest) -> Result<DiagnosticReport> {
+        crate::error::unsupported_operation("run diagnostic report")
     }
 
-    /// Get available diagnostic checks
+    /// Retired diagnostic-check catalog helper.
+    #[deprecated(note = "Redis Software does not register diagnostics report routes")]
     pub async fn list_checks(&self) -> Result<Vec<String>> {
-        self.client.get("/v1/diagnostics/checks").await
+        crate::error::unsupported_operation("list diagnostic checks")
     }
 
-    /// Get last diagnostic report
+    /// Retired last-report helper.
+    #[deprecated(note = "Redis Software does not register diagnostics report routes")]
     pub async fn get_last_report(&self) -> Result<DiagnosticReport> {
-        self.client.get("/v1/diagnostics/last").await
+        crate::error::unsupported_operation("get last diagnostic report")
     }
 
-    /// Get specific diagnostic report
-    pub async fn get_report(&self, report_id: &str) -> Result<DiagnosticReport> {
-        self.client
-            .get(&format!("/v1/diagnostics/reports/{}", report_id))
-            .await
+    /// Retired report lookup helper.
+    #[deprecated(note = "Redis Software does not register diagnostics report routes")]
+    pub async fn get_report(&self, _report_id: &str) -> Result<DiagnosticReport> {
+        crate::error::unsupported_operation("get diagnostic report")
     }
 
-    /// List all diagnostic reports
+    /// Retired report-list helper.
+    #[deprecated(note = "Redis Software does not register diagnostics report routes")]
     pub async fn list_reports(&self) -> Result<Vec<DiagnosticReport>> {
-        self.client.get("/v1/diagnostics/reports").await
+        crate::error::unsupported_operation("list diagnostic reports")
     }
 
     /// Get diagnostics configuration/state - GET /v1/diagnostics

@@ -1,17 +1,13 @@
 //! CRDB tasks endpoint tests for Redis Enterprise
 
-use redis_enterprise::{CrdbTasksHandler, CreateCrdbTaskRequest, EnterpriseClient};
+use redis_enterprise::{CrdbTasksHandler, EnterpriseClient};
 use serde_json::json;
-use wiremock::matchers::{basic_auth, body_json, method, path};
+use wiremock::matchers::{basic_auth, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 // Test helper functions
 fn success_response(body: serde_json::Value) -> ResponseTemplate {
     ResponseTemplate::new(200).set_body_json(body)
-}
-
-fn created_response(body: serde_json::Value) -> ResponseTemplate {
-    ResponseTemplate::new(201).set_body_json(body)
 }
 
 fn no_content_response() -> ResponseTemplate {
@@ -61,6 +57,15 @@ fn test_failed_task() -> serde_json::Value {
         "start_time": "2023-01-01T10:00:00Z",
         "end_time": "2023-01-01T10:30:00Z",
         "error": "Connection timeout during restore"
+    })
+}
+
+fn test_other_crdb_task() -> serde_json::Value {
+    json!({
+        "task_id": "task-other",
+        "crdb_guid": "crdb-other",
+        "task_type": "sync",
+        "status": "completed"
     })
 }
 
@@ -243,120 +248,6 @@ async fn test_crdb_tasks_get_nonexistent() {
 }
 
 #[tokio::test]
-async fn test_crdb_tasks_create() {
-    let mock_server = MockServer::start().await;
-
-    let request = CreateCrdbTaskRequest {
-        crdb_guid: "crdb-456".to_string(),
-        task_type: "sync".to_string(),
-        params: Some(json!({
-            "source": "cluster-1",
-            "target": "cluster-2"
-        })),
-    };
-
-    Mock::given(method("POST"))
-        .and(path("/v1/crdb_tasks"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&request))
-        .respond_with(created_response(test_crdb_task()))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = CrdbTasksHandler::new(client);
-    let result = handler.create(request).await;
-
-    assert!(result.is_ok());
-    let task = result.unwrap();
-    assert_eq!(task.task_id, "task-123");
-    assert_eq!(task.crdb_guid, "crdb-456");
-    assert_eq!(task.task_type, "sync");
-    assert_eq!(task.status, "running");
-}
-
-#[tokio::test]
-async fn test_crdb_tasks_create_without_params() {
-    let mock_server = MockServer::start().await;
-
-    let request = CreateCrdbTaskRequest {
-        crdb_guid: "crdb-456".to_string(),
-        task_type: "backup".to_string(),
-        params: None,
-    };
-
-    Mock::given(method("POST"))
-        .and(path("/v1/crdb_tasks"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&request))
-        .respond_with(created_response(json!({
-            "task_id": "task-backup-1",
-            "crdb_guid": "crdb-456",
-            "task_type": "backup",
-            "status": "pending",
-            "progress": 0.0,
-            "start_time": null,
-            "end_time": null,
-            "error": null
-        })))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = CrdbTasksHandler::new(client);
-    let result = handler.create(request).await;
-
-    assert!(result.is_ok());
-    let task = result.unwrap();
-    assert_eq!(task.task_id, "task-backup-1");
-    assert_eq!(task.task_type, "backup");
-    assert_eq!(task.status, "pending");
-}
-
-#[tokio::test]
-async fn test_crdb_tasks_create_invalid() {
-    let mock_server = MockServer::start().await;
-
-    let request = CreateCrdbTaskRequest {
-        crdb_guid: "invalid".to_string(),
-        task_type: "unknown".to_string(),
-        params: None,
-    };
-
-    Mock::given(method("POST"))
-        .and(path("/v1/crdb_tasks"))
-        .and(basic_auth("admin", "password"))
-        .and(body_json(&request))
-        .respond_with(error_response(400, "Invalid task type"))
-        .mount(&mock_server)
-        .await;
-
-    let client = EnterpriseClient::builder()
-        .base_url(mock_server.uri())
-        .username("admin")
-        .password("password")
-        .build()
-        .unwrap();
-
-    let handler = CrdbTasksHandler::new(client);
-    let result = handler.create(request).await;
-
-    assert!(result.is_err());
-}
-
-#[tokio::test]
 async fn test_crdb_tasks_cancel() {
     let mock_server = MockServer::start().await;
 
@@ -458,11 +349,12 @@ async fn test_crdb_tasks_list_by_crdb() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/crdb-456/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([
             test_crdb_task(),
-            test_completed_task()
+            test_completed_task(),
+            test_other_crdb_task()
         ])))
         .mount(&mock_server)
         .await;
@@ -489,9 +381,9 @@ async fn test_crdb_tasks_list_by_crdb_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/crdb-999/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
+        .respond_with(success_response(json!([test_crdb_task()])))
         .mount(&mock_server)
         .await;
 
@@ -511,13 +403,13 @@ async fn test_crdb_tasks_list_by_crdb_empty() {
 }
 
 #[tokio::test]
-async fn test_crdb_tasks_list_by_crdb_nonexistent() {
+async fn test_crdb_tasks_list_by_crdb_nonexistent_is_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/nonexistent/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
-        .respond_with(error_response(404, "CRDB not found"))
+        .respond_with(success_response(json!([test_crdb_task()])))
         .mount(&mock_server)
         .await;
 
@@ -531,5 +423,6 @@ async fn test_crdb_tasks_list_by_crdb_nonexistent() {
     let handler = CrdbTasksHandler::new(client);
     let result = handler.list_by_crdb("nonexistent").await;
 
-    assert!(result.is_err());
+    assert!(result.is_ok());
+    assert!(result.unwrap().is_empty());
 }

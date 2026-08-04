@@ -156,11 +156,10 @@ impl ModuleHandler {
         self.client.delete(&format!("/v1/modules/{}", uid)).await
     }
 
-    /// Update module configuration
-    pub async fn update(&self, uid: &str, updates: Value) -> Result<Module> {
-        self.client
-            .put(&format!("/v1/modules/{}", uid), &updates)
-            .await
+    /// Retired module update helper.
+    #[deprecated(note = "Redis Software does not register PUT /v1/modules/{uid}")]
+    pub async fn update(&self, _uid: &str, _updates: Value) -> Result<Module> {
+        crate::error::unsupported_operation("update module")
     }
 
     /// Configure modules for a specific database - POST /v1/modules/config/bdb/{uid}

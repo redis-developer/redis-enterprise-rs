@@ -552,12 +552,14 @@ impl ClusterHandler {
         self.client.post("/v1/bootstrap/join", &body).await
     }
 
-    /// Remove node from cluster (CLUSTER.REMOVE_NODE)
+    /// Remove a node through the documented node action.
     pub async fn remove_node(&self, node_uid: u32) -> Result<Value> {
         self.client
-            .delete(&format!("/v1/nodes/{}", node_uid))
-            .await?;
-        Ok(serde_json::json!({"message": format!("Node {} removed", node_uid)}))
+            .post(
+                &format!("/v1/nodes/{}/actions/remove", node_uid),
+                &serde_json::json!({}),
+            )
+            .await
     }
 
     /// Reset cluster to factory defaults (CLUSTER.RESET) - DANGEROUS
@@ -578,14 +580,16 @@ impl ClusterHandler {
 
     // raw variant removed: use recover()
 
-    /// Get cluster settings (CLUSTER.SETTINGS)
+    /// Retired cluster settings alias.
+    #[deprecated(note = "Redis Software does not register /v1/cluster/settings")]
     pub async fn settings(&self) -> Result<Value> {
-        self.client.get("/v1/cluster/settings").await
+        crate::error::unsupported_operation("get cluster settings alias")
     }
 
-    /// Get cluster topology (CLUSTER.TOPOLOGY)
+    /// Retired cluster topology alias.
+    #[deprecated(note = "Redis Software does not register /v1/cluster/topology")]
     pub async fn topology(&self) -> Result<Value> {
-        self.client.get("/v1/cluster/topology").await
+        crate::error::unsupported_operation("get cluster topology alias")
     }
 
     /// List available cluster actions - GET /v1/cluster/actions
