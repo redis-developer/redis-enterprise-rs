@@ -6,8 +6,8 @@ evidence found in `src/` and `tests/`.
 ## Summary
 
 - Total documented endpoints audited: `209`
-- `implemented_and_tested`: `77`
-- `implemented_no_test_path_evidence`: `127`
+- `implemented_and_tested`: `90`
+- `implemented_no_test_path_evidence`: `114`
 - `test_only_path_evidence`: `0`
 - `docs_only`: `5`
 

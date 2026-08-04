@@ -151,6 +151,66 @@ Run the opt-in live smoke test:
 cargo test --test live_enterprise_smoke -- --ignored
 ```
 
+## Inventory Compliance Matrix
+
+`tests/live_compliance.rs` turns the checked-in API inventory into one visible
+result for every documented method and path. Normal test runs exercise its CSV
+parsing, resource resolution, sanitization, and baseline comparison without a
+server. The ignored live test:
+
+- probes safe `GET` operations and skips debug-info downloads;
+- resolves path parameters only from resources discovered on that cluster;
+- compares selected raw responses with their typed model round trips;
+- records the actual server version and discovered API capabilities;
+- classifies every operation as `pass`, `known_difference`,
+  `version_specific`, `skipped`, `unsupported`, or `fail`; and
+- writes only status metadata, JSON field paths, and sanitized error classes.
+  It never writes response bodies, credentials, resource IDs, or field values.
+
+To create a candidate for review against the pinned 8.2 image, first export the
+client variables from the smoke-check section, then run:
+
+```bash
+REDIS_ENTERPRISE_EXPECTED_VERSION="8.2.0-25" \
+REDIS_ENTERPRISE_IMAGE="redislabs/redis:8.2.0-25.12" \
+REDIS_ENTERPRISE_COMPLIANCE_RECORD=true \
+cargo test --test live_compliance live_inventory_compliance -- --ignored --nocapture
+```
+
+The sanitized report and one-family baseline candidate are written under
+`target/` by default. Override their locations with
+`REDIS_ENTERPRISE_COMPLIANCE_OUTPUT` and
+`REDIS_ENTERPRISE_COMPLIANCE_BASELINE_OUTPUT`. Review the candidate before
+merging its `safe` profile into
+`tests/fixtures/live_compliance_baseline.json`; recording never updates the
+checked-in baseline automatically.
+
+After a baseline is reviewed, omit `REDIS_ENTERPRISE_COMPLIANCE_RECORD` to make
+operation, status-code, typed-model, or newly dropped-field drift fail the run.
+Reviewed dropped-field paths are an allowlist because some server fields are
+transient; an observed subset or a model improvement can pass, but a newly
+dropped path cannot:
+
+```bash
+REDIS_ENTERPRISE_EXPECTED_VERSION="8.2.0-25" \
+REDIS_ENTERPRISE_IMAGE="redislabs/redis:8.2.0-25.12" \
+cargo test --test live_compliance live_inventory_compliance -- --ignored --nocapture
+```
+
+Run the disposable user lifecycle separately by adding
+`REDIS_ENTERPRISE_LIVE_WRITES=true`. Write-enabled reports use a distinct
+`writes` baseline profile so safe-read runs cannot accidentally accept or
+invalidate write coverage. The lifecycle removes stale compliance-prefixed
+users before it begins, which cleans up resources left by an interrupted prior
+run, and attempts follow-up cleanup on create or delete errors as well as the
+normal delete before returning. Do not run write-enabled compliance jobs
+concurrently against the same cluster. All other writes stay skipped with an
+explicit reason until they have a self-cleaning implementation.
+
+A missing family or profile baseline is a test failure, not implicit approval.
+Each required version in the support matrix must be recorded on its exact image
+and reviewed independently.
+
 ## Teardown and cleanup
 
 The validation cluster is fully disposable. Tear it down with:
@@ -197,10 +257,9 @@ read-only flow, but it does not yet establish full endpoint completeness.
 
 This snapshot is historical evidence, not the complete support matrix. Record
 future runs with the exact product version, image tag, date, and test scope.
+## Remaining Coverage
 
-## Next Steps
-
-- Expand the ignored live smoke suite beyond cluster, node, and database reads
-- Add disposable-resource CRUD flows for higher-confidence validation
-- Compare live responses against the generated API inventory in
-  [api-inventory.md](./api-inventory.md)
+The matrix starts with all safe reads and a disposable user CRUD lifecycle.
+Additional write routes should move out of `skipped` only when they have a
+self-cleaning implementation and an explicit safety review. Destructive cluster
+operations remain outside the default live suite.
