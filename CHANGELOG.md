@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.9.1...v0.10.0) - 2026-08-04
+
+### Added
+
+- *(api)* refresh inventory and add current Enterprise routes ([#110](https://github.com/redis-developer/redis-enterprise-rs/pull/110))
+
+### Fixed
+
+- harden supported-version contract matrix ([#127](https://github.com/redis-developer/redis-enterprise-rs/pull/127))
+- *(api)* handle empty and streamed response bodies ([#120](https://github.com/redis-developer/redis-enterprise-rs/pull/120))
+- *(bdb)* support Redis version selection ([#118](https://github.com/redis-developer/redis-enterprise-rs/pull/118))
+
+### Other
+
+- add coverage and dependency quality gates ([#123](https://github.com/redis-developer/redis-enterprise-rs/pull/123))
+- *(api)* automate docs drift and supported-version compliance ([#122](https://github.com/redis-developer/redis-enterprise-rs/pull/122))
+- *(models)* validate typed models against observed payloads ([#121](https://github.com/redis-developer/redis-enterprise-rs/pull/121))
+- *(api)* classify non-inventory Enterprise routes ([#117](https://github.com/redis-developer/redis-enterprise-rs/pull/117))
+- *(coverage)* make Enterprise API audit behavioral ([#113](https://github.com/redis-developer/redis-enterprise-rs/pull/113))
+- *(compliance)* add versioned Enterprise REST matrix ([#112](https://github.com/redis-developer/redis-enterprise-rs/pull/112))
+- *(api)* define Redis Software version support ([#111](https://github.com/redis-developer/redis-enterprise-rs/pull/111))
+
 ## [0.9.1](https://github.com/redis-developer/redis-enterprise-rs/compare/v0.9.0...v0.9.1) - 2026-06-02
 
 ### Other
