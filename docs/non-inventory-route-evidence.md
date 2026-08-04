@@ -13,7 +13,7 @@ supported public API.
 |---|---:|---|
 | `verified_undocumented` | 13 | The exact method/path is registered by at least one current 8.x family, but is absent from the public-doc inventory. Keep it visible as an intentional compatibility exception while documentation and behavioral coverage are evaluated. |
 | `compatibility_legacy` | 9 | The method/path is registered in 7.4, 7.8, and 7.22, but not in 8.0 or 8.2. Keep only for the crate's older supported families and do not recommend it for new integrations. |
-| `invalid` | 59 | None of the five supported families registers the claimed method/path. Treat the handler as a removal, deprecation, or canonical-path correction candidate. |
+| `invalid` | 49 | None of the five supported families registers the claimed method/path. Treat the handler as a removal, deprecation, or canonical-path correction candidate. |
 
 Seven original invalid routes have already left the registry because their
 public methods now use the documented collection-first alert and statistics
@@ -21,7 +21,18 @@ paths, and node removal now uses the documented node action. Six more live
 routes are recognized as literal values of documented `{action}` templates
 instead of false non-inventory positives. The shard stats handler was also
 moved to its documented collection-first path. The registry therefore contains
-81 current exceptions and cleanup candidates.
+81 exceptions and cleanup candidates at the first checkpoint. Six additional
+invented aliases or relationship paths now delegate to canonical collection
+routes: cluster license, cluster suffixes, CRDB tasks by CRDB, proxies by
+database or node, and shards by node. The registry therefore contains 75
+exceptions and cleanup candidates at the second checkpoint. Database metrics
+and users-by-role now also delegate to their canonical statistics and users
+collections. The registry therefore contains 73 current exceptions and cleanup
+candidates at the third checkpoint. Per-endpoint statistics now select from the
+documented global endpoint-statistics collection, leaving 72 current exceptions
+and cleanup candidates at the fourth checkpoint. Single-metric shard statistics
+now select the requested values from the documented shard-statistics response,
+leaving 71 current exceptions and cleanup candidates.
 
 The 13 current compatibility exceptions are:
 
@@ -47,11 +58,11 @@ The review used exact Docker images from the
 
 | Redis Software | Claimed method registered | Claimed method absent |
 |---|---:|---:|
-| 7.4.6-272 | 17 | 64 |
-| 7.8.6-286 | 21 | 60 |
-| 7.22.2-170 | 21 | 60 |
-| 8.0.20-68 | 13 | 68 |
-| 8.2.0-25 | 13 | 68 |
+| 7.4.6-272 | 17 | 54 |
+| 7.8.6-286 | 21 | 50 |
+| 7.22.2-170 | 21 | 50 |
+| 8.0.20-68 | 13 | 58 |
+| 8.2.0-25 | 13 | 58 |
 
 The runs were completed on August 4, 2026. Every path was probed with
 `OPTIONS`; no route mutation was executed. Redis Software returns `404` for an
@@ -77,7 +88,7 @@ matrix against one exact supported version and fails on either kind of drift:
 a reviewed route disappearing or a reviewed invalid route unexpectedly
 appearing.
 
-The next cleanup step is to correct, deprecate, or remove the 59 invalid
+The next cleanup step is to correct, deprecate, or remove the 49 invalid
 handlers module by module, checking downstream redisctl use before making a
 breaking API change. The registry should shrink as those decisions land; it is
 not a permanent exceptions budget.

@@ -8,6 +8,23 @@ use wiremock::matchers::{basic_auth, method, path};
 use wiremock::{Mock, MockServer};
 
 #[tokio::test]
+async fn test_database_metrics_uses_canonical_stats_route() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("GET"))
+        .and(path("/v1/bdbs/stats/1"))
+        .and(basic_auth("admin", "password"))
+        .respond_with(success_response(json!({"interval": "1min"})))
+        .mount(&mock_server)
+        .await;
+
+    let client = test_client(&mock_server);
+    let result = client.databases().metrics(1).await.unwrap();
+
+    assert_eq!(result["interval"], "1min");
+}
+
+#[tokio::test]
 async fn test_database_get_shards() {
     let mock_server = MockServer::start().await;
 

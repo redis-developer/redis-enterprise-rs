@@ -191,7 +191,7 @@ fn route_registry_is_complete_and_consistent() {
     let routes = load_routes(&registry);
     assert_eq!(
         routes.len(),
-        81,
+        71,
         "issue #105's registry shrinks as routes move to documented canonical paths"
     );
 
@@ -262,7 +262,7 @@ fn route_registry_is_complete_and_consistent() {
         dispositions.get(&RouteDisposition::CompatibilityLegacy),
         Some(&9)
     );
-    assert_eq!(dispositions.get(&RouteDisposition::Invalid), Some(&59));
+    assert_eq!(dispositions.get(&RouteDisposition::Invalid), Some(&49));
 }
 
 #[tokio::test]

@@ -470,7 +470,7 @@ async fn test_suffixes_cluster_suffixes() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/cluster/suffixes"))
+        .and(path("/v1/suffixes"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([
             {
@@ -516,7 +516,7 @@ async fn test_suffixes_cluster_suffixes_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/cluster/suffixes"))
+        .and(path("/v1/suffixes"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([])))
         .mount(&mock_server)
@@ -542,7 +542,7 @@ async fn test_suffixes_cluster_suffixes_error() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/cluster/suffixes"))
+        .and(path("/v1/suffixes"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(500, "Internal server error"))
         .mount(&mock_server)

@@ -304,13 +304,9 @@ async fn test_shard_stats_metric() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/shards/shard:1:1/stats/ops_per_sec"))
+        .and(path("/v1/shards/stats/shard:1:1"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!({
-            "interval": "1sec",
-            "timestamps": [1640995200, 1640995260, 1640995320],
-            "values": [1250.5, 1180.2, 1320.8]
-        })))
+        .respond_with(success_response(shard_stats()))
         .mount(&mock_server)
         .await;
 
@@ -336,12 +332,18 @@ async fn test_shard_stats_metric_memory() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/shards/shard:2:1/stats/memory_usage"))
+        .and(path("/v1/shards/stats/shard:2:1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!({
-            "interval": "1min",
-            "timestamps": [1640995200, 1640995260],
-            "values": [1048576, 1052000]
+            "uid": "shard:2:1",
+            "intervals": [{
+                "interval": "1min",
+                "timestamps": [1640995200, 1640995260],
+                "values": [
+                    {"memory_usage": 1048576},
+                    {"memory_usage": 1052000}
+                ]
+            }]
         })))
         .mount(&mock_server)
         .await;
@@ -428,11 +430,13 @@ async fn test_shard_list_by_node() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/shards"))
+        .and(path("/v1/shards"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([
             master_shard(),
+            replica_shard(),
             backup_shard(),
+            importing_shard(),
             minimal_shard()
         ])))
         .mount(&mock_server)
@@ -468,9 +472,9 @@ async fn test_shard_list_by_node_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/999/shards"))
+        .and(path("/v1/shards"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
+        .respond_with(success_response(json!([master_shard()])))
         .mount(&mock_server)
         .await;
 
@@ -546,12 +550,9 @@ async fn test_shard_stats_metric_invalid() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/shards/shard:1:1/stats/invalid_metric"))
+        .and(path("/v1/shards/stats/shard:1:1"))
         .and(basic_auth("admin", "password"))
-        .respond_with(ResponseTemplate::new(400).set_body_json(json!({
-            "error": "Invalid metric name",
-            "code": "INVALID_METRIC"
-        })))
+        .respond_with(success_response(shard_stats()))
         .mount(&mock_server)
         .await;
 

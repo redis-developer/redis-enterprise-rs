@@ -107,22 +107,12 @@
       ],
       "disposition": "verified_undocumented"
     },
-    "GET /v1/bdbs/metrics/{}": {
-      "module": "bdb",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "GET /v1/bdbs/{}/alert_settings": {
       "module": "bdb",
       "present_versions": [],
       "disposition": "invalid"
     },
     "GET /v1/bdbs/{}/endpoints": {
-      "module": "bdb",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/bdbs/{}/proxies": {
       "module": "bdb",
       "present_versions": [],
       "disposition": "invalid"
@@ -148,17 +138,7 @@
       "present_versions": [],
       "disposition": "invalid"
     },
-    "GET /v1/cluster/license": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "GET /v1/cluster/settings": {
-      "module": "cluster",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/cluster/suffixes": {
       "module": "cluster",
       "present_versions": [],
       "disposition": "invalid"
@@ -177,11 +157,6 @@
         "8.2.0-25"
       ],
       "disposition": "verified_undocumented"
-    },
-    "GET /v1/crdbs/{}/tasks": {
-      "module": "crdb",
-      "present_versions": [],
-      "disposition": "invalid"
     },
     "GET /v1/debuginfo": {
       "module": "debuginfo",
@@ -228,11 +203,6 @@
       "present_versions": [],
       "disposition": "invalid"
     },
-    "GET /v1/endpoints/{}/stats": {
-      "module": "endpoints",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "GET /v1/job_scheduler/{}": {
       "module": "job_scheduler",
       "present_versions": [],
@@ -268,16 +238,6 @@
       "present_versions": [],
       "disposition": "invalid"
     },
-    "GET /v1/nodes/{}/proxies": {
-      "module": "nodes",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/nodes/{}/shards": {
-      "module": "nodes",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
     "GET /v1/nodes/{}/wd_status": {
       "module": "nodes",
       "present_versions": [
@@ -300,16 +260,6 @@
     },
     "GET /v1/roles/builtin": {
       "module": "roles",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/roles/{}/users": {
-      "module": "roles",
-      "present_versions": [],
-      "disposition": "invalid"
-    },
-    "GET /v1/shards/{}/stats/{}": {
-      "module": "shards",
       "present_versions": [],
       "disposition": "invalid"
     },

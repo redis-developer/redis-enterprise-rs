@@ -90,8 +90,8 @@ impl SuffixesHandler {
         self.client.delete(&format!("/v1/suffix/{}", name)).await
     }
 
-    /// Get cluster DNS suffixes configuration
+    /// Get cluster DNS suffixes through the canonical suffix collection.
     pub async fn cluster_suffixes(&self) -> Result<Vec<Suffix>> {
-        self.client.get("/v1/cluster/suffixes").await
+        self.list().await
     }
 }

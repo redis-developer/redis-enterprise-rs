@@ -328,9 +328,13 @@ async fn test_proxy_list_by_database() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/1/proxies"))
+        .and(path("/v1/proxies"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([active_proxy(), standby_proxy()])))
+        .respond_with(success_response(json!([
+            active_proxy(),
+            standby_proxy(),
+            minimal_proxy()
+        ])))
         .mount(&mock_server)
         .await;
 
@@ -362,9 +366,9 @@ async fn test_proxy_list_by_database_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/999/proxies"))
+        .and(path("/v1/proxies"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
+        .respond_with(success_response(json!([active_proxy()])))
         .mount(&mock_server)
         .await;
 
@@ -388,9 +392,13 @@ async fn test_proxy_list_by_node() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/proxies"))
+        .and(path("/v1/proxies"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([active_proxy(), minimal_proxy()])))
+        .respond_with(success_response(json!([
+            active_proxy(),
+            standby_proxy(),
+            minimal_proxy()
+        ])))
         .mount(&mock_server)
         .await;
 
@@ -422,9 +430,9 @@ async fn test_proxy_list_by_node_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/999/proxies"))
+        .and(path("/v1/proxies"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
+        .respond_with(success_response(json!([active_proxy()])))
         .mount(&mock_server)
         .await;
 

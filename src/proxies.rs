@@ -207,18 +207,30 @@ impl ProxyHandler {
             .await
     }
 
-    /// Get proxies for a specific database
+    /// Get proxies for a specific database.
+    ///
+    /// Redis Software does not expose a database-scoped proxy route. Fetch the
+    /// documented global collection and filter it client-side instead.
     pub async fn list_by_database(&self, bdb_uid: u32) -> Result<Vec<Proxy>> {
-        self.client
-            .get(&format!("/v1/bdbs/{}/proxies", bdb_uid))
-            .await
+        Ok(self
+            .list()
+            .await?
+            .into_iter()
+            .filter(|proxy| proxy.bdb_uid == Some(bdb_uid))
+            .collect())
     }
 
-    /// Get proxies for a specific node
+    /// Get proxies for a specific node.
+    ///
+    /// Redis Software does not expose a node-scoped proxy route. Fetch the
+    /// documented global collection and filter it client-side instead.
     pub async fn list_by_node(&self, node_uid: u32) -> Result<Vec<Proxy>> {
-        self.client
-            .get(&format!("/v1/nodes/{}/proxies", node_uid))
-            .await
+        Ok(self
+            .list()
+            .await?
+            .into_iter()
+            .filter(|proxy| proxy.node_uid == Some(node_uid))
+            .collect())
     }
 
     /// Reload proxy configuration

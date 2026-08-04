@@ -6,7 +6,7 @@
 //! - Manage endpoint routing
 
 use crate::client::RestClient;
-use crate::error::Result;
+use crate::error::{RestError, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -84,11 +84,13 @@ impl EndpointsHandler {
         self.client.get(&format!("/v1/endpoints/{}", uid)).await
     }
 
-    /// Get endpoint statistics
+    /// Get statistics for one endpoint from the canonical global collection.
     pub async fn stats(&self, uid: &str) -> Result<EndpointStats> {
-        self.client
-            .get(&format!("/v1/endpoints/{}/stats", uid))
-            .await
+        self.all_stats()
+            .await?
+            .into_iter()
+            .find(|stats| stats.uid == uid)
+            .ok_or(RestError::NotFound)
     }
 
     /// Get all endpoint statistics

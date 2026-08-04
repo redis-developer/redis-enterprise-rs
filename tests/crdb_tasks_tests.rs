@@ -64,6 +64,15 @@ fn test_failed_task() -> serde_json::Value {
     })
 }
 
+fn test_other_crdb_task() -> serde_json::Value {
+    json!({
+        "task_id": "task-other",
+        "crdb_guid": "crdb-other",
+        "task_type": "sync",
+        "status": "completed"
+    })
+}
+
 #[tokio::test]
 async fn test_crdb_tasks_list() {
     let mock_server = MockServer::start().await;
@@ -458,11 +467,12 @@ async fn test_crdb_tasks_list_by_crdb() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/crdb-456/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([
             test_crdb_task(),
-            test_completed_task()
+            test_completed_task(),
+            test_other_crdb_task()
         ])))
         .mount(&mock_server)
         .await;
@@ -489,9 +499,9 @@ async fn test_crdb_tasks_list_by_crdb_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/crdb-999/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!([])))
+        .respond_with(success_response(json!([test_crdb_task()])))
         .mount(&mock_server)
         .await;
 
@@ -511,13 +521,13 @@ async fn test_crdb_tasks_list_by_crdb_empty() {
 }
 
 #[tokio::test]
-async fn test_crdb_tasks_list_by_crdb_nonexistent() {
+async fn test_crdb_tasks_list_by_crdb_nonexistent_is_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/crdbs/nonexistent/tasks"))
+        .and(path("/v1/crdb_tasks"))
         .and(basic_auth("admin", "password"))
-        .respond_with(error_response(404, "CRDB not found"))
+        .respond_with(success_response(json!([test_crdb_task()])))
         .mount(&mock_server)
         .await;
 
@@ -531,5 +541,6 @@ async fn test_crdb_tasks_list_by_crdb_nonexistent() {
     let handler = CrdbTasksHandler::new(client);
     let result = handler.list_by_crdb("nonexistent").await;
 
-    assert!(result.is_err());
+    assert!(result.is_ok());
+    assert!(result.unwrap().is_empty());
 }

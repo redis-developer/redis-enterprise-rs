@@ -239,9 +239,19 @@ impl CrdbHandler {
         self.client.delete(&format!("/v1/crdbs/{}", guid)).await
     }
 
-    /// Get CRDB tasks
+    /// Get tasks for a CRDB.
+    ///
+    /// Redis Software exposes tasks as a global collection, not beneath an
+    /// individual CRDB. Preserve this convenience method by filtering the
+    /// canonical collection client-side.
     pub async fn tasks(&self, guid: &str) -> Result<Value> {
-        self.client.get(&format!("/v1/crdbs/{}/tasks", guid)).await
+        let tasks: Vec<Value> = self.client.get("/v1/crdb_tasks").await?;
+        Ok(Value::Array(
+            tasks
+                .into_iter()
+                .filter(|task| task.get("crdb_guid").and_then(Value::as_str) == Some(guid))
+                .collect(),
+        ))
     }
 
     /// Flush all data from an Active-Active database.

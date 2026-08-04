@@ -313,7 +313,7 @@ async fn test_license_cluster_license() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/cluster/license"))
+        .and(path("/v1/license"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!({
             "key": "cluster-license-789",

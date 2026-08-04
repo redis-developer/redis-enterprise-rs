@@ -100,10 +100,16 @@ impl CrdbTasksHandler {
         self.client.post_action(&path, &serde_json::json!({})).await
     }
 
-    /// Get tasks for a specific CRDB
+    /// Get tasks for a specific CRDB.
+    ///
+    /// Redis Software does not expose a CRDB-scoped task route. Fetch the
+    /// documented global collection and filter it client-side instead.
     pub async fn list_by_crdb(&self, crdb_guid: &str) -> Result<Vec<CrdbTask>> {
-        self.client
-            .get(&format!("/v1/crdbs/{}/tasks", crdb_guid))
-            .await
+        Ok(self
+            .list()
+            .await?
+            .into_iter()
+            .filter(|task| task.crdb_guid == crdb_guid)
+            .collect())
     }
 }

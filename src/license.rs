@@ -139,8 +139,8 @@ impl LicenseHandler {
         self.client.post("/v1/license/validate", &request).await
     }
 
-    /// Get license from cluster
+    /// Get the cluster license through the canonical license endpoint.
     pub async fn cluster_license(&self) -> Result<License> {
-        self.client.get("/v1/cluster/license").await
+        self.get().await
     }
 }

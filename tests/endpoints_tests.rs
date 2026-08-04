@@ -267,9 +267,12 @@ async fn test_endpoint_stats() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/endpoints/endpoint-1/stats"))
+        .and(path("/v1/endpoints/stats"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(test_endpoint_stats_data()))
+        .respond_with(success_response(json!([
+            test_endpoint_stats_data(),
+            test_endpoint_stats_minimal_data()
+        ])))
         .mount(&mock_server)
         .await;
 
@@ -304,9 +307,12 @@ async fn test_endpoint_stats_minimal() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/endpoints/endpoint-2/stats"))
+        .and(path("/v1/endpoints/stats"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(test_endpoint_stats_minimal_data()))
+        .respond_with(success_response(json!([
+            test_endpoint_stats_data(),
+            test_endpoint_stats_minimal_data()
+        ])))
         .mount(&mock_server)
         .await;
 
@@ -331,9 +337,12 @@ async fn test_endpoint_stats_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/endpoints/nonexistent/stats"))
+        .and(path("/v1/endpoints/stats"))
         .and(basic_auth("admin", "password"))
-        .respond_with(error_response(404, "Endpoint not found"))
+        .respond_with(success_response(json!([
+            test_endpoint_stats_data(),
+            test_endpoint_stats_minimal_data()
+        ])))
         .mount(&mock_server)
         .await;
 

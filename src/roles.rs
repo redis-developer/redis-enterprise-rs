@@ -105,8 +105,20 @@ impl RolesHandler {
         self.client.get("/v1/roles/builtin").await
     }
 
-    /// Get users assigned to a role
+    /// Get user UIDs assigned to a role.
+    ///
+    /// Redis Software does not expose a role-scoped users route. Fetch the
+    /// canonical users collection and filter its `role_uids` client-side.
     pub async fn users(&self, uid: u32) -> Result<Vec<u32>> {
-        self.client.get(&format!("/v1/roles/{}/users", uid)).await
+        let users: Vec<crate::users::User> = self.client.get("/v1/users").await?;
+        Ok(users
+            .into_iter()
+            .filter(|user| {
+                user.role_uids
+                    .as_ref()
+                    .is_some_and(|role_uids| role_uids.contains(&uid))
+            })
+            .map(|user| user.uid)
+            .collect())
     }
 }
