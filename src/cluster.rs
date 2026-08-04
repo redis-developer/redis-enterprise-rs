@@ -47,6 +47,7 @@ use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::BTreeMap;
 use typed_builder::TypedBuilder;
 
 /// Response from cluster action operations
@@ -79,6 +80,7 @@ pub struct ClusterNode {
 
 /// Cluster information from the REST API
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct ClusterInfo {
     /// Cluster unique ID (read-only)
     pub uid: Option<u32>,
@@ -333,6 +335,14 @@ pub struct ClusterInfo {
 
     /// Wait command support
     pub wait_command: Option<bool>,
+
+    /// Additive or version-specific response fields not yet modeled explicitly.
+    ///
+    /// Cluster payloads expose release-specific feature flags and internal
+    /// capability maps. They are retained here so typed reads remain lossless
+    /// without assigning unstable fields a false cross-version schema.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
 }
 
 /// Cluster-wide settings configuration (57 fields)

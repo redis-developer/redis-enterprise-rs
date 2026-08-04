@@ -16,7 +16,7 @@ validation annotations.
 - Request body matchers: `28`
 - Query matchers: `6`
 - Response fixtures: `129`
-- Explicit fixture-deserialization evidence: `7`
+- Explicit fixture-deserialization evidence: `8`
 - Explicit live evidence: `19`
 
 ### Dispositions

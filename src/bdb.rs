@@ -68,6 +68,7 @@ use crate::error::Result;
 use futures::stream::Stream;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::BTreeMap;
 use std::pin::Pin;
 use std::time::Duration;
 use tokio::time::sleep;
@@ -186,8 +187,9 @@ pub struct DatabaseUpgradeRequest {
     pub modules: Option<Vec<ModuleUpgrade>>,
 }
 
-/// Database information from the REST API - 100% field coverage (152/152 fields)
+/// Version-aware database information from the REST API.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct DatabaseInfo {
     // Core database identification and status
     /// Database's unique ID (read-only).
@@ -573,10 +575,19 @@ pub struct DatabaseInfo {
     pub tags: Option<Vec<String>>,
     /// Current topology epoch counter (read-only).
     pub topology_epoch: Option<u32>,
+
+    /// Additive or version-specific response fields not yet modeled explicitly.
+    ///
+    /// Redis Software adds advanced database controls between supported release
+    /// families. Retaining them prevents typed reads from silently discarding
+    /// fields while stable public fields are promoted deliberately.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
 }
 
 /// Database endpoint information
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct EndpointInfo {
     /// Unique identifier for the endpoint
     pub uid: Option<String>,
@@ -592,10 +603,15 @@ pub struct EndpointInfo {
     pub addr_type: Option<String>,
     /// OSS cluster API preferred IP type
     pub oss_cluster_api_preferred_ip_type: Option<String>,
+    /// OSS cluster API preferred endpoint type (`ip` or `hostname`).
+    pub oss_cluster_api_preferred_endpoint_type: Option<String>,
     /// List of proxy UIDs to exclude
     pub exclude_proxies: Option<Vec<u32>>,
     /// List of proxy UIDs to include
     pub include_proxies: Option<Vec<u32>>,
+    /// Additive or version-specific endpoint fields.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
 }
 
 /// Module configuration for database creation

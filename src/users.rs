@@ -12,10 +12,12 @@ use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::BTreeMap;
 use typed_builder::TypedBuilder;
 
 /// User information
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct User {
     /// Unique identifier (read-only).
     pub uid: u32,
@@ -47,6 +49,11 @@ pub struct User {
     pub alert_bdb_crdt_src_syncer: Option<bool>,
     /// Password expiration duration in seconds
     pub password_expiration_duration: Option<u32>,
+    /// UNIX timestamp of the user's last successful authentication.
+    pub last_login: Option<u64>,
+    /// Additive or version-specific user fields.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
 }
 
 /// Create user request

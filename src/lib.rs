@@ -434,7 +434,7 @@ pub use alerts::{Alert, AlertHandler, AlertSettings, ClusterAlertState};
 pub use redis_acls::{CreateRedisAclRequest, RedisAcl, RedisAclHandler};
 
 // Shards
-pub use shards::{Shard, ShardHandler, ShardStats};
+pub use shards::{Shard, ShardHandler, ShardLoading, ShardStats};
 
 // Proxies
 pub use proxies::{Proxy, ProxyHandler, ProxyStats};

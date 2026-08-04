@@ -68,11 +68,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/availability_api",
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -190,10 +186,7 @@
             "GET /v1/cluster": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/availability_api"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/cluster/actions": {
               "status": "pass",
@@ -316,13 +309,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "pass",
@@ -463,12 +450,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -803,11 +785,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/availability_api",
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -925,10 +903,7 @@
             "GET /v1/cluster": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/availability_api"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/cluster/actions": {
               "status": "pass",
@@ -1051,13 +1026,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "pass",
@@ -1198,12 +1167,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -1542,10 +1506,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -1786,13 +1747,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "version_specific",
@@ -1933,12 +1888,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -2273,10 +2223,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -2517,13 +2464,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "version_specific",
@@ -2664,12 +2605,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -3008,10 +2944,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -3252,13 +3185,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "pass",
@@ -3399,12 +3326,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -3675,741 +3597,6 @@
           }
         },
         "writes": {
-            "operations": {
-              "DELETE /v1/bdbs/{uid}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/bdbs/{uid}/passwords": {
-                "status": "skipped"
-              },
-              "DELETE /v1/cluster/actions/{action}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/cluster/auditing/db_conns": {
-                "status": "skipped"
-              },
-              "DELETE /v1/cluster/certificates/{certificate_name}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/cluster/ldap": {
-                "status": "skipped"
-              },
-              "DELETE /v1/cluster/sso": {
-                "status": "skipped"
-              },
-              "DELETE /v1/crdbs/{crdb_guid}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/ldap_mappings/{uid}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/nodes/{node_uid}/actions/{action}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/nodes/{uid}/snapshots/{snapshot_name}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/redis_acls/{uid}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/roles/{uid}": {
-                "status": "skipped"
-              },
-              "DELETE /v1/users/{uid}": {
-                "status": "pass"
-              },
-              "DELETE /v2/local/modules/user-defined/artifacts/<module_name>/<version>": {
-                "status": "skipped"
-              },
-              "DELETE /v2/modules/user-defined/<uid>": {
-                "status": "skipped"
-              },
-              "GET /v1/actions": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/actions/bdb/{bdb_uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/actions/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "dropped_fields",
-                "dropped_paths": [
-                  "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type"
-                ]
-              },
-              "GET /v1/bdbs/alerts": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/alerts/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/alerts/{uid}/{alert}": {
-                "status": "skipped"
-              },
-              "GET /v1/bdbs/crdt_sources/alerts": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/crdt_sources/alerts/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/crdt_sources/alerts/{uid}/{crdt_src_id}": {
-                "status": "skipped"
-              },
-              "GET /v1/bdbs/crdt_sources/alerts/{uid}/{crdt_src_id}/{alert}": {
-                "status": "skipped"
-              },
-              "GET /v1/bdbs/debuginfo": {
-                "status": "skipped"
-              },
-              "GET /v1/bdbs/replica_sources/alerts": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/replica_sources/alerts/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/replica_sources/alerts/{uid}/{replica_src_id}": {
-                "status": "skipped"
-              },
-              "GET /v1/bdbs/replica_sources/alerts/{uid}/{replica_src_id}/{alert}": {
-                "status": "skipped"
-              },
-              "GET /v1/bdbs/stats": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/stats/last": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/stats/last/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/stats/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/{bdb_uid}/debuginfo": {
-                "status": "skipped"
-              },
-              "GET /v1/bdbs/{bdb_uid}/peer_stats": {
-                "status": "known_difference",
-                "status_code": 406
-              },
-              "GET /v1/bdbs/{bdb_uid}/peer_stats/{uid}": {
-                "status": "known_difference",
-                "status_code": 406
-              },
-              "GET /v1/bdbs/{bdb_uid}/shards": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/{bdb_uid}/sync_source_stats": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/{bdb_uid}/sync_source_stats/{uid}": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/bdbs/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/{uid}/actions/optimize_shards_placement": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/{uid}/actions/recover": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/{uid}/availability": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/bdbs/{uid}/syncer_state": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/bdbs/{uid}/syncer_state/crdt": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/bdbs/{uid}/syncer_state/replica": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/boostrap": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/cluster": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "pass"
-              },
-              "GET /v1/cluster/actions": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/actions/{action}": {
-                "status": "skipped"
-              },
-              "GET /v1/cluster/alerts": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/alerts/{alert}": {
-                "status": "skipped"
-              },
-              "GET /v1/cluster/auditing/db_conns": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/certificates": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/check": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/debuginfo": {
-                "status": "skipped"
-              },
-              "GET /v1/cluster/ldap": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/module-capabilities": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/policy": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/services_configuration": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/sso": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/cluster/sso/saml/metadata/sp": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/cluster/stats": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cluster/stats/last": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/cm_settings": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/crdb_tasks": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/crdb_tasks/{task_id}": {
-                "status": "skipped"
-              },
-              "GET /v1/crdbs": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "pass"
-              },
-              "GET /v1/crdbs/{crdb_guid}": {
-                "status": "skipped"
-              },
-              "GET /v1/crdbs/{crdb_guid}/health_report": {
-                "status": "skipped"
-              },
-              "GET /v1/debuginfo/all": {
-                "status": "skipped"
-              },
-              "GET /v1/debuginfo/all/bdb/{bdb_uid}": {
-                "status": "skipped"
-              },
-              "GET /v1/debuginfo/node": {
-                "status": "skipped"
-              },
-              "GET /v1/debuginfo/node/bdb/{bdb_uid}": {
-                "status": "skipped"
-              },
-              "GET /v1/diagnostics": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/endpoints/stats": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/job_scheduler": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/jsonschema": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/ldap_mappings": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/ldap_mappings/{uid}": {
-                "status": "skipped"
-              },
-              "GET /v1/license": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "dropped_fields",
-                "dropped_paths": [
-                  "/cluster_name",
-                  "/flash_shards_limit",
-                  "/owner",
-                  "/ram_shards_limit"
-                ]
-              },
-              "GET /v1/local/bdbs/{uid}/endpoint/availability": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/local/node/master_healthcheck": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/local/services": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/logs": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/metrics_config": {
-                "status": "version_specific",
-                "status_code": 404,
-                "model_status": "skipped"
-              },
-              "GET /v1/migrations/<uid>": {
-                "status": "skipped"
-              },
-              "GET /v1/modules": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "pass"
-              },
-              "GET /v1/modules/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "pass"
-              },
-              "GET /v1/nodes/actions": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/alerts": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/alerts/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/alerts/{uid}/{alert}": {
-                "status": "skipped"
-              },
-              "GET /v1/nodes/check/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/debuginfo": {
-                "status": "skipped"
-              },
-              "GET /v1/nodes/stats": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/stats/last": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/stats/last/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/stats/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/status": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/{node_uid}/actions": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/{node_uid}/actions/{action}": {
-                "status": "skipped"
-              },
-              "GET /v1/nodes/{node_uid}/debuginfo": {
-                "status": "skipped"
-              },
-              "GET /v1/nodes/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/{uid}/snapshots": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/nodes/{uid}/status": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/ocsp": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/ocsp/status": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/proxies": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "pass"
-              },
-              "GET /v1/proxies/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/redis_acls": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/redis_acls/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/roles": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "pass"
-              },
-              "GET /v1/roles/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/shards": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "dropped_fields",
-                "dropped_paths": [
-                  "/*/detailed_status",
-                  "/*/loading",
-                  "/*/report_timestamp"
-                ]
-              },
-              "GET /v1/shards/stats": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/shards/stats/last": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/shards/stats/last/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/shards/stats/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/shards/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/suffix/{name}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/suffixes": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v1/usage_report": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v1/users": {
-                "status": "pass",
-                "status_code": 200,
-                "model_status": "pass"
-              },
-              "GET /v1/users/{uid}": {
-                "status": "pass",
-                "status_code": 200
-              },
-              "GET /v2/actions": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v2/actions/{uid}": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "GET /v2/local/modules/user-defined/artifacts": {
-                "status": "version_specific",
-                "status_code": 404
-              },
-              "PATCH /v1/cluster/change_password_hashing_algorithm": {
-                "status": "skipped"
-              },
-              "PATCH /v1/crdbs/{crdb_guid}": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/alerts/{uid}": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/actions/export": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/actions/import": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/actions/recover": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/actions/resume_traffic": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/actions/stop_traffic": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/modules/config": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/modules/upgrade": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/passwords": {
-                "status": "skipped"
-              },
-              "POST /v1/bdbs/{uid}/upgrade": {
-                "status": "skipped"
-              },
-              "POST /v1/bootstrap/validate/{action}": {
-                "status": "skipped"
-              },
-              "POST /v1/bootstrap/{action}": {
-                "status": "skipped"
-              },
-              "POST /v1/cluster/actions/{action}": {
-                "status": "skipped"
-              },
-              "POST /v1/cluster/certificates/rotate": {
-                "status": "skipped"
-              },
-              "POST /v1/cluster/sso/saml/metadata/idp": {
-                "status": "skipped"
-              },
-              "POST /v1/crdb_tasks/{task_id}/actions/cancel": {
-                "status": "skipped"
-              },
-              "POST /v1/crdbs": {
-                "status": "skipped"
-              },
-              "POST /v1/crdbs/{crdb_guid}/updates": {
-                "status": "skipped"
-              },
-              "POST /v1/crdbs/{crdb_guid}/upgrade": {
-                "status": "skipped"
-              },
-              "POST /v1/ldap_mappings": {
-                "status": "skipped"
-              },
-              "POST /v1/local/services": {
-                "status": "skipped"
-              },
-              "POST /v1/modules/config/bdb/{uid}": {
-                "status": "skipped"
-              },
-              "POST /v1/nodes/{node_uid}/actions/{action}": {
-                "status": "skipped"
-              },
-              "POST /v1/ocsp/test": {
-                "status": "skipped"
-              },
-              "POST /v1/redis_acls": {
-                "status": "skipped"
-              },
-              "POST /v1/roles": {
-                "status": "skipped"
-              },
-              "POST /v1/services": {
-                "status": "skipped"
-              },
-              "POST /v1/shards/actions/failover": {
-                "status": "skipped"
-              },
-              "POST /v1/shards/actions/migrate": {
-                "status": "skipped"
-              },
-              "POST /v1/shards/{uid}/actions/failover": {
-                "status": "skipped"
-              },
-              "POST /v1/shards/{uid}/actions/migrate": {
-                "status": "skipped"
-              },
-              "POST /v1/users": {
-                "status": "pass"
-              },
-              "POST /v1/users/authorize": {
-                "status": "skipped"
-              },
-              "POST /v1/users/refresh_jwt": {
-                "status": "skipped"
-              },
-              "POST /v2/bdbs": {
-                "status": "skipped"
-              },
-              "POST /v2/local/modules/user-defined/artifacts": {
-                "status": "skipped"
-              },
-              "POST /v2/modules/user-defined": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}/actions/backup_reset_status": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}/actions/export_reset_status": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}/actions/import_reset_status": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}/actions/rebalance": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}/actions/revamp": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}/passwords": {
-                "status": "skipped"
-              },
-              "PUT /v1/bdbs/{uid}/{action}": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster/auditing/db_conns": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster/certificates": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster/ldap": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster/policy": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster/services_configuration": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster/sso": {
-                "status": "skipped"
-              },
-              "PUT /v1/cluster/update_cert": {
-                "status": "skipped"
-              },
-              "PUT /v1/cm_settings": {
-                "status": "skipped"
-              },
-              "PUT /v1/crdbs/{crdb_guid}/flush": {
-                "status": "skipped"
-              },
-              "PUT /v1/crdbs/{crdb_guid}/purge": {
-                "status": "skipped"
-              },
-              "PUT /v1/diagnostics": {
-                "status": "skipped"
-              },
-              "PUT /v1/job_scheduler": {
-                "status": "skipped"
-              },
-              "PUT /v1/ldap_mappings/{uid}": {
-                "status": "skipped"
-              },
-              "PUT /v1/license": {
-                "status": "skipped"
-              },
-              "PUT /v1/metrics_config": {
-                "status": "skipped"
-              },
-              "PUT /v1/nodes/{uid}": {
-                "status": "skipped"
-              },
-              "PUT /v1/ocsp": {
-                "status": "skipped"
-              },
-              "PUT /v1/proxies": {
-                "status": "skipped"
-              },
-              "PUT /v1/proxies/{uid}": {
-                "status": "skipped"
-              },
-              "PUT /v1/redis_acls/{uid}": {
-                "status": "skipped"
-              },
-              "PUT /v1/roles/{uid}": {
-                "status": "skipped"
-              },
-              "PUT /v1/users/{uid}": {
-                "status": "pass"
-              }
-            }
-          }
-        }
-      },
-    "8.0": {
-      "profiles": {
-        "safe": {
           "operations": {
             "DELETE /v1/bdbs/{uid}": {
               "status": "skipped"
@@ -4451,7 +3638,7 @@
               "status": "skipped"
             },
             "DELETE /v1/users/{uid}": {
-              "status": "skipped"
+              "status": "pass"
             },
             "DELETE /v2/local/modules/user-defined/artifacts/<module_name>/<version>": {
               "status": "skipped"
@@ -4474,34 +3661,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/asm_scaling",
-                "/*/auto_shards_balancing",
-                "/*/auto_shards_balancing_grace_period",
-                "/*/availability_api",
-                "/*/conns_global_maximum_dedicated",
-                "/*/conns_minimum_dedicated",
-                "/*/disconnect_clients_on_password_removal",
-                "/*/dmc_shard_routing_map",
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type",
-                "/*/is_balanced",
-                "/*/link_sconn_on_full_request",
-                "/*/link_sconn_on_full_request_size_limit",
-                "/*/partial_request_timeout_seconds",
-                "/*/preemptive_drain_timeout_seconds",
-                "/*/query_performance_factor",
-                "/*/replica_sconns_on_demand",
-                "/*/replication_oom_threshold_percent",
-                "/*/scaling_in_progress",
-                "/*/search_on_bigstore",
-                "/*/shard_imbalance_threshold",
-                "/*/shard_imbalance_threshold_percentage",
-                "/*/streamlined_translation",
-                "/*/string_sharing",
-                "/*/traffic_manually_disabled",
-                "/*/use_grpc_syncer_communication"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -4619,34 +3779,728 @@
             "GET /v1/cluster": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/availability_api",
-                "/availability_lag_tolerance_ms",
-                "/client_eviction",
-                "/client_maint_notifications",
-                "/clusterset_on_topology_changed",
-                "/crdt_supported_featureset_version_map",
-                "/crdt_supported_module_featureset_version_map",
-                "/crdt_supported_protocol_versions_map",
-                "/disconnect_clients_on_password_removal",
-                "/dmc_external_authentication",
-                "/dmc_external_cba_authentication",
-                "/dmc_external_entraid_authentication",
-                "/dmc_external_ldap_authentication",
-                "/grpc_cluster_wd",
-                "/metrics_auth",
-                "/oss_cluster_client_maint_notifications",
-                "/pdns_server_type",
-                "/redis_flex_multitenant",
-                "/replica_sconns_on_demand",
-                "/shared_strings_enabled",
-                "/state_machine_smart_client_handoffs_delay_ms",
-                "/streamlined_translation",
-                "/usage_report_fields",
-                "/use_grpc_syncer_communication",
-                "/uuid"
-              ]
+              "model_status": "pass"
+            },
+            "GET /v1/cluster/actions": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/actions/{action}": {
+              "status": "skipped"
+            },
+            "GET /v1/cluster/alerts": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/alerts/{alert}": {
+              "status": "skipped"
+            },
+            "GET /v1/cluster/auditing/db_conns": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/certificates": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/check": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/debuginfo": {
+              "status": "skipped"
+            },
+            "GET /v1/cluster/ldap": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/module-capabilities": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/policy": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/services_configuration": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/sso": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/cluster/sso/saml/metadata/sp": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/cluster/stats": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cluster/stats/last": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/cm_settings": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/crdb_tasks": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/crdb_tasks/{task_id}": {
+              "status": "skipped"
+            },
+            "GET /v1/crdbs": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/crdbs/{crdb_guid}": {
+              "status": "skipped"
+            },
+            "GET /v1/crdbs/{crdb_guid}/health_report": {
+              "status": "skipped"
+            },
+            "GET /v1/debuginfo/all": {
+              "status": "skipped"
+            },
+            "GET /v1/debuginfo/all/bdb/{bdb_uid}": {
+              "status": "skipped"
+            },
+            "GET /v1/debuginfo/node": {
+              "status": "skipped"
+            },
+            "GET /v1/debuginfo/node/bdb/{bdb_uid}": {
+              "status": "skipped"
+            },
+            "GET /v1/diagnostics": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/endpoints/stats": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/job_scheduler": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/jsonschema": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/ldap_mappings": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/ldap_mappings/{uid}": {
+              "status": "skipped"
+            },
+            "GET /v1/license": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/local/bdbs/{uid}/endpoint/availability": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/local/node/master_healthcheck": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/local/services": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/logs": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/metrics_config": {
+              "status": "version_specific",
+              "status_code": 404,
+              "model_status": "skipped"
+            },
+            "GET /v1/migrations/<uid>": {
+              "status": "skipped"
+            },
+            "GET /v1/modules": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/modules/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/nodes/actions": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/alerts": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/alerts/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/alerts/{uid}/{alert}": {
+              "status": "skipped"
+            },
+            "GET /v1/nodes/check/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/debuginfo": {
+              "status": "skipped"
+            },
+            "GET /v1/nodes/stats": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/stats/last": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/stats/last/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/stats/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/status": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/{node_uid}/actions": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/{node_uid}/actions/{action}": {
+              "status": "skipped"
+            },
+            "GET /v1/nodes/{node_uid}/debuginfo": {
+              "status": "skipped"
+            },
+            "GET /v1/nodes/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/{uid}/snapshots": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/nodes/{uid}/status": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/ocsp": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/ocsp/status": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/proxies": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/proxies/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/redis_acls": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/redis_acls/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/roles": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/roles/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/shards": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/shards/stats": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/shards/stats/last": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/shards/stats/last/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/shards/stats/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/shards/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/suffix/{name}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/suffixes": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/usage_report": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/users": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/users/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v2/actions": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v2/actions/{uid}": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v2/local/modules/user-defined/artifacts": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "PATCH /v1/cluster/change_password_hashing_algorithm": {
+              "status": "skipped"
+            },
+            "PATCH /v1/crdbs/{crdb_guid}": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/alerts/{uid}": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/actions/export": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/actions/import": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/actions/recover": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/actions/resume_traffic": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/actions/stop_traffic": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/modules/config": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/modules/upgrade": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/passwords": {
+              "status": "skipped"
+            },
+            "POST /v1/bdbs/{uid}/upgrade": {
+              "status": "skipped"
+            },
+            "POST /v1/bootstrap/validate/{action}": {
+              "status": "skipped"
+            },
+            "POST /v1/bootstrap/{action}": {
+              "status": "skipped"
+            },
+            "POST /v1/cluster/actions/{action}": {
+              "status": "skipped"
+            },
+            "POST /v1/cluster/certificates/rotate": {
+              "status": "skipped"
+            },
+            "POST /v1/cluster/sso/saml/metadata/idp": {
+              "status": "skipped"
+            },
+            "POST /v1/crdb_tasks/{task_id}/actions/cancel": {
+              "status": "skipped"
+            },
+            "POST /v1/crdbs": {
+              "status": "skipped"
+            },
+            "POST /v1/crdbs/{crdb_guid}/updates": {
+              "status": "skipped"
+            },
+            "POST /v1/crdbs/{crdb_guid}/upgrade": {
+              "status": "skipped"
+            },
+            "POST /v1/ldap_mappings": {
+              "status": "skipped"
+            },
+            "POST /v1/local/services": {
+              "status": "skipped"
+            },
+            "POST /v1/modules/config/bdb/{uid}": {
+              "status": "skipped"
+            },
+            "POST /v1/nodes/{node_uid}/actions/{action}": {
+              "status": "skipped"
+            },
+            "POST /v1/ocsp/test": {
+              "status": "skipped"
+            },
+            "POST /v1/redis_acls": {
+              "status": "skipped"
+            },
+            "POST /v1/roles": {
+              "status": "skipped"
+            },
+            "POST /v1/services": {
+              "status": "skipped"
+            },
+            "POST /v1/shards/actions/failover": {
+              "status": "skipped"
+            },
+            "POST /v1/shards/actions/migrate": {
+              "status": "skipped"
+            },
+            "POST /v1/shards/{uid}/actions/failover": {
+              "status": "skipped"
+            },
+            "POST /v1/shards/{uid}/actions/migrate": {
+              "status": "skipped"
+            },
+            "POST /v1/users": {
+              "status": "pass"
+            },
+            "POST /v1/users/authorize": {
+              "status": "skipped"
+            },
+            "POST /v1/users/refresh_jwt": {
+              "status": "skipped"
+            },
+            "POST /v2/bdbs": {
+              "status": "skipped"
+            },
+            "POST /v2/local/modules/user-defined/artifacts": {
+              "status": "skipped"
+            },
+            "POST /v2/modules/user-defined": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}/actions/backup_reset_status": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}/actions/export_reset_status": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}/actions/import_reset_status": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}/actions/rebalance": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}/actions/revamp": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}/passwords": {
+              "status": "skipped"
+            },
+            "PUT /v1/bdbs/{uid}/{action}": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster/auditing/db_conns": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster/certificates": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster/ldap": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster/policy": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster/services_configuration": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster/sso": {
+              "status": "skipped"
+            },
+            "PUT /v1/cluster/update_cert": {
+              "status": "skipped"
+            },
+            "PUT /v1/cm_settings": {
+              "status": "skipped"
+            },
+            "PUT /v1/crdbs/{crdb_guid}/flush": {
+              "status": "skipped"
+            },
+            "PUT /v1/crdbs/{crdb_guid}/purge": {
+              "status": "skipped"
+            },
+            "PUT /v1/diagnostics": {
+              "status": "skipped"
+            },
+            "PUT /v1/job_scheduler": {
+              "status": "skipped"
+            },
+            "PUT /v1/ldap_mappings/{uid}": {
+              "status": "skipped"
+            },
+            "PUT /v1/license": {
+              "status": "skipped"
+            },
+            "PUT /v1/metrics_config": {
+              "status": "skipped"
+            },
+            "PUT /v1/nodes/{uid}": {
+              "status": "skipped"
+            },
+            "PUT /v1/ocsp": {
+              "status": "skipped"
+            },
+            "PUT /v1/proxies": {
+              "status": "skipped"
+            },
+            "PUT /v1/proxies/{uid}": {
+              "status": "skipped"
+            },
+            "PUT /v1/redis_acls/{uid}": {
+              "status": "skipped"
+            },
+            "PUT /v1/roles/{uid}": {
+              "status": "skipped"
+            },
+            "PUT /v1/users/{uid}": {
+              "status": "pass"
+            }
+          }
+        }
+      }
+    },
+    "8.0": {
+      "profiles": {
+        "safe": {
+          "operations": {
+            "DELETE /v1/bdbs/{uid}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/bdbs/{uid}/passwords": {
+              "status": "skipped"
+            },
+            "DELETE /v1/cluster/actions/{action}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/cluster/auditing/db_conns": {
+              "status": "skipped"
+            },
+            "DELETE /v1/cluster/certificates/{certificate_name}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/cluster/ldap": {
+              "status": "skipped"
+            },
+            "DELETE /v1/cluster/sso": {
+              "status": "skipped"
+            },
+            "DELETE /v1/crdbs/{crdb_guid}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/ldap_mappings/{uid}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/nodes/{node_uid}/actions/{action}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/nodes/{uid}/snapshots/{snapshot_name}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/redis_acls/{uid}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/roles/{uid}": {
+              "status": "skipped"
+            },
+            "DELETE /v1/users/{uid}": {
+              "status": "skipped"
+            },
+            "DELETE /v2/local/modules/user-defined/artifacts/<module_name>/<version>": {
+              "status": "skipped"
+            },
+            "DELETE /v2/modules/user-defined/<uid>": {
+              "status": "skipped"
+            },
+            "GET /v1/actions": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/actions/bdb/{bdb_uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/actions/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
+            },
+            "GET /v1/bdbs/alerts": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/alerts/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/alerts/{uid}/{alert}": {
+              "status": "skipped"
+            },
+            "GET /v1/bdbs/crdt_sources/alerts": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/crdt_sources/alerts/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/crdt_sources/alerts/{uid}/{crdt_src_id}": {
+              "status": "skipped"
+            },
+            "GET /v1/bdbs/crdt_sources/alerts/{uid}/{crdt_src_id}/{alert}": {
+              "status": "skipped"
+            },
+            "GET /v1/bdbs/debuginfo": {
+              "status": "skipped"
+            },
+            "GET /v1/bdbs/replica_sources/alerts": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/replica_sources/alerts/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/replica_sources/alerts/{uid}/{replica_src_id}": {
+              "status": "skipped"
+            },
+            "GET /v1/bdbs/replica_sources/alerts/{uid}/{replica_src_id}/{alert}": {
+              "status": "skipped"
+            },
+            "GET /v1/bdbs/stats": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/stats/last": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/stats/last/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/stats/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/{bdb_uid}/debuginfo": {
+              "status": "skipped"
+            },
+            "GET /v1/bdbs/{bdb_uid}/peer_stats": {
+              "status": "known_difference",
+              "status_code": 406
+            },
+            "GET /v1/bdbs/{bdb_uid}/peer_stats/{uid}": {
+              "status": "known_difference",
+              "status_code": 406
+            },
+            "GET /v1/bdbs/{bdb_uid}/shards": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/{bdb_uid}/sync_source_stats": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/{bdb_uid}/sync_source_stats/{uid}": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/bdbs/{uid}": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/{uid}/actions/optimize_shards_placement": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/{uid}/actions/recover": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/{uid}/availability": {
+              "status": "pass",
+              "status_code": 200
+            },
+            "GET /v1/bdbs/{uid}/syncer_state": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/bdbs/{uid}/syncer_state/crdt": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/bdbs/{uid}/syncer_state/replica": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/boostrap": {
+              "status": "version_specific",
+              "status_code": 404
+            },
+            "GET /v1/cluster": {
+              "status": "pass",
+              "status_code": 200,
+              "model_status": "pass"
             },
             "GET /v1/cluster/actions": {
               "status": "pass",
@@ -4769,13 +4623,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "pass",
@@ -4916,14 +4764,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/actual_role",
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/marked_for_removal",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -4960,10 +4801,7 @@
             "GET /v1/users": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/last_login"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/users/{uid}": {
               "status": "pass",
@@ -5261,34 +5099,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/asm_scaling",
-                "/*/auto_shards_balancing",
-                "/*/auto_shards_balancing_grace_period",
-                "/*/availability_api",
-                "/*/conns_global_maximum_dedicated",
-                "/*/conns_minimum_dedicated",
-                "/*/disconnect_clients_on_password_removal",
-                "/*/dmc_shard_routing_map",
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type",
-                "/*/is_balanced",
-                "/*/link_sconn_on_full_request",
-                "/*/link_sconn_on_full_request_size_limit",
-                "/*/partial_request_timeout_seconds",
-                "/*/preemptive_drain_timeout_seconds",
-                "/*/query_performance_factor",
-                "/*/replica_sconns_on_demand",
-                "/*/replication_oom_threshold_percent",
-                "/*/scaling_in_progress",
-                "/*/search_on_bigstore",
-                "/*/shard_imbalance_threshold",
-                "/*/shard_imbalance_threshold_percentage",
-                "/*/streamlined_translation",
-                "/*/string_sharing",
-                "/*/traffic_manually_disabled",
-                "/*/use_grpc_syncer_communication"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -5406,34 +5217,7 @@
             "GET /v1/cluster": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/availability_api",
-                "/availability_lag_tolerance_ms",
-                "/client_eviction",
-                "/client_maint_notifications",
-                "/clusterset_on_topology_changed",
-                "/crdt_supported_featureset_version_map",
-                "/crdt_supported_module_featureset_version_map",
-                "/crdt_supported_protocol_versions_map",
-                "/disconnect_clients_on_password_removal",
-                "/dmc_external_authentication",
-                "/dmc_external_cba_authentication",
-                "/dmc_external_entraid_authentication",
-                "/dmc_external_ldap_authentication",
-                "/grpc_cluster_wd",
-                "/metrics_auth",
-                "/oss_cluster_client_maint_notifications",
-                "/pdns_server_type",
-                "/redis_flex_multitenant",
-                "/replica_sconns_on_demand",
-                "/shared_strings_enabled",
-                "/state_machine_smart_client_handoffs_delay_ms",
-                "/streamlined_translation",
-                "/usage_report_fields",
-                "/use_grpc_syncer_communication",
-                "/uuid"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/cluster/actions": {
               "status": "pass",
@@ -5556,13 +5340,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "pass",
@@ -5703,14 +5481,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/actual_role",
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/marked_for_removal",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -5747,10 +5518,7 @@
             "GET /v1/users": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/last_login"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/users/{uid}": {
               "status": "pass",
@@ -6052,39 +5820,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/asm_scaling",
-                "/*/audit_settings",
-                "/*/auto_shards_balancing",
-                "/*/auto_shards_balancing_grace_period",
-                "/*/availability_api",
-                "/*/conns_global_maximum_dedicated",
-                "/*/conns_minimum_dedicated",
-                "/*/disconnect_clients_on_password_removal",
-                "/*/dmc_shard_routing_map",
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type",
-                "/*/gradual_sync_policy",
-                "/*/gradual_sync_policy_parameters",
-                "/*/is_balanced",
-                "/*/link_sconn_on_full_request",
-                "/*/link_sconn_on_full_request_size_limit",
-                "/*/max_pubsub_connections",
-                "/*/maxmemory_rapid_growth",
-                "/*/partial_request_timeout_seconds",
-                "/*/preemptive_drain_timeout_seconds",
-                "/*/query_performance_factor",
-                "/*/replica_sconns_on_demand",
-                "/*/replication_oom_threshold_percent",
-                "/*/scaling_in_progress",
-                "/*/search_on_bigstore",
-                "/*/shard_imbalance_threshold",
-                "/*/shard_imbalance_threshold_percentage",
-                "/*/streamlined_translation",
-                "/*/string_sharing",
-                "/*/traffic_manually_disabled",
-                "/*/use_grpc_syncer_communication"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -6202,41 +5938,7 @@
             "GET /v1/cluster": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/allow_modules_upload",
-                "/asm_client_maint_notifications",
-                "/availability_api",
-                "/availability_lag_tolerance_ms",
-                "/client_eviction",
-                "/client_maint_notifications",
-                "/clusterset_on_topology_changed",
-                "/control_plane_basic_authentication",
-                "/crdt_supported_featureset_version_map",
-                "/crdt_supported_module_featureset_version_map",
-                "/crdt_supported_protocol_versions_map",
-                "/disconnect_clients_on_password_removal",
-                "/dmc_external_authentication",
-                "/dmc_external_cba_authentication",
-                "/dmc_external_entraid_authentication",
-                "/dmc_external_ldap_authentication",
-                "/grpc_cluster_wd",
-                "/grpc_gossip",
-                "/grpc_gossip_only",
-                "/grpc_info_provider",
-                "/metrics_auth",
-                "/oss_cluster_client_maint_notifications",
-                "/pdns_server_type",
-                "/redis_flex_multitenant",
-                "/replica_sconns_on_demand",
-                "/shared_strings_enabled",
-                "/state_machine_smart_client_handoffs_asm_delay_ms",
-                "/state_machine_smart_client_handoffs_delay_ms",
-                "/streamlined_translation",
-                "/usage_report_fields",
-                "/use_grpc_syncer_communication",
-                "/uuid"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/cluster/actions": {
               "status": "pass",
@@ -6359,13 +6061,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "pass",
@@ -6403,10 +6099,7 @@
             "GET /v1/nodes": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/node_guardrails_ingress_throttling_worker_limit_ops_per_sec"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/nodes/actions": {
               "status": "pass",
@@ -6509,14 +6202,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/actual_role",
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/marked_for_removal",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -6553,10 +6239,7 @@
             "GET /v1/users": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/last_login"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/users/{uid}": {
               "status": "pass",
@@ -6854,39 +6537,7 @@
             "GET /v1/bdbs": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/asm_scaling",
-                "/*/audit_settings",
-                "/*/auto_shards_balancing",
-                "/*/auto_shards_balancing_grace_period",
-                "/*/availability_api",
-                "/*/conns_global_maximum_dedicated",
-                "/*/conns_minimum_dedicated",
-                "/*/disconnect_clients_on_password_removal",
-                "/*/dmc_shard_routing_map",
-                "/*/endpoints/*/oss_cluster_api_preferred_endpoint_type",
-                "/*/gradual_sync_policy",
-                "/*/gradual_sync_policy_parameters",
-                "/*/is_balanced",
-                "/*/link_sconn_on_full_request",
-                "/*/link_sconn_on_full_request_size_limit",
-                "/*/max_pubsub_connections",
-                "/*/maxmemory_rapid_growth",
-                "/*/partial_request_timeout_seconds",
-                "/*/preemptive_drain_timeout_seconds",
-                "/*/query_performance_factor",
-                "/*/replica_sconns_on_demand",
-                "/*/replication_oom_threshold_percent",
-                "/*/scaling_in_progress",
-                "/*/search_on_bigstore",
-                "/*/shard_imbalance_threshold",
-                "/*/shard_imbalance_threshold_percentage",
-                "/*/streamlined_translation",
-                "/*/string_sharing",
-                "/*/traffic_manually_disabled",
-                "/*/use_grpc_syncer_communication"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/bdbs/alerts": {
               "status": "pass",
@@ -7004,41 +6655,7 @@
             "GET /v1/cluster": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/allow_modules_upload",
-                "/asm_client_maint_notifications",
-                "/availability_api",
-                "/availability_lag_tolerance_ms",
-                "/client_eviction",
-                "/client_maint_notifications",
-                "/clusterset_on_topology_changed",
-                "/control_plane_basic_authentication",
-                "/crdt_supported_featureset_version_map",
-                "/crdt_supported_module_featureset_version_map",
-                "/crdt_supported_protocol_versions_map",
-                "/disconnect_clients_on_password_removal",
-                "/dmc_external_authentication",
-                "/dmc_external_cba_authentication",
-                "/dmc_external_entraid_authentication",
-                "/dmc_external_ldap_authentication",
-                "/grpc_cluster_wd",
-                "/grpc_gossip",
-                "/grpc_gossip_only",
-                "/grpc_info_provider",
-                "/metrics_auth",
-                "/oss_cluster_client_maint_notifications",
-                "/pdns_server_type",
-                "/redis_flex_multitenant",
-                "/replica_sconns_on_demand",
-                "/shared_strings_enabled",
-                "/state_machine_smart_client_handoffs_asm_delay_ms",
-                "/state_machine_smart_client_handoffs_delay_ms",
-                "/streamlined_translation",
-                "/usage_report_fields",
-                "/use_grpc_syncer_communication",
-                "/uuid"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/cluster/actions": {
               "status": "pass",
@@ -7161,13 +6778,7 @@
             "GET /v1/license": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/cluster_name",
-                "/flash_shards_limit",
-                "/owner",
-                "/ram_shards_limit"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/local/bdbs/{uid}/endpoint/availability": {
               "status": "pass",
@@ -7205,10 +6816,7 @@
             "GET /v1/nodes": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/node_guardrails_ingress_throttling_worker_limit_ops_per_sec"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/nodes/actions": {
               "status": "pass",
@@ -7311,14 +6919,7 @@
             "GET /v1/shards": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/actual_role",
-                "/*/detailed_status",
-                "/*/loading",
-                "/*/marked_for_removal",
-                "/*/report_timestamp"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/shards/stats": {
               "status": "pass",
@@ -7355,10 +6956,7 @@
             "GET /v1/users": {
               "status": "pass",
               "status_code": 200,
-              "model_status": "dropped_fields",
-              "dropped_paths": [
-                "/*/last_login"
-              ]
+              "model_status": "pass"
             },
             "GET /v1/users/{uid}": {
               "status": "pass",

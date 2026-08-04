@@ -8,10 +8,13 @@
 use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::collections::BTreeMap;
 use typed_builder::TypedBuilder;
 
 /// License information
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct License {
     /// License key - the actual field name returned by API
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -71,6 +74,10 @@ pub struct License {
     /// List of features supported by license
     #[serde(skip_serializing_if = "Option::is_none")]
     pub features: Option<Vec<String>>,
+
+    /// Additive or version-specific license fields.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
 }
 
 /// License update request

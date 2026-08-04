@@ -9,6 +9,7 @@ use crate::client::RestClient;
 use crate::error::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::BTreeMap;
 use typed_builder::TypedBuilder;
 
 /// Response from node action operations
@@ -22,6 +23,7 @@ pub struct NodeActionResponse {
 
 /// Node information
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Node {
     /// Cluster unique ID of node (read-only)
     pub uid: u32,
@@ -119,6 +121,15 @@ pub struct Node {
 
     /// Recovery files path
     pub recovery_path: Option<String>,
+
+    /// Per-worker ingress throttling limit in operations per second.
+    ///
+    /// Observed on Redis Software 8.2 nodes.
+    pub node_guardrails_ingress_throttling_worker_limit_ops_per_sec: Option<i64>,
+
+    /// Additive or version-specific node fields.
+    #[serde(default, flatten, skip_serializing_if = "BTreeMap::is_empty")]
+    pub additional_fields: BTreeMap<String, Value>,
 }
 
 /// Node stats

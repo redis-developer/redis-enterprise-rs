@@ -178,6 +178,7 @@ public-doc inventory. The earlier docs-only triage remains available as
 - [Redis Software REST API Reference](https://redis.io/docs/latest/operate/rs/references/rest-api/)
 - [Version support and compatibility policy](docs/version-support.md)
 - [Local live-validation runbook](docs/live-validation.md) — bring up a disposable Redis Enterprise cluster via Docker Compose for SDK validation against the real API.
+- [Model-fidelity evidence](docs/model-fidelity.md) — documented fields, sanitized cross-version fixtures, lossless additive-field handling, and exact request wire shapes.
 - [Non-inventory route evidence](docs/non-inventory-route-evidence.md) — versioned live dispositions for SDK method/path pairs absent from the public-doc inventory.
 
 ## License
