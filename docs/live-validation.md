@@ -84,6 +84,35 @@ down -v`; cluster state is not portable between server versions. Docker images
 are for development and testing only, as stated in the official Redis
 documentation.
 
+### Database engine version selection
+
+The Redis Software image version and the Redis database engine version are
+separate choices. Nodes advertise the engines they can provision in the
+`supported_database_versions` field returned by `GET /v1/nodes`. Database
+creation can select one explicitly:
+
+```rust
+let request = CreateDatabaseRequest::builder()
+    .name("matrix-test")
+    .memory_size(104_857_600)
+    .redis_version("7.4")
+    .persistence("disabled") // Serializes as data_persistence.
+    .build();
+```
+
+The client deliberately does not guess a version. Omitting `redis_version`
+preserves the server-default behavior; callers that require reproducible
+provisioning should choose a value advertised by the target cluster. The
+ignored live database lifecycle selects the newest advertised Redis engine,
+creates its own prefixed database, waits for it to become active, and removes
+it:
+
+```bash
+cargo test --test live_enterprise_smoke \
+  live_database_create_delete_with_advertised_redis_version \
+  -- --ignored --nocapture
+```
+
 The init profile configures:
 
 - cluster name: `test-cluster`
@@ -269,6 +298,17 @@ docker compose up -d
 ```
 
 ## Current Validation Snapshot
+
+On August 4, 2026, the self-cleaning database lifecycle passed against both:
+
+- Redis Software `7.8.6-286` in `redislabs/redis:7.8.6-286`; and
+- Redis Software `8.2.0-25` in `redislabs/redis:8.2.0-25.12`.
+
+For each disposable cluster, the test selected the newest Redis engine listed
+in the node's `supported_database_versions`, sent the typed create request,
+observed the database reach `active`, deleted it, and confirmed it was no
+longer returned. Containers, networks, and volumes were removed after each
+run.
 
 On April 21, 2026, the existing `basic_enterprise` example completed
 successfully against a local Redis Enterprise Software `8.0.10-81` cluster and

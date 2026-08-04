@@ -1,7 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use redis_enterprise::{CreateUserRequest, EnterpriseClient};
-use serde_json::Value;
+use redis_enterprise::{CreateDatabaseRequest, CreateUserRequest, EnterpriseClient, Node};
+use serde_json::{Value, json};
 use tokio::time::{Duration, sleep};
 
 fn require_client() -> EnterpriseClient {
@@ -11,6 +11,73 @@ fn require_client() -> EnterpriseClient {
             err
         )
     })
+}
+
+fn version_key(version: &str) -> (u32, u32, u32) {
+    let mut parts = version.split('.').map(|part| part.parse().unwrap_or(0));
+    (
+        parts.next().unwrap_or(0),
+        parts.next().unwrap_or(0),
+        parts.next().unwrap_or(0),
+    )
+}
+
+fn newest_advertised_redis_version(nodes: &[Node]) -> Option<String> {
+    nodes
+        .iter()
+        .flat_map(|node| {
+            node.supported_database_versions
+                .as_deref()
+                .unwrap_or_default()
+        })
+        .filter(|entry| entry["db_type"].as_str() == Some("redis"))
+        .filter_map(|entry| entry["redis_version"].as_str())
+        .max_by_key(|version| version_key(version))
+        .map(str::to_owned)
+}
+
+#[test]
+fn advertised_version_selection_uses_newest_redis_engine() {
+    let nodes: Vec<Node> = serde_json::from_value(json!([{
+        "uid": 1,
+        "status": "active",
+        "supported_database_versions": [
+            {"db_type": "redis", "redis_version": "6.2", "version": "6.2.13"},
+            {"db_type": "memcached", "version": "9.9.9"},
+            {"db_type": "redis", "redis_version": "7.4", "version": "7.4.0"},
+            {"db_type": "redis", "redis_version": "7.2", "version": "7.2.4"}
+        ]
+    }]))
+    .expect("node fixture should deserialize");
+
+    assert_eq!(
+        newest_advertised_redis_version(&nodes).as_deref(),
+        Some("7.4")
+    );
+}
+
+async fn remove_live_test_databases(client: &EnterpriseClient, name_prefix: &str) {
+    let databases = client
+        .databases()
+        .list()
+        .await
+        .expect("stale live-test database discovery should succeed");
+
+    for database in databases
+        .into_iter()
+        .filter(|database| database.name.starts_with(name_prefix))
+    {
+        client
+            .databases()
+            .delete(database.uid)
+            .await
+            .unwrap_or_else(|err| {
+                panic!(
+                    "failed to remove stale live-test database {}: {}",
+                    database.uid, err
+                )
+            });
+    }
 }
 
 #[tokio::test]
@@ -157,6 +224,104 @@ async fn live_cluster_check_and_shard_stats_smoke() {
         shards_last.as_object().is_some(),
         "all shards last stats should be returned as an object keyed by shard uid"
     );
+}
+
+#[tokio::test]
+#[ignore = "requires a disposable live Redis Enterprise cluster configured via REDIS_ENTERPRISE_* env vars"]
+async fn live_database_create_delete_with_advertised_redis_version() {
+    // api-audit-live: GET /v1/nodes
+    // api-audit-live: GET /v1/bdbs
+    // api-audit-live: POST /v1/bdbs
+    // api-audit-live: GET /v1/bdbs/{uid}
+    // api-audit-live: DELETE /v1/bdbs/{uid}
+    const NAME_PREFIX: &str = "redis-enterprise-rs-live-";
+    let client = require_client();
+
+    remove_live_test_databases(&client, NAME_PREFIX).await;
+
+    let nodes = client
+        .nodes()
+        .list()
+        .await
+        .expect("node list should succeed");
+    let redis_version = newest_advertised_redis_version(&nodes)
+        .expect("at least one node should advertise a Redis database version");
+    let unique = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system time should be after unix epoch")
+        .as_secs();
+    let name = format!("{NAME_PREFIX}{unique}");
+
+    let request = CreateDatabaseRequest::builder()
+        .name(name.clone())
+        .memory_size(104_857_600)
+        .redis_version(redis_version.clone())
+        .replication(false)
+        .persistence("disabled")
+        .build();
+    let created = client
+        .databases()
+        .create(request)
+        .await
+        .expect("database create should accept an advertised Redis version");
+    let uid = created.uid;
+
+    let observation = async {
+        for _ in 0..60 {
+            let database = client
+                .databases()
+                .info(uid)
+                .await
+                .map_err(|err| format!("created database should be readable: {err}"))?;
+            match database.status.as_deref() {
+                Some("active") => {
+                    if database.name != name {
+                        return Err(format!(
+                            "created database name mismatch: expected {name}, got {}",
+                            database.name
+                        ));
+                    }
+                    if database.redis_version.as_deref() != Some(redis_version.as_str()) {
+                        return Err(format!(
+                            "created database version mismatch: expected {redis_version}, got {:?}",
+                            database.redis_version
+                        ));
+                    }
+                    return Ok(());
+                }
+                Some("creation-failed" | "creation_failed" | "failed") => {
+                    return Err(format!(
+                        "database {uid} entered failure status {:?}",
+                        database.status
+                    ));
+                }
+                _ => sleep(Duration::from_secs(1)).await,
+            }
+        }
+
+        Err(format!(
+            "database {uid} did not become active within 60 seconds"
+        ))
+    }
+    .await;
+
+    let delete_result = client.databases().delete(uid).await;
+    if let Err(err) = delete_result {
+        panic!("failed to remove live-test database {uid}: {err}; observation: {observation:?}");
+    }
+
+    for _ in 0..30 {
+        match client.databases().info(uid).await {
+            Ok(_) => sleep(Duration::from_millis(200)).await,
+            Err(err) if err.is_not_found() => {
+                observation.expect("created database should match the requested version");
+                return;
+            }
+            Err(err) => panic!("unexpected error while verifying database deletion: {err}"),
+        }
+    }
+
+    panic!("deleted database {uid} was still visible after waiting for deletion to propagate");
 }
 
 #[tokio::test]

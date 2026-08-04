@@ -5,7 +5,7 @@ use crate::common::{
 };
 use redis_enterprise::bdb::CreateDatabaseRequest;
 use serde_json::json;
-use wiremock::matchers::{basic_auth, method, path};
+use wiremock::matchers::{basic_auth, body_json, method, path};
 use wiremock::{Mock, MockServer};
 
 #[tokio::test]
@@ -64,7 +64,13 @@ async fn test_database_create() {
     Mock::given(method("POST"))
         .and(path("/v1/bdbs"))
         .and(basic_auth("admin", "password"))
+        .and(body_json(json!({
+            "name": "test-db",
+            "memory_size": 1073741824u64,
+            "port": 12000
+        })))
         .respond_with(created_response(test_database()))
+        .expect(1)
         .mount(&mock_server)
         .await;
 
@@ -80,6 +86,47 @@ async fn test_database_create() {
     let db = request.unwrap();
     assert_eq!(db.uid, 1);
     assert_eq!(db.name, "test-db");
+}
+
+#[tokio::test]
+async fn test_database_create_with_explicit_redis_version() {
+    let mock_server = MockServer::start().await;
+
+    Mock::given(method("POST"))
+        .and(path("/v1/bdbs"))
+        .and(basic_auth("admin", "password"))
+        .and(body_json(json!({
+            "name": "test-db",
+            "memory_size": 1073741824u64,
+            "redis_version": "7.4",
+            "data_persistence": "disabled"
+        })))
+        .respond_with(created_response(json!({
+            "uid": 1,
+            "name": "test-db",
+            "type": "redis",
+            "memory_size": 1073741824u64,
+            "status": "active",
+            "redis_version": "7.4"
+        })))
+        .expect(1)
+        .mount(&mock_server)
+        .await;
+
+    let client = test_client(&mock_server);
+    let request_data = CreateDatabaseRequest::builder()
+        .name("test-db")
+        .memory_size(1073741824)
+        .redis_version("7.4")
+        .persistence("disabled")
+        .build();
+    let database = client
+        .databases()
+        .create(request_data)
+        .await
+        .expect("database creation should succeed");
+
+    assert_eq!(database.redis_version.as_deref(), Some("7.4"));
 }
 
 #[tokio::test]
