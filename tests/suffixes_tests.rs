@@ -338,7 +338,7 @@ async fn test_suffixes_update() {
     let mock_server = MockServer::start().await;
     let request = test_create_suffix_request();
 
-    Mock::given(method("PUT"))
+    Mock::given(method("PATCH"))
         .and(path("/v1/suffix/new-suffix"))
         .and(basic_auth("admin", "password"))
         .and(body_json(&request))
@@ -372,7 +372,7 @@ async fn test_suffixes_update_nonexistent() {
     let mock_server = MockServer::start().await;
     let request = test_create_suffix_request();
 
-    Mock::given(method("PUT"))
+    Mock::given(method("PATCH"))
         .and(path("/v1/suffix/nonexistent"))
         .and(basic_auth("admin", "password"))
         .and(body_json(&request))

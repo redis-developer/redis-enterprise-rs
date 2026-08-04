@@ -243,7 +243,7 @@ async fn test_stats_node() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/stats"))
+        .and(path("/v1/nodes/stats/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_node_stats()))
         .mount(&mock_server)
@@ -271,7 +271,7 @@ async fn test_stats_node_with_query() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/stats"))
+        .and(path("/v1/nodes/stats/1"))
         .and(query_param("interval", "1hour"))
         .and(query_param("stime", "2023-01-01T10:00:00Z"))
         .and(query_param("etime", "2023-01-01T14:00:00Z"))
@@ -306,7 +306,7 @@ async fn test_stats_node_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/999/stats"))
+        .and(path("/v1/nodes/stats/999"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Node not found"))
         .mount(&mock_server)
@@ -330,7 +330,7 @@ async fn test_stats_node_last() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/stats/last"))
+        .and(path("/v1/nodes/stats/last/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_node_last_stats()))
         .mount(&mock_server)
@@ -354,7 +354,7 @@ async fn test_stats_node_last_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/999/stats/last"))
+        .and(path("/v1/nodes/stats/last/999"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Node not found"))
         .mount(&mock_server)
@@ -438,7 +438,7 @@ async fn test_stats_database() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/1/stats"))
+        .and(path("/v1/bdbs/stats/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_database_stats()))
         .mount(&mock_server)
@@ -466,7 +466,7 @@ async fn test_stats_database_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/999/stats"))
+        .and(path("/v1/bdbs/stats/999"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Database not found"))
         .mount(&mock_server)
@@ -490,7 +490,7 @@ async fn test_stats_database_last() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/1/stats/last"))
+        .and(path("/v1/bdbs/stats/last/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_database_last_stats()))
         .mount(&mock_server)

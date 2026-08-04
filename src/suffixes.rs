@@ -71,11 +71,18 @@ impl SuffixesHandler {
         self.client.post("/v1/suffix", &request).await
     }
 
-    /// Update a suffix
+    /// Update a suffix with the method registered by Redis Software 8.0+.
+    ///
+    /// Redis Software 7.x does not register a suffix update method. The old
+    /// SDK implementation sent `PUT`, which is not registered by any supported
+    /// family; current 8.x releases register `PATCH`.
     pub async fn update(&self, name: &str, request: CreateSuffixRequest) -> Result<Suffix> {
-        self.client
-            .put(&format!("/v1/suffix/{}", name), &request)
-            .await
+        let body = serde_json::to_value(request)?;
+        let value = self
+            .client
+            .patch_raw(&format!("/v1/suffix/{}", name), body)
+            .await?;
+        serde_json::from_value(value).map_err(Into::into)
     }
 
     /// Delete a suffix

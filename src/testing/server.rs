@@ -195,19 +195,19 @@ impl MockEnterpriseServer {
 
     // Alert mocks
 
-    /// Mock GET /v1/bdbs/{bdb_uid}/alerts to return alerts for a database
+    /// Mock GET /v1/bdbs/alerts/{bdb_uid} to return alerts for a database
     pub async fn mock_database_alerts(&self, bdb_uid: u32, alerts: Vec<Value>) {
         Mock::given(method("GET"))
-            .and(path(format!("/v1/bdbs/{}/alerts", bdb_uid)))
+            .and(path(format!("/v1/bdbs/alerts/{}", bdb_uid)))
             .respond_with(ResponseTemplate::new(200).set_body_json(alerts))
             .mount(&self.server)
             .await;
     }
 
-    /// Mock GET /v1/nodes/{node_uid}/alerts to return alerts for a node
+    /// Mock GET /v1/nodes/alerts/{node_uid} to return alerts for a node
     pub async fn mock_node_alerts(&self, node_uid: u32, alerts: Vec<Value>) {
         Mock::given(method("GET"))
-            .and(path(format!("/v1/nodes/{}/alerts", node_uid)))
+            .and(path(format!("/v1/nodes/alerts/{}", node_uid)))
             .respond_with(ResponseTemplate::new(200).set_body_json(alerts))
             .mount(&self.server)
             .await;

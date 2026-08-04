@@ -401,8 +401,8 @@ async fn test_node_update_nonexistent() {
 async fn test_node_remove() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("DELETE"))
-        .and(path("/v1/nodes/2"))
+    Mock::given(method("POST"))
+        .and(path("/v1/nodes/2/actions/remove"))
         .and(basic_auth("admin", "password"))
         .respond_with(no_content_response())
         .mount(&mock_server)
@@ -425,8 +425,8 @@ async fn test_node_remove() {
 async fn test_node_remove_nonexistent() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("DELETE"))
-        .and(path("/v1/nodes/999"))
+    Mock::given(method("POST"))
+        .and(path("/v1/nodes/999/actions/remove"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Node not found"))
         .mount(&mock_server)
@@ -450,7 +450,7 @@ async fn test_node_stats() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/stats"))
+        .and(path("/v1/nodes/stats/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(test_node_stats_data()))
         .mount(&mock_server)
@@ -482,7 +482,7 @@ async fn test_node_stats_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/999/stats"))
+        .and(path("/v1/nodes/stats/999"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Node not found"))
         .mount(&mock_server)

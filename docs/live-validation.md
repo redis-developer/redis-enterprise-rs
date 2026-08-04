@@ -211,6 +211,31 @@ A missing family or profile baseline is a test failure, not implicit approval.
 Each required version in the support matrix must be recorded on its exact image
 and reviewed independently.
 
+## Non-Inventory Route Matrix
+
+The SDK also contains method/path pairs that are absent from the generated
+public-doc inventory. The ignored `live_non_inventory_options_audit` validates
+those paths without executing writes. It sends `OPTIONS` to a concrete form of
+each path and compares the returned `Allow` header with the reviewed evidence
+for the exact server version:
+
+```bash
+REDIS_ENTERPRISE_EXPECTED_VERSION="8.2.0-25" \
+cargo test --test live_non_inventory_routes \
+  live_non_inventory_options_audit -- --ignored --nocapture
+```
+
+The password and other client environment variables are the same as the
+inventory compliance matrix. The sanitized report contains route templates,
+status codes, and registered method names only. It contains no response bodies,
+credentials, or environment identifiers.
+
+The checked-in registry and reviewed results for all supported families are
+described in the
+[non-inventory route evidence matrix](./non-inventory-route-evidence.md).
+`OPTIONS` confirms path and method registration only; it is not a substitute
+for safe read validation or self-cleaning write lifecycles.
+
 ## Teardown and cleanup
 
 The validation cluster is fully disposable. Tear it down with:

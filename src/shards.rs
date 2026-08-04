@@ -101,7 +101,7 @@ impl ShardHandler {
 
     /// Get shard statistics
     pub async fn stats(&self, uid: &str) -> Result<ShardStats> {
-        self.client.get(&format!("/v1/shards/{}/stats", uid)).await
+        self.client.get(&format!("/v1/shards/stats/{}", uid)).await
     }
 
     /// Get shard statistics for a specific metric

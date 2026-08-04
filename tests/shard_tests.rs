@@ -264,7 +264,7 @@ async fn test_shard_stats() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/shards/shard:1:1/stats"))
+        .and(path("/v1/shards/stats/shard:1:1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(shard_stats()))
         .mount(&mock_server)
@@ -520,7 +520,7 @@ async fn test_shard_stats_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/shards/nonexistent:shard/stats"))
+        .and(path("/v1/shards/stats/nonexistent:shard"))
         .and(basic_auth("admin", "password"))
         .respond_with(ResponseTemplate::new(404).set_body_json(json!({
             "error": "Shard not found"

@@ -11,19 +11,19 @@ validation annotations.
 - Unique documented operations: `203`
 - Collapsed duplicate aliases: `6`
 - Handler declarations: `195`
-- Wiremock method/path matchers: `132`
+- Wiremock method/path matchers: `137`
 - Explicit Wiremock call-count expectations: `2`
 - Request body matchers: `25`
-- Query matchers: `5`
-- Response fixtures: `120`
+- Query matchers: `6`
+- Response fixtures: `125`
 - Explicit fixture-deserialization evidence: `7`
 - Explicit live evidence: `13`
 
 ### Dispositions
 
 - `handler_with_asserted_mock`: `2`
-- `handler_with_mock_evidence`: `130`
-- `handler_without_mock_evidence`: `63`
+- `handler_with_mock_evidence`: `135`
+- `handler_without_mock_evidence`: `58`
 - `mock_without_handler`: `0`
 - `docs_only`: `8`
 
@@ -57,7 +57,6 @@ validation annotations.
 - `DELETE /v1/cluster/auditing/db_conns`: handler has no matching mock evidence
 - `DELETE /v1/cluster/certificates/{certificate_name}`: handler has no matching mock evidence
 - `GET /v1/actions/bdb/{bdb_uid}`: handler has no matching mock evidence
-- `GET /v1/bdbs/alerts/{uid}`: handler has no matching mock evidence
 - `GET /v1/bdbs/alerts/{uid}/{alert}`: handler has no matching mock evidence
 - `GET /v1/bdbs/crdt_sources/alerts`: handler has no matching mock evidence
 - `GET /v1/bdbs/crdt_sources/alerts/{uid}`: handler has no matching mock evidence
@@ -67,12 +66,13 @@ validation annotations.
 - `GET /v1/bdbs/replica_sources/alerts/{uid}/{replica_src_id}`: handler has no matching mock evidence
 - `GET /v1/bdbs/replica_sources/alerts/{uid}/{replica_src_id}/{alert}`: handler has no matching mock evidence
 - `GET /v1/bdbs/stats/last`: handler has no matching mock evidence
-- `GET /v1/bdbs/stats/last/{uid}`: handler has no matching mock evidence
-- `GET /v1/bdbs/stats/{uid}`: handler has no matching mock evidence
 - `GET /v1/bdbs/{uid}/actions/recover`: handler has no matching mock evidence
 - `GET /v1/bdbs/{uid}/availability`: handler has no matching mock evidence
 - `GET /v1/bdbs/{bdb_uid}/peer_stats/{uid}`: handler has no matching mock evidence
 - `GET /v1/bdbs/{bdb_uid}/sync_source_stats`: handler has no matching mock evidence
+- `GET /v1/bdbs/{bdb_uid}/sync_source_stats/{uid}`: handler has no matching mock evidence
+- `GET /v1/bdbs/{uid}/syncer_state/crdt`: handler has no matching mock evidence
+- `GET /v1/bdbs/{uid}/syncer_state/replica`: handler has no matching mock evidence
 
 ## Reproduce
 

@@ -552,12 +552,14 @@ impl ClusterHandler {
         self.client.post("/v1/bootstrap/join", &body).await
     }
 
-    /// Remove node from cluster (CLUSTER.REMOVE_NODE)
+    /// Remove a node through the documented node action.
     pub async fn remove_node(&self, node_uid: u32) -> Result<Value> {
         self.client
-            .delete(&format!("/v1/nodes/{}", node_uid))
-            .await?;
-        Ok(serde_json::json!({"message": format!("Node {} removed", node_uid)}))
+            .post(
+                &format!("/v1/nodes/{}/actions/remove", node_uid),
+                &serde_json::json!({}),
+            )
+            .await
     }
 
     /// Reset cluster to factory defaults (CLUSTER.RESET) - DANGEROUS

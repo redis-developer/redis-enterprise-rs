@@ -236,10 +236,10 @@ async fn test_cluster_join_node() {
 async fn test_cluster_remove_node() {
     let mock_server = MockServer::start().await;
 
-    Mock::given(method("DELETE"))
-        .and(path("/v1/nodes/2"))
+    Mock::given(method("POST"))
+        .and(path("/v1/nodes/2/actions/remove"))
         .and(basic_auth("admin", "password"))
-        .respond_with(success_response(json!({})))
+        .respond_with(success_response(json!({"status": "started"})))
         .mount(&mock_server)
         .await;
 
@@ -254,7 +254,7 @@ async fn test_cluster_remove_node() {
     let result = handler.remove_node(2).await;
 
     assert!(result.is_ok());
-    assert_eq!(result.unwrap()["message"], "Node 2 removed");
+    assert_eq!(result.unwrap()["status"], "started");
 }
 
 #[tokio::test]

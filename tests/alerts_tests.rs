@@ -80,7 +80,7 @@ async fn test_alerts_list_by_database() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/1/alerts"))
+        .and(path("/v1/bdbs/alerts/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([test_database_alert()])))
         .mount(&mock_server)
@@ -108,7 +108,7 @@ async fn test_alerts_list_by_database_empty() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/bdbs/1/alerts"))
+        .and(path("/v1/bdbs/alerts/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([])))
         .mount(&mock_server)
@@ -134,7 +134,7 @@ async fn test_alerts_list_by_node() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/1/alerts"))
+        .and(path("/v1/nodes/alerts/1"))
         .and(basic_auth("admin", "password"))
         .respond_with(success_response(json!([test_alert()])))
         .mount(&mock_server)
@@ -162,7 +162,7 @@ async fn test_alerts_list_by_node_nonexistent() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/nodes/999/alerts"))
+        .and(path("/v1/nodes/alerts/999"))
         .and(basic_auth("admin", "password"))
         .respond_with(error_response(404, "Node not found"))
         .mount(&mock_server)

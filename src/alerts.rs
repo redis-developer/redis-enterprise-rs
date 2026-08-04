@@ -253,14 +253,14 @@ impl AlertHandler {
     /// List alerts for a specific database
     pub async fn list_by_database(&self, bdb_uid: u32) -> Result<Vec<Alert>> {
         self.client
-            .get(&format!("/v1/bdbs/{}/alerts", bdb_uid))
+            .get(&format!("/v1/bdbs/alerts/{}", bdb_uid))
             .await
     }
 
     /// List alerts for a specific node
     pub async fn list_by_node(&self, node_uid: u32) -> Result<Vec<Alert>> {
         self.client
-            .get(&format!("/v1/nodes/{}/alerts", node_uid))
+            .get(&format!("/v1/nodes/alerts/{}", node_uid))
             .await
     }
 

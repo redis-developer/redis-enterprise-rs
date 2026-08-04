@@ -218,17 +218,17 @@ impl StatsHandler {
         if let Some(q) = query {
             let query_str = serde_urlencoded::to_string(&q).unwrap_or_default();
             self.client
-                .get(&format!("/v1/nodes/{}/stats?{}", uid, query_str))
+                .get(&format!("/v1/nodes/stats/{}?{}", uid, query_str))
                 .await
         } else {
-            self.client.get(&format!("/v1/nodes/{}/stats", uid)).await
+            self.client.get(&format!("/v1/nodes/stats/{}", uid)).await
         }
     }
 
     /// Get node stats for last interval
     pub async fn node_last(&self, uid: u32) -> Result<LastStatsResponse> {
         self.client
-            .get(&format!("/v1/nodes/{}/stats/last", uid))
+            .get(&format!("/v1/nodes/stats/last/{}", uid))
             .await
     }
 
@@ -255,16 +255,14 @@ impl StatsHandler {
 
     // raw variant removed: use nodes_last()
 
-    /// Get node stats via alternate path form
+    /// Alias for [`Self::node`] without a query.
     pub async fn node_alt(&self, uid: u32) -> Result<StatsResponse> {
-        self.client.get(&format!("/v1/nodes/stats/{}", uid)).await
+        self.node(uid, None).await
     }
 
-    /// Get node last stats via alternate path form
+    /// Alias for [`Self::node_last`].
     pub async fn node_last_alt(&self, uid: u32) -> Result<LastStatsResponse> {
-        self.client
-            .get(&format!("/v1/nodes/stats/last/{}", uid))
-            .await
+        self.node_last(uid).await
     }
 
     /// Get database stats
@@ -272,17 +270,17 @@ impl StatsHandler {
         if let Some(q) = query {
             let query_str = serde_urlencoded::to_string(&q).unwrap_or_default();
             self.client
-                .get(&format!("/v1/bdbs/{}/stats?{}", uid, query_str))
+                .get(&format!("/v1/bdbs/stats/{}?{}", uid, query_str))
                 .await
         } else {
-            self.client.get(&format!("/v1/bdbs/{}/stats", uid)).await
+            self.client.get(&format!("/v1/bdbs/stats/{}", uid)).await
         }
     }
 
     /// Get database stats for last interval
     pub async fn database_last(&self, uid: u32) -> Result<LastStatsResponse> {
         self.client
-            .get(&format!("/v1/bdbs/{}/stats/last", uid))
+            .get(&format!("/v1/bdbs/stats/last/{}", uid))
             .await
     }
 
@@ -309,16 +307,14 @@ impl StatsHandler {
 
     // raw variant removed: use databases_last()
 
-    /// Get database stats via alternate path form
+    /// Alias for [`Self::database`] without a query.
     pub async fn database_alt(&self, uid: u32) -> Result<StatsResponse> {
-        self.client.get(&format!("/v1/bdbs/stats/{}", uid)).await
+        self.database(uid, None).await
     }
 
-    /// Get database last stats via alternate path form
+    /// Alias for [`Self::database_last`].
     pub async fn database_last_alt(&self, uid: u32) -> Result<LastStatsResponse> {
-        self.client
-            .get(&format!("/v1/bdbs/stats/last/{}", uid))
-            .await
+        self.database_last(uid).await
     }
 
     /// Get shard stats
