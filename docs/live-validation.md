@@ -186,7 +186,10 @@ merging its `safe` profile into
 checked-in baseline automatically.
 
 After a baseline is reviewed, omit `REDIS_ENTERPRISE_COMPLIANCE_RECORD` to make
-any operation, status-code, typed-model, or dropped-field drift fail the run:
+operation, status-code, typed-model, or newly dropped-field drift fail the run.
+Reviewed dropped-field paths are an allowlist because some server fields are
+transient; an observed subset or a model improvement can pass, but a newly
+dropped path cannot:
 
 ```bash
 REDIS_ENTERPRISE_EXPECTED_VERSION="8.2.0-25" \

@@ -212,6 +212,7 @@ impl Resources {
             "uid" if template.starts_with("/v1/actions/") => self.action_uid.as_deref(),
             "uid" if template.starts_with("/v2/actions/") => self.action_uid.as_deref(),
             "uid" if template.starts_with("/v1/bdbs/") => self.bdb_uid.as_deref(),
+            "uid" if template.starts_with("/v1/local/bdbs/") => self.bdb_uid.as_deref(),
             "uid" if template.starts_with("/v1/ldap_mappings/") => self.ldap_mapping_uid.as_deref(),
             "uid" if template.starts_with("/v1/modules/") => self.module_uid.as_deref(),
             "uid" if template.starts_with("/v1/nodes/") => self.node_uid.as_deref(),
@@ -430,10 +431,16 @@ fn classify_error(error: &RestError) -> ComplianceStatus {
 }
 
 async fn probe_get(client: &EnterpriseClient, path: &str) -> Result<Value, RestError> {
-    if path == "/v1/cluster/sso/saml/metadata/sp" {
+    if is_text_response(path) {
         return client.get_text(path).await.map(Value::String);
     }
     client.get_raw(path).await
+}
+
+fn is_text_response(path: &str) -> bool {
+    path == "/v1/cluster/sso/saml/metadata/sp"
+        || path == "/v1/usage_report"
+        || path.ends_with("/availability")
 }
 
 fn operation_report(
@@ -681,10 +688,9 @@ async fn run_user_lifecycle(
         }
     }
 
-    let update = UpdateUserRequest::builder()
-        .name("Redis Enterprise Compliance Updated")
-        .email_alerts(false)
-        .build();
+    // Redis Software rejects an administrator changing another user's name;
+    // exercise an explicitly mutable alert preference instead.
+    let update = UpdateUserRequest::builder().email_alerts(true).build();
     match client.users().update(uid, update).await {
         Ok(_) => {
             if let Some(report) = reports.get_mut("PUT /v1/users/{uid}") {
@@ -857,6 +863,26 @@ fn baseline_profile(report: &ComplianceReport) -> &'static str {
     }
 }
 
+fn baseline_entry_matches(expected: &BaselineEntry, actual: &BaselineEntry) -> bool {
+    if expected.status != actual.status || expected.status_code != actual.status_code {
+        return false;
+    }
+
+    match (expected.model_status, actual.model_status) {
+        (Some(ModelStatus::DroppedFields), Some(ModelStatus::DroppedFields)) => actual
+            .dropped_paths
+            .iter()
+            .all(|path| expected.dropped_paths.contains(path)),
+        (Some(ModelStatus::DroppedFields), Some(ModelStatus::Pass)) => {
+            actual.dropped_paths.is_empty()
+        }
+        _ => {
+            expected.model_status == actual.model_status
+                && expected.dropped_paths == actual.dropped_paths
+        }
+    }
+}
+
 fn compare_baseline(
     report: &ComplianceReport,
     baseline: &ComplianceBaseline,
@@ -887,7 +913,7 @@ fn compare_baseline(
     let mut differences = Vec::new();
     for (key, expected_entry) in &expected.operations {
         match actual.get(key) {
-            Some(actual_entry) if actual_entry == expected_entry => {}
+            Some(actual_entry) if baseline_entry_matches(expected_entry, actual_entry) => {}
             Some(actual_entry) => differences.push(format!(
                 "{key}: expected {expected_entry:?}, observed {actual_entry:?}"
             )),
@@ -970,12 +996,27 @@ fn resource_resolver_is_context_aware_and_refuses_unknown_values() {
         ..Resources::default()
     };
     assert_eq!(resources.resolve("/v1/bdbs/{uid}").unwrap(), "/v1/bdbs/7");
+    assert_eq!(
+        resources
+            .resolve("/v1/local/bdbs/{uid}/endpoint/availability")
+            .unwrap(),
+        "/v1/local/bdbs/7/endpoint/availability"
+    );
     assert_eq!(resources.resolve("/v1/nodes/{uid}").unwrap(), "/v1/nodes/3");
     assert_eq!(
         resources.resolve("/v1/users/<uid>").unwrap(),
         "/v1/users/11"
     );
     assert!(resources.resolve("/v1/cluster/actions/{action}").is_err());
+}
+
+#[test]
+fn non_json_safe_reads_are_explicit() {
+    assert!(is_text_response("/v1/cluster/sso/saml/metadata/sp"));
+    assert!(is_text_response("/v1/usage_report"));
+    assert!(is_text_response("/v1/bdbs/7/availability"));
+    assert!(is_text_response("/v1/local/bdbs/7/endpoint/availability"));
+    assert!(!is_text_response("/v1/bdbs/7"));
 }
 
 #[test]
@@ -1044,6 +1085,65 @@ fn baseline_comparison_detects_operation_drift() {
     drifted.operations[0].status = ComplianceStatus::VersionSpecific;
     drifted.operations[0].status_code = Some(404);
     assert!(compare_baseline(&drifted, &baseline).is_err());
+}
+
+#[test]
+fn dropped_field_baseline_is_a_reviewed_allowlist() {
+    let operation = OperationReport {
+        method: "GET".into(),
+        path: "/v1/cluster".into(),
+        source_pages: vec!["cluster".into()],
+        status: ComplianceStatus::Pass,
+        status_code: Some(200),
+        reason: "ok".into(),
+        model: Some(ModelComparison {
+            model: "ClusterInfo".into(),
+            status: ModelStatus::DroppedFields,
+            dropped_paths: vec!["/always".into(), "/transient".into()],
+            reason: "known fields".into(),
+        }),
+    };
+    let mut report = ComplianceReport {
+        schema_version: REPORT_SCHEMA_VERSION,
+        generated_at: "2026-08-04T00:00:00Z".into(),
+        server_version: "8.2.0-25".into(),
+        version_family: "8.2".into(),
+        image: None,
+        capabilities: ServerCapabilities {
+            api_versions: vec!["v1".into()],
+            discovered_collections: vec!["/v1/cluster".into()],
+            rbac: true,
+            active_active: false,
+            ldap_mappings: false,
+        },
+        writes_enabled: false,
+        summary: summarize(std::slice::from_ref(&operation)),
+        operations: vec![operation],
+    };
+    let baseline = baseline_candidate(&report);
+
+    report.operations[0]
+        .model
+        .as_mut()
+        .expect("model comparison")
+        .dropped_paths = vec!["/always".into()];
+    assert!(compare_baseline(&report, &baseline).is_ok());
+
+    let model = report.operations[0]
+        .model
+        .as_mut()
+        .expect("model comparison");
+    model.status = ModelStatus::Pass;
+    model.dropped_paths.clear();
+    assert!(compare_baseline(&report, &baseline).is_ok());
+
+    let model = report.operations[0]
+        .model
+        .as_mut()
+        .expect("model comparison");
+    model.status = ModelStatus::DroppedFields;
+    model.dropped_paths = vec!["/always".into(), "/new".into()];
+    assert!(compare_baseline(&report, &baseline).is_err());
 }
 
 #[tokio::test]
