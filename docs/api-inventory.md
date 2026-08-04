@@ -52,9 +52,32 @@ Or write to a custom path:
 python3 scripts/export_api_inventory.py --output docs/api-inventory.csv
 ```
 
+## Audit SDK And Test Evidence
+
+The generated coverage audit deduplicates the inventory by normalized HTTP
+method and path, then records distinct static evidence for handler declarations,
+Wiremock method/path matchers, request body and query matchers, response
+fixtures, typed fixture deserialization, and explicitly annotated live tests.
+
+Run its regression tests and regenerate both audit artifacts with:
+
+```bash
+python3 -m unittest discover -s scripts/tests -p 'test_*.py'
+python3 scripts/audit_api_coverage.py
+git diff --exit-code -- docs/api-coverage-audit.csv docs/api-coverage-audit.md
+```
+
+The audit deliberately does not count ordinary path literals or comments as
+behavioral coverage. A Wiremock method/path matcher is reported separately from
+an explicit call-count expectation, and response fixtures are not presented as
+proof of field completeness. See
+[api-coverage-audit.md](./api-coverage-audit.md) for all interpretation limits.
+
 ## Recommended Workflow
 
 1. Regenerate the CSV from the official docs.
-2. Run the live smoke suite against a real Redis Enterprise instance.
-3. Compare live-tested endpoints to the generated inventory.
-4. File follow-up issues for undocumented, missing, or mismatched paths.
+2. Run the method-aware static audit and review changed evidence dimensions.
+3. Run the live smoke or compliance suite against a real Redis Enterprise
+   instance.
+4. Compare live-tested endpoints to the generated inventory.
+5. File follow-up issues for undocumented, missing, or mismatched paths.

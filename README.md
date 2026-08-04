@@ -162,8 +162,10 @@ REST API surface. Handler organization:
 - **Administration** — license, certificates, OCSP, debug info, services
 
 For an authoritative per-endpoint inventory see
-[`docs/api-inventory.csv`](docs/api-inventory.csv). For the historical audit
-of routes the SDK once exposed but the docs do not, see
+[`docs/api-inventory.csv`](docs/api-inventory.csv). The generated
+[method-aware coverage audit](docs/api-coverage-audit.md) keeps handler, mock,
+request, response, fixture, and live evidence separate. For the historical
+audit of routes the SDK once exposed but the docs do not, see
 [`docs/api-gap-triage.md`](docs/api-gap-triage.md).
 
 ## Documentation

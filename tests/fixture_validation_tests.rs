@@ -13,6 +13,7 @@ use serde_json::Value;
 
 #[test]
 fn test_cluster_info_from_fixture() {
+    // api-audit-response: GET /v1/cluster
     let fixture = include_str!("fixtures/cluster.json");
     let cluster: ClusterInfo =
         serde_json::from_str(fixture).expect("Failed to deserialize cluster info");
@@ -21,6 +22,7 @@ fn test_cluster_info_from_fixture() {
 
 #[test]
 fn test_database_list_from_fixture() {
+    // api-audit-response: GET /v1/bdbs
     let fixture = include_str!("fixtures/bdbs_list.json");
     let databases: Vec<Database> =
         serde_json::from_str(fixture).expect("Failed to deserialize database list");
@@ -29,6 +31,7 @@ fn test_database_list_from_fixture() {
 
 #[test]
 fn test_single_database_from_fixture() {
+    // api-audit-response: GET /v1/bdbs/{uid}
     let fixture = include_str!("fixtures/bdb_single.json");
     let _database: Database =
         serde_json::from_str(fixture).expect("Failed to deserialize single database");
@@ -36,6 +39,7 @@ fn test_single_database_from_fixture() {
 
 #[test]
 fn test_nodes_list_from_fixture() {
+    // api-audit-response: GET /v1/nodes
     let fixture = include_str!("fixtures/nodes_list.json");
     let nodes: Vec<Node> = serde_json::from_str(fixture).expect("Failed to deserialize nodes list");
     assert!(!nodes.is_empty());
@@ -43,6 +47,7 @@ fn test_nodes_list_from_fixture() {
 
 #[test]
 fn test_users_list_from_fixture() {
+    // api-audit-response: GET /v1/users
     let fixture = include_str!("fixtures/users_list.json");
     let users: Vec<User> = serde_json::from_str(fixture).expect("Failed to deserialize users list");
     assert!(!users.is_empty());
@@ -50,6 +55,7 @@ fn test_users_list_from_fixture() {
 
 #[test]
 fn test_modules_list_from_fixture() {
+    // api-audit-response: GET /v1/modules
     let fixture = include_str!("fixtures/modules_list.json");
     let modules: Vec<Module> =
         serde_json::from_str(fixture).expect("Failed to deserialize modules list");
@@ -63,6 +69,7 @@ fn test_modules_list_from_fixture() {
 
 #[test]
 fn test_license_from_fixture() {
+    // api-audit-response: GET /v1/license
     let fixture = include_str!("fixtures/license.json");
     let _license: License = serde_json::from_str(fixture).expect("Failed to deserialize license");
 }
