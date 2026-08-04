@@ -36,6 +36,10 @@ The compose file defaults to:
 - `REDIS_ENTERPRISE_UI_PORT=8443`
 - `REDIS_ENTERPRISE_DB_PORT=12000`
 
+The initializer also defaults to an immutable reviewed redisctl image digest.
+Set `REDISCTL_IMAGE` only when intentionally validating a newer initializer;
+scheduled contract runs use the checked-in digest.
+
 You can override the host ports to avoid collisions with an existing local
 cluster:
 
@@ -62,7 +66,11 @@ as the same service definition.
 ## Required Version Matrix
 
 Release validation uses the exact images in the
-[version support policy](./version-support.md):
+[version support policy](./version-support.md).
+
+The weekly [Enterprise API contract workflow](./contract-automation.md) runs
+the safe compliance profile against this entire matrix. This local runbook is
+still the reproduction path and is used for focused write or debugging work.
 
 | Family | Image |
 |---|---|

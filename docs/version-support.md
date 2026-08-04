@@ -112,8 +112,10 @@ Before publishing a crate release:
 - the support table and container pins must be reviewed against Redis's current
   lifecycle and release notes.
 
-Until the automated multi-version compliance workflow is available, these are
-manual release checks and their results belong in
+The weekly [Enterprise API contract workflow](./contract-automation.md) runs the
+safe profile across the full pinned image matrix and publishes sanitized
+per-version artifacts. Self-cleaning write lifecycles remain an explicit manual
+dispatch option. Release review should inspect the newest scheduled result plus
 [the live-validation log](./live-validation.md).
 
 ## Adding and Retiring Server Versions

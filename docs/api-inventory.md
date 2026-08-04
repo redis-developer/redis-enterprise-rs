@@ -52,6 +52,12 @@ Or write to a custom path:
 python3 scripts/export_api_inventory.py --output docs/api-inventory.csv
 ```
 
+The weekly [Enterprise API contract workflow](./contract-automation.md) writes
+the crawl to a temporary artifact and compares normalized method/path sets. It
+never overwrites this reviewed inventory. Fetch, parse, local-output, CSV, and
+semantic-drift failures are classified separately so an external outage cannot
+masquerade as API removal.
+
 ## Audit SDK And Test Evidence
 
 The generated coverage audit deduplicates the inventory by normalized HTTP
